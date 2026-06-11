@@ -31,26 +31,26 @@
 }
 
 :root {
-  --background: #f3f4f6; /* Modern platinum light gray background */
-  --foreground: #18181b; /* Warm graphite main text */
-  --card: #ffffff; /* Crisp white cards for visual hierarchy */
+  --background: #e4e4e7; /* Slightly darker shade of neutral gray (Zinc-200) */
+  --foreground: #18181b;
+  --card: #ffffff; /* Contrast white cards */
   --card-foreground: #18181b;
   --popover: #ffffff;
   --popover-foreground: #18181b;
-  --primary: #18181b; /* Graphite dark primary */
+  --primary: #18181b;
   --primary-foreground: #ffffff;
-  --secondary: #e4e4e7; /* Silver gray for fields and borders */
+  --secondary: #d4d4d8; /* Zinc-300 secondary overlay */
   --secondary-foreground: #18181b;
   --muted: #f4f4f5;
   --muted-foreground: #71717a;
-  --accent: #0f62fe; /* Premium SAP carbon blue accent */
+  --accent: #0f62fe; /* SAP Carbon Blue */
   --accent-foreground: #ffffff;
   --destructive: #dc2626;
-  --border: #d4d4d8; /* Clean thin gray borders */
+  --border: #d4d4d8; /* Zinc-300 borders */
   --input: #d4d4d8;
   --ring: #18181b;
   --radius: 0.5rem;
-  --sidebar: #f8f9fa; /* Clean, light platinum sidebar */
+  --sidebar: #f4f4f5; /* Zinc-100 sidebar background for elegant depth */
 }
 
 @layer base {
