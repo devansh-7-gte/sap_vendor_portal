@@ -75,7 +75,7 @@ export default function Sidebar({ activeTab, setActiveTab, state, onReset }) {
   };
 
   return (
-    <aside className={`bg-stone-50 border-r border-stone-200 flex flex-col shrink-0 select-none h-full transition-all duration-300 ease-in-out ${
+    <aside className={`bg-sidebar border-r border-border flex flex-col shrink-0 select-none h-full transition-all duration-300 ease-in-out ${
       sidebarCollapsed ? 'w-16' : 'w-64'
     }`}>
       {/* NAVIGATION SECTION */}

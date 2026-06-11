@@ -65,26 +65,26 @@ export default function DashboardView({ state, setActiveTab }) {
         </div>
       </div>
 
-      {/* 2. WELCOME BANNER (Blue-955 Card with Horizontal Actions) */}
-      <div className="bg-blue-950 text-white rounded-xl p-6 shadow-md border border-blue-900 flex flex-col lg:flex-row lg:items-center lg:justify-between gap-6">
+      {/* 2. WELCOME BANNER (Dark Charcoal Card with Blue Highlights) */}
+      <div className="bg-primary text-primary-foreground rounded-xl p-6 shadow-sm border border-border flex flex-col lg:flex-row lg:items-center lg:justify-between gap-6">
         <div>
-          <p className="text-[10px] uppercase tracking-widest text-blue-300 font-bold">WELCOME BACK</p>
+          <p className="text-[10px] uppercase tracking-widest text-blue-400 font-bold">WELCOME BACK</p>
           <h3 className="text-xl font-bold text-white mt-1">
             {state.profile.companyName || 'Bharat Steel & Alloys Pvt. Ltd.'}
           </h3>
-          <div className="flex flex-wrap items-center gap-x-4 gap-y-2 mt-2 text-xs text-blue-100/90">
-            <span>Vendor Code: <strong className="font-mono text-blue-200">{state.profile.sapVendorCode || 'SAP-100042'}</strong></span>
-            <span className="text-blue-900">|</span>
-            <span>GSTIN: <strong className="font-mono text-blue-200">{state.profile.gstin || '27AABCB1234F1Z5'}</strong></span>
-            <span className="px-2 py-0.5 rounded-full bg-blue-900/50 text-blue-200 border border-blue-800/80 text-[10px] font-semibold flex items-center gap-1 font-sans">
-              <span className="size-1.5 rounded-full bg-blue-400 animate-pulse"></span>
+          <div className="flex flex-wrap items-center gap-x-4 gap-y-2 mt-2 text-xs text-stone-300">
+            <span>Vendor Code: <strong className="font-mono text-stone-100">{state.profile.sapVendorCode || 'SAP-100042'}</strong></span>
+            <span className="text-stone-700">|</span>
+            <span>GSTIN: <strong className="font-mono text-stone-100">{state.profile.gstin || '27AABCB1234F1Z5'}</strong></span>
+            <span className="px-2 py-0.5 rounded-full bg-stone-800 text-blue-300 border border-stone-700 text-[10px] font-semibold flex items-center gap-1 font-sans">
+              <span className="size-1.5 rounded-full bg-blue-500 animate-pulse"></span>
               Active
             </span>
           </div>
         </div>
 
         {/* QUICK ICON SHORTCUTS */}
-        <div className="flex flex-wrap items-center gap-2 sm:gap-4 border-t border-blue-900 pt-4 lg:border-t-0 lg:pt-0">
+        <div className="flex flex-wrap items-center gap-2 sm:gap-4 border-t border-stone-850 pt-4 lg:border-t-0 lg:pt-0">
           {[
             { label: 'Submit Invoice', tab: 'invoices', icon: Receipt },
             { label: 'Create ASN', tab: 'pos', icon: ShoppingBag },
@@ -98,9 +98,9 @@ export default function DashboardView({ state, setActiveTab }) {
               <button
                 key={idx}
                 onClick={() => setActiveTab(action.tab)}
-                className="flex flex-col items-center justify-center w-20 py-2.5 rounded-lg hover:bg-white/10 transition-colors text-center cursor-pointer text-blue-200 hover:text-white"
+                className="flex flex-col items-center justify-center w-20 py-2.5 rounded-lg hover:bg-white/10 transition-colors text-center cursor-pointer text-stone-300 hover:text-white"
               >
-                <IconComp className="size-5 mb-1.5 text-blue-300" />
+                <IconComp className="size-5 mb-1.5 text-blue-400" />
                 <span className="text-[10px] font-semibold leading-tight">{action.label}</span>
               </button>
             );

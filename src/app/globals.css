@@ -27,28 +27,30 @@
   --radius-md: calc(var(--radius) * 0.8);
   --radius-lg: var(--radius);
   --radius-xl: calc(var(--radius) * 1.4);
+  --color-sidebar: var(--sidebar);
 }
 
 :root {
-  --background: #fafaf9; /* Stone-50 - warm, human, organic white */
-  --foreground: #1c1917; /* Stone-900 - dark warm charcoal text */
-  --card: #ffffff; /* Pure White */
-  --card-foreground: #1c1917;
+  --background: #f3f4f6; /* Modern platinum light gray background */
+  --foreground: #18181b; /* Warm graphite main text */
+  --card: #ffffff; /* Crisp white cards for visual hierarchy */
+  --card-foreground: #18181b;
   --popover: #ffffff;
-  --popover-foreground: #1c1917;
-  --primary: #292524; /* Stone-800 - dark graphite, premium warm charcoal */
-  --primary-foreground: #fafaf9;
-  --secondary: #f5f5f4; /* Stone-100 */
-  --secondary-foreground: #1c1917;
-  --muted: #f5f5f4;
-  --muted-foreground: #78716c; /* Stone-500 */
-  --accent: #44403c; /* Stone-700 */
-  --accent-foreground: #fafaf9;
-  --destructive: #7f1d1d; /* Deep crimson - muted, professional */
-  --border: #e7e5e4; /* Stone-200 */
-  --input: #e7e5e4;
-  --ring: #78716c;
-  --radius: 0.5rem; /* Standard rounded corners */
+  --popover-foreground: #18181b;
+  --primary: #18181b; /* Graphite dark primary */
+  --primary-foreground: #ffffff;
+  --secondary: #e4e4e7; /* Silver gray for fields and borders */
+  --secondary-foreground: #18181b;
+  --muted: #f4f4f5;
+  --muted-foreground: #71717a;
+  --accent: #0f62fe; /* Premium SAP carbon blue accent */
+  --accent-foreground: #ffffff;
+  --destructive: #dc2626;
+  --border: #d4d4d8; /* Clean thin gray borders */
+  --input: #d4d4d8;
+  --ring: #18181b;
+  --radius: 0.5rem;
+  --sidebar: #f8f9fa; /* Clean, light platinum sidebar */
 }
 
 @layer base {

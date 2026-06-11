@@ -18,7 +18,7 @@ export default function PortalLayout({ children }) {
   } = usePortal();
 
   return (
-    <div className="flex flex-col h-screen overflow-hidden bg-stone-100/50 text-stone-800 font-sans">
+    <div className="flex flex-col h-screen overflow-hidden bg-background text-foreground font-sans">
       <Header />
 
       <div className="flex-1 flex overflow-hidden relative">
