@@ -1,0 +1,313 @@
+import React from 'react';
+import { Button } from '@/components/ui/button';
+import {
+  Building2,
+  Truck,
+  CreditCard,
+  Check,
+  Clock,
+  CheckCircle2,
+  AlertTriangle
+} from 'lucide-react';
+
+export default function OnboardingView({ state, companyForm, setCompanyForm, handleCompanySubmit, approveRegistration }) {
+  const isApproved = state.profile.status === 'Approved';
+  const isPending = state.profile.status === 'Pending Approval';
+  const isDraft = state.profile.status === 'Draft' || state.profile.status === 'Rejected';
+
+  return (
+    <div className="space-y-6 max-w-4xl animate-fade-in">
+      <div>
+        <h2 className="text-xl font-bold tracking-tight text-gray-900">Vendor Onboarding & Compliance</h2>
+        <p className="text-gray-500 text-xs mt-0.5">Submit organizational details to register vendor master record in SAP.</p>
+      </div>
+
+      {/* STEP PROGRESS TRACKER */}
+      <div className="flex items-center gap-4 p-4.5 rounded-xl border border-stone-200 bg-white shadow-sm">
+        <div className="flex items-center gap-2">
+          <span className={`size-5 rounded-full flex items-center justify-center font-bold text-[10px] ${
+            isApproved ? 'bg-stone-850 text-white' : 'bg-stone-100 text-stone-500 border border-stone-200'
+          }`}>
+            {isApproved ? <Check className="size-3" /> : '1'}
+          </span>
+          <span className={`text-xs font-semibold ${isApproved ? 'text-stone-900' : 'text-stone-500'}`}>General Profile</span>
+        </div>
+        <div className="h-px bg-stone-200 flex-1"></div>
+        <div className="flex items-center gap-2">
+          <span className={`size-5 rounded-full flex items-center justify-center font-bold text-[10px] ${
+            isApproved ? 'bg-stone-850 text-white' : isPending ? 'bg-stone-600 text-white animate-pulse' : 'bg-stone-100 text-stone-500 border border-stone-200'
+          }`}>
+            {isApproved ? <Check className="size-3" /> : '2'}
+          </span>
+          <span className={`text-xs font-semibold ${isPending ? 'text-stone-700' : isApproved ? 'text-stone-900' : 'text-stone-500'}`}>Compliance Check</span>
+        </div>
+        <div className="h-px bg-stone-200 flex-1"></div>
+        <div className="flex items-center gap-2">
+          <span className={`size-5 rounded-full flex items-center justify-center font-bold text-[10px] ${
+            isApproved ? 'bg-stone-850 text-white' : 'bg-stone-100 text-stone-500 border border-stone-200'
+          }`}>
+            {isApproved ? <Check className="size-3" /> : '3'}
+          </span>
+          <span className={`text-xs font-semibold ${isApproved ? 'text-stone-900' : 'text-stone-500'}`}>SAP Sync Success</span>
+        </div>
+      </div>
+
+      {/* 1. ONBOARDING REGISTRATION FORM */}
+      {isDraft && (
+        <form onSubmit={handleCompanySubmit} className="space-y-6">
+          {state.profile.status === 'Rejected' && (
+            <div className="p-4 rounded-xl border border-red-200 bg-red-50/50 text-red-700 flex items-start gap-3">
+              <AlertTriangle className="size-5 shrink-0 mt-0.5 text-red-650" />
+              <div>
+                <h4 className="font-bold text-xs">Compliance Verification Failure</h4>
+                <p className="text-[11px] mt-1 text-red-700/80">The provided GSTIN or Account documentation failed automated compliance validation in SAP ERP.</p>
+              </div>
+            </div>
+          )}
+
+          {/* Company details */}
+          <div className="p-6 rounded-xl border border-stone-200 bg-white shadow-sm space-y-4">
+            <h3 className="text-xs font-bold text-stone-450 tracking-wider uppercase border-b border-stone-100 pb-2 flex items-center gap-2">
+              <Building2 className="size-4 text-stone-550" /> Company profile specifications
+            </h3>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div className="space-y-1">
+                <label className="text-[10px] font-bold text-stone-500 uppercase tracking-wider block">Company Legal Name *</label>
+                <input
+                  type="text" required value={companyForm.companyName}
+                  onChange={e => setCompanyForm({ ...companyForm, companyName: e.target.value })}
+                  placeholder="e.g. Enterprise Solutions Pvt Ltd"
+                  className="w-full bg-white border border-stone-300 focus:border-stone-500 focus:ring-1 focus:ring-stone-500 rounded-xl py-2 px-3 text-xs outline-none transition-all text-stone-900 font-sans"
+                />
+              </div>
+              <div className="space-y-1">
+                <label className="text-[10px] font-bold text-stone-500 uppercase tracking-wider block">GSTIN / Tax ID *</label>
+                <input
+                  type="text" required value={companyForm.gstin}
+                  onChange={e => setCompanyForm({ ...companyForm, gstin: e.target.value })}
+                  placeholder="e.g. 07AAAAA1111A1Z1"
+                  className="w-full bg-white border border-stone-300 focus:border-stone-500 focus:ring-1 focus:ring-stone-500 rounded-xl py-2 px-3 text-xs outline-none transition-all text-stone-900 uppercase font-mono"
+                />
+              </div>
+              <div className="space-y-1">
+                <label className="text-[10px] font-bold text-stone-500 uppercase tracking-wider block">PAN (Income Tax Identifier)</label>
+                <input
+                  type="text" value={companyForm.pan}
+                  onChange={e => setCompanyForm({ ...companyForm, pan: e.target.value })}
+                  placeholder="e.g. ABCDE1234F"
+                  className="w-full bg-white border border-stone-300 focus:border-stone-500 focus:ring-1 focus:ring-stone-500 rounded-xl py-2 px-3 text-xs outline-none transition-all text-stone-900 uppercase font-mono"
+                />
+              </div>
+              <div className="grid grid-cols-2 gap-3">
+                <div className="space-y-1">
+                  <label className="text-[10px] font-bold text-stone-500 uppercase tracking-wider block">Email Address *</label>
+                  <input
+                    type="email" required value={companyForm.email}
+                    onChange={e => setCompanyForm({ ...companyForm, email: e.target.value })}
+                    placeholder="sales@company.com"
+                    className="w-full bg-white border border-stone-300 focus:border-stone-500 focus:ring-1 focus:ring-stone-500 rounded-xl py-2 px-3 text-xs outline-none transition-all text-stone-900"
+                  />
+                </div>
+                <div className="space-y-1">
+                  <label className="text-[10px] font-bold text-stone-500 uppercase tracking-wider block">Phone Endpoint</label>
+                  <input
+                    type="text" value={companyForm.phone}
+                    onChange={e => setCompanyForm({ ...companyForm, phone: e.target.value })}
+                    placeholder="+91 98765 43210"
+                    className="w-full bg-white border border-stone-300 focus:border-stone-500 focus:ring-1 focus:ring-stone-500 rounded-xl py-2 px-3 text-xs outline-none transition-all text-stone-900"
+                  />
+                </div>
+              </div>
+            </div>
+          </div>
+
+          {/* Address details */}
+          <div className="p-6 rounded-xl border border-stone-200 bg-white shadow-sm space-y-4">
+            <h3 className="text-xs font-bold text-stone-450 tracking-wider uppercase border-b border-stone-100 pb-2 flex items-center gap-2">
+              <Truck className="size-4 text-stone-550" /> Dispatch & registered office address
+            </h3>
+            <div className="space-y-1.5">
+              <label className="text-[10px] font-bold text-stone-500 uppercase tracking-wider block">Street Address</label>
+              <input
+                type="text" value={companyForm.address}
+                onChange={e => setCompanyForm({ ...companyForm, address: e.target.value })}
+                placeholder="Plot 42, Phase 1, Industrial Area"
+                className="w-full bg-white border border-stone-300 focus:border-stone-500 focus:ring-1 focus:ring-stone-500 rounded-xl py-2 px-3 text-xs outline-none transition-all text-stone-900"
+              />
+            </div>
+            <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+              <div className="space-y-1">
+                <label className="text-[10px] font-bold text-stone-500 uppercase tracking-wider block">City</label>
+                <input
+                  type="text" value={companyForm.city}
+                  onChange={e => setCompanyForm({ ...companyForm, city: e.target.value })}
+                  placeholder="New Delhi"
+                  className="w-full bg-white border border-stone-300 focus:border-stone-500 focus:ring-1 focus:ring-stone-500 rounded-xl py-2 px-3 text-xs outline-none transition-all text-stone-900"
+                />
+              </div>
+              <div className="space-y-1">
+                <label className="text-[10px] font-bold text-stone-500 uppercase tracking-wider block">State</label>
+                <input
+                  type="text" value={companyForm.state}
+                  onChange={e => setCompanyForm({ ...companyForm, state: e.target.value })}
+                  placeholder="Delhi"
+                  className="w-full bg-white border border-stone-300 focus:border-stone-500 focus:ring-1 focus:ring-stone-500 rounded-xl py-2 px-3 text-xs outline-none transition-all text-stone-900"
+                />
+              </div>
+              <div className="space-y-1">
+                <label className="text-[10px] font-bold text-stone-500 uppercase tracking-wider block">Postal Code</label>
+                <input
+                  type="text" value={companyForm.postalCode}
+                  onChange={e => setCompanyForm({ ...companyForm, postalCode: e.target.value })}
+                  placeholder="110001"
+                  className="w-full bg-white border border-stone-300 focus:border-stone-500 focus:ring-1 focus:ring-stone-500 rounded-xl py-2 px-3 text-xs outline-none transition-all text-stone-900"
+                />
+              </div>
+            </div>
+          </div>
+
+          {/* Banking details */}
+          <div className="p-6 rounded-xl border border-stone-200 bg-white shadow-sm space-y-4">
+            <h3 className="text-xs font-bold text-stone-450 tracking-wider uppercase border-b border-stone-100 pb-2 flex items-center gap-2">
+              <CreditCard className="size-4 text-stone-550" /> Banking settlement specifications
+            </h3>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div className="space-y-1">
+                <label className="text-[10px] font-bold text-stone-500 uppercase tracking-wider block">Bank Institution Name</label>
+                <input
+                  type="text" value={companyForm.bankName}
+                  onChange={e => setCompanyForm({ ...companyForm, bankName: e.target.value })}
+                  placeholder="State Bank of India"
+                  className="w-full bg-white border border-stone-300 focus:border-stone-500 focus:ring-1 focus:ring-stone-500 rounded-xl py-2 px-3 text-xs outline-none transition-all text-stone-900"
+                />
+              </div>
+              <div className="space-y-1">
+                <label className="text-[10px] font-bold text-stone-550 uppercase tracking-wider block">Account Name / Beneficiary</label>
+                <input
+                  type="text" value={companyForm.accountName}
+                  onChange={e => setCompanyForm({ ...companyForm, accountName: e.target.value })}
+                  placeholder="e.g. Enterprise Solutions Account"
+                  className="w-full bg-white border border-stone-300 focus:border-stone-500 focus:ring-1 focus:ring-stone-500 rounded-xl py-2 px-3 text-xs outline-none transition-all text-stone-900"
+                />
+              </div>
+              <div className="space-y-1">
+                <label className="text-[10px] font-bold text-stone-500 uppercase tracking-wider block">Account Number</label>
+                <input
+                  type="password" value={companyForm.accountNumber}
+                  onChange={e => setCompanyForm({ ...companyForm, accountNumber: e.target.value })}
+                  placeholder="••••••••••••••"
+                  className="w-full bg-white border border-stone-300 focus:border-stone-500 focus:ring-1 focus:ring-stone-500 rounded-xl py-2 px-3 text-xs outline-none transition-all text-stone-900 font-mono"
+                />
+              </div>
+              <div className="space-y-1">
+                <label className="text-[10px] font-bold text-stone-500 uppercase tracking-wider block">IFSC / Routing Code</label>
+                <input
+                  type="text" value={companyForm.ifscCode}
+                  onChange={e => setCompanyForm({ ...companyForm, ifscCode: e.target.value })}
+                  placeholder="SBIN0001234"
+                  className="w-full bg-white border border-stone-300 focus:border-stone-500 focus:ring-1 focus:ring-stone-500 rounded-xl py-2 px-3 text-xs outline-none transition-all text-stone-900 uppercase font-mono"
+                />
+              </div>
+            </div>
+          </div>
+
+          {/* SUBMIT */}
+          <div className="flex justify-end gap-3">
+            <Button type="submit" variant="default" size="lg" className="bg-stone-850 hover:bg-stone-950 text-stone-50 font-bold px-8 shadow-sm">
+              Trigger BAPI Onboarding Sync
+            </Button>
+          </div>
+        </form>
+      )}
+
+      {/* 2. PENDING COMPLIANCE STATE */}
+      {isPending && (
+        <div className="p-8 rounded-2xl border border-stone-200 bg-white text-center space-y-6 flex flex-col items-center shadow-sm">
+          <div className="size-14 rounded-full bg-stone-50 border border-stone-200 flex items-center justify-center text-stone-500">
+            <Clock className="size-6 animate-pulse" />
+          </div>
+          <div className="space-y-2">
+            <h3 className="text-base font-bold text-stone-900">Compliance Processing in SAP ERP</h3>
+            <p className="text-xs text-stone-500 max-w-md mx-auto leading-relaxed">
+              We have dispatched general master records to BAPI queues. Verification of compliance certificates is executing in background.
+            </p>
+          </div>
+          {/* PROGRESS */}
+          <div className="w-64 bg-stone-100 h-1.5 rounded-full overflow-hidden border border-stone-200">
+            <div className="bg-stone-750 h-full w-2/3 rounded-full animate-progress-bar"></div>
+          </div>
+
+          <button
+            onClick={approveRegistration}
+            className="px-4.5 py-2 bg-stone-850 hover:bg-stone-950 text-stone-50 rounded-xl text-xs font-bold font-sans transition-all"
+          >
+            Acknowledge compliance checks manually
+          </button>
+        </div>
+      )}
+
+      {/* 3. APPROVED STATE */}
+      {isApproved && (
+        <div className="space-y-6">
+          <div className="p-6 rounded-2xl border border-stone-200 bg-white flex items-start gap-4 shadow-sm">
+            <div className="size-11 rounded-full bg-stone-50 flex items-center justify-center text-stone-600 shrink-0 border border-stone-200">
+              <CheckCircle2 className="size-5.5" />
+            </div>
+            <div className="space-y-1">
+              <h3 className="text-sm font-bold text-stone-900">SAP Vendor Master Record Synced</h3>
+              <p className="text-xs text-stone-500 leading-normal">
+                Onboarding check complete. Assigned Vendor Code: <span className="font-mono text-stone-850 font-bold bg-stone-100 border border-stone-200 px-2 py-0.5 rounded ml-1">{state.profile.sapVendorCode}</span>
+              </p>
+              <div className="flex items-center gap-4 text-[10px] text-stone-400 mt-2 font-medium">
+                <span>Synced At: {new Date(state.profile.approvedAt || '').toLocaleString()}</span>
+                <span>•</span>
+                <span className="text-stone-600 font-bold font-mono">STATUS: ACTIVE</span>
+              </div>
+            </div>
+          </div>
+
+          {/* PROFILE SUMMARY */}
+          <div className="p-6 rounded-xl border border-stone-200 bg-white shadow-sm space-y-4">
+            <h3 className="text-[10px] font-bold text-stone-450 uppercase tracking-wider border-b border-stone-100 pb-2">Registered Entity Profile Details</h3>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-x-8 gap-y-3.5 text-xs">
+              <div className="flex justify-between border-b border-stone-100 pb-2">
+                <span className="text-stone-500">Legal Entity Name</span>
+                <span className="font-semibold text-stone-900">{state.profile.companyName}</span>
+              </div>
+              <div className="flex justify-between border-b border-stone-100 pb-2">
+                <span className="text-stone-500">SAP Vendor Code</span>
+                <span className="font-mono font-bold text-stone-850">{state.profile.sapVendorCode}</span>
+              </div>
+              <div className="flex justify-between border-b border-stone-100 pb-2">
+                <span className="text-stone-500">GSTIN / Tax ID</span>
+                <span className="font-mono text-stone-900">{state.profile.gstin}</span>
+              </div>
+              <div className="flex justify-between border-b border-stone-100 pb-2">
+                <span className="text-stone-500">PAN Number</span>
+                <span className="font-mono text-stone-900">{state.profile.pan}</span>
+              </div>
+              <div className="flex justify-between border-b border-stone-100 pb-2">
+                <span className="text-stone-500">Email Address</span>
+                <span className="text-stone-900">{state.profile.email}</span>
+              </div>
+              <div className="flex justify-between border-b border-stone-100 pb-2">
+                <span className="text-stone-500">Settlement Bank</span>
+                <span className="text-stone-900">{state.profile.bankName}</span>
+              </div>
+              <div className="flex justify-between border-b border-stone-100 pb-2">
+                <span className="text-stone-500">Account Details</span>
+                <span className="font-mono text-stone-900">••••{state.profile.accountNumber?.slice(-4)} ({state.profile.ifscCode})</span>
+              </div>
+              <div className="flex justify-between border-b border-stone-100 pb-2">
+                <span className="text-stone-500">Registered Office</span>
+                <span className="text-stone-900">{state.profile.city}, {state.profile.state}</span>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}        </div>
+        </div>
+      )}
+    </div>
+  );
+}
