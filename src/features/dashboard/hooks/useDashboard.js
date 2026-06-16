@@ -5,27 +5,33 @@ import { INITIAL_CHATS, INITIAL_PERFORMANCE } from '../constants';
 import { dashboardService } from '../services/dashboardService';
 
 export function useDashboard(profile, clearAllLogs) {
-  const [chats, setChats] = useState([]);
-  const [performance, setPerformance] = useState(INITIAL_PERFORMANCE);
-
-  // Hydrate chats and performance from localStorage or backend on mount
-  useEffect(() => {
-    try {
-      const savedChats = localStorage.getItem('sap_vendor_portal_chats');
-      if (savedChats) {
-        setChats(JSON.parse(savedChats));
-      } else {
-        setChats(INITIAL_CHATS);
+  const [chats, setChats] = useState(() => {
+    if (typeof window !== 'undefined') {
+      try {
+        const savedChats = localStorage.getItem('sap_vendor_portal_chats');
+        if (savedChats) {
+          return JSON.parse(savedChats);
+        }
+      } catch (e) {
+        console.error('Failed to load dashboard state chats', e);
       }
-      
-      const savedPerf = localStorage.getItem('sap_vendor_portal_performance');
-      if (savedPerf) {
-        setPerformance(JSON.parse(savedPerf));
-      }
-    } catch (e) {
-      console.error('Failed to load dashboard state', e);
     }
-  }, []);
+    return INITIAL_CHATS;
+  });
+
+  const [performance, setPerformance] = useState(() => {
+    if (typeof window !== 'undefined') {
+      try {
+        const savedPerf = localStorage.getItem('sap_vendor_portal_performance');
+        if (savedPerf) {
+          return JSON.parse(savedPerf);
+        }
+      } catch (e) {
+        console.error('Failed to load dashboard state performance', e);
+      }
+    }
+    return INITIAL_PERFORMANCE;
+  });
 
   // Fetch live backend performance score if vendor is approved
   useEffect(() => {

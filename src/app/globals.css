@@ -31,26 +31,26 @@
 }
 
 :root {
-  --background: #e4e4e7; /* Slightly darker shade of neutral gray (Zinc-200) */
-  --foreground: #18181b;
-  --card: #ffffff; /* Contrast white cards */
-  --card-foreground: #18181b;
+  --background: #f0f4f8; /* Soft SAP gray-blue background */
+  --foreground: #1c1c1c; /* Dark gray for high contrast text */
+  --card: #ffffff; /* Clean white cards */
+  --card-foreground: #1c1c1c;
   --popover: #ffffff;
-  --popover-foreground: #18181b;
-  --primary: #18181b;
+  --popover-foreground: #1c1c1c;
+  --primary: #004080; /* Classic SAP Steel Blue */
   --primary-foreground: #ffffff;
-  --secondary: #d4d4d8; /* Zinc-300 secondary overlay */
-  --secondary-foreground: #18181b;
-  --muted: #f4f4f5;
-  --muted-foreground: #71717a;
-  --accent: #0f62fe; /* SAP Carbon Blue */
+  --secondary: #e1ebf4; /* Light Fiori Blue */
+  --secondary-foreground: #004080;
+  --muted: #f4f6f9;
+  --muted-foreground: #555555;
+  --accent: #0a6ed1; /* Standard blue accent */
   --accent-foreground: #ffffff;
-  --destructive: #dc2626;
-  --border: #d4d4d8; /* Zinc-300 borders */
-  --input: #d4d4d8;
-  --ring: #18181b;
-  --radius: 0.5rem;
-  --sidebar: #f4f4f5; /* Zinc-100 sidebar background for elegant depth */
+  --destructive: #bb0000;
+  --border: #d2d5d8; /* Distinct enterprise border grid line */
+  --input: #ffffff;
+  --ring: #0a6ed1;
+  --radius: 0.25rem; /* Standard sharper Fiori corners */
+  --sidebar: #eff3f8; /* Light sidebar */
 }
 
 @layer base {
@@ -59,15 +59,56 @@
   }
   
   html {
-    font-size: 16px; /* Explicit base size for scaling font bigger */
-    font-family: -apple-system, BlinkMacSystemFont, "SF Pro Text", "SF Pro Display", "SF Pro", "Segoe UI", Roboto, "Helvetica Neue", Helvetica, Arial, sans-serif;
+    zoom: 1.25;
+    font-size: 16px; /* Back to standard 16px to prevent layout distortion */
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
   }
   
   body {
     @apply bg-background text-foreground;
-    font-family: -apple-system, BlinkMacSystemFont, "SF Pro Text", "SF Pro Display", "SF Pro", "Segoe UI", Roboto, "Helvetica Neue", Helvetica, Arial, sans-serif;
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
     -webkit-font-smoothing: antialiased;
-    font-size: 1.025rem; /* Larger body scale */
+    font-size: 0.95rem; /* Clean grid text sizing */
+  }
+
+  /* Support clean input fields inside table cells and forms */
+  input[type="text"], input[type="number"], input[type="date"], select, textarea {
+    background-color: #ffffff !important;
+    border-radius: 2px !important;
+    border: 1px solid #d6d3d1 !important; /* border-stone-300 */
+    padding: 0.25rem 0.5rem !important; /* compact padding */
+    font-size: 0.75rem !important; /* text-xs */
+    height: 2rem !important; /* h-8 */
+    box-shadow: none !important;
+    outline: none !important;
+    color: #1c1917 !important; /* text-stone-900 */
+  }
+  input[type="text"]:focus, input[type="number"]:focus, input[type="date"]:focus, select:focus, textarea:focus {
+    border-color: #2563eb !important; /* blue-600 focus border */
+    box-shadow: 0 0 0 1px #2563eb !important;
+  }
+  textarea {
+    height: auto !important;
+    min-height: 4.5rem !important;
+  }
+
+  /* Center absolute search and calendar icons vertically */
+  .relative > svg.absolute {
+    top: 50% !important;
+    transform: translateY(-50%) !important;
+  }
+
+  /* Hide native calendar icon in date inputs when a custom Lucide calendar icon is present in the wrapper */
+  .relative:has(> svg) input[type="date"]::-webkit-calendar-picker-indicator {
+    background: transparent;
+    color: transparent;
+    cursor: pointer;
+    opacity: 0;
+    position: absolute;
+    right: 8px;
+    width: 20px;
+    height: 100%;
+    z-index: 10;
   }
 }
 
@@ -107,4 +148,13 @@
 
 .custom-scrollbar::-webkit-scrollbar-thumb:hover {
   background: rgba(148, 163, 184, 0.5);
+}
+
+/* Global hover overrides to map all black hovers and borders to theme-aligned amber color */
+.hover\:bg-black:hover {
+  background-color: #f59e0b !important; /* amber-500 */
+}
+
+.hover\:border-black:hover {
+  border-color: #f59e0b !important; /* amber-500 */
 }

@@ -37,42 +37,42 @@ export default function DashboardView({ state, setActiveTab }) {
   const totalSettledPayments = state.payments.reduce((sum, p) => sum + p.amount, 0);
 
   return (
-    <div className="space-y-6 max-w-full animate-fade-in pb-16">
+    <div className="space-y-4 max-w-full animate-fade-in pb-12">
 
       {/* 1. TOP HEADER & MAIN BUTTON ACTIONS */}
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
         <div>
-          <h2 className="text-2xl font-bold tracking-tight text-stone-900">Vendor Dashboard</h2>
-          <p className="text-stone-500 text-sm mt-0.5">
+          <h2 className="text-lg font-bold tracking-tight text-stone-900">Vendor Dashboard</h2>
+          <p className="text-stone-500 text-xs mt-0.5">
             Your account overview &mdash; 02 Jun 2025 &bull; FY 2025-26 Q1
           </p>
         </div>
-        <div className="flex items-center gap-2.5">
+        <div className="flex items-center gap-2">
           <button
             onClick={() => setActiveTab('payments')}
-            className="flex items-center gap-2 px-4 py-2 bg-white border border-stone-250 text-stone-700 rounded-lg text-sm font-semibold hover:bg-stone-50 transition-colors shadow-sm cursor-pointer"
+            className="flex items-center gap-1.5 px-3 py-1.5 bg-white border border-stone-250 text-stone-700 rounded text-xs font-semibold hover:bg-stone-50 transition-colors shadow-sm cursor-pointer"
           >
-            <Download className="size-4 text-stone-400" />
+            <Download className="size-3.5 text-stone-400" />
             <span>Download Statement</span>
           </button>
           <button
             onClick={() => setActiveTab('invoices')}
-            className="flex items-center gap-2 px-4 py-2 bg-stone-850 text-stone-50 rounded-lg text-sm font-semibold hover:bg-stone-950 transition-colors shadow-sm cursor-pointer"
+            className="flex items-center gap-1.5 px-3 py-1.5 bg-stone-850 text-stone-50 rounded text-xs font-semibold hover:bg-stone-950 transition-colors shadow-sm cursor-pointer"
           >
-            <FileText className="size-4 text-green-900" />
+            <FileText className="size-3.5 text-green-900" />
             <span className='text-green-900'>Submit Invoice</span>
           </button>
         </div>
       </div>
 
       {/* 2. WELCOME BANNER (Blue-955 Card with Horizontal Actions) */}
-      <div className="bg-blue-950 text-white rounded-xl p-6 shadow-md border border-blue-900 flex flex-col lg:flex-row lg:items-center lg:justify-between gap-6">
+      <div className="bg-blue-950 text-white rounded-lg p-4 shadow-md border border-blue-900 flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4">
         <div>
           <p className="text-[10px] uppercase tracking-widest text-blue-300 font-bold">WELCOME BACK</p>
-          <h3 className="text-xl font-bold text-white mt-1">
+          <h3 className="text-base font-bold text-white mt-0.5">
             {state.profile.companyName || 'Bharat Steel & Alloys Pvt. Ltd.'}
           </h3>
-          <div className="flex flex-wrap items-center gap-x-4 gap-y-2 mt-2 text-xs text-blue-100/90">
+          <div className="flex flex-wrap items-center gap-x-3 gap-y-1 mt-1.5 text-[11px] text-blue-100/90">
             <span>Vendor Code: <strong className="font-mono text-blue-200">{state.profile.sapVendorCode || 'SAP-100042'}</strong></span>
             <span className="text-blue-900">|</span>
             <span>GSTIN: <strong className="font-mono text-blue-200">{state.profile.gstin || '27AABCB1234F1Z5'}</strong></span>
@@ -84,7 +84,7 @@ export default function DashboardView({ state, setActiveTab }) {
         </div>
 
         {/* QUICK ICON SHORTCUTS */}
-        <div className="flex flex-wrap items-center gap-2 sm:gap-4 border-t border-blue-900 pt-4 lg:border-t-0 lg:pt-0">
+        <div className="flex flex-wrap items-center gap-1.5 sm:gap-3 border-t border-blue-900 pt-3 lg:border-t-0 lg:pt-0">
           {[
             { label: 'Submit Invoice', tab: 'invoices', icon: Receipt },
             { label: 'Create ASN', tab: 'pos', icon: ShoppingBag },
@@ -98,10 +98,10 @@ export default function DashboardView({ state, setActiveTab }) {
               <button
                 key={idx}
                 onClick={() => setActiveTab(action.tab)}
-                className="flex flex-col items-center justify-center w-20 py-2.5 rounded-lg hover:bg-white/10 transition-colors text-center cursor-pointer text-blue-200 hover:text-white"
+                className="flex flex-col items-center justify-center w-16 py-2 rounded-lg hover:bg-white/10 transition-colors text-center cursor-pointer text-blue-200 hover:text-white"
               >
-                <IconComp className="size-5 mb-1.5 text-blue-300" />
-                <span className="text-[10px] font-semibold leading-tight">{action.label}</span>
+                <IconComp className="size-4 mb-1 text-blue-300" />
+                <span className="text-[9px] font-semibold leading-tight">{action.label}</span>
               </button>
             );
           })}
@@ -109,71 +109,71 @@ export default function DashboardView({ state, setActiveTab }) {
       </div>
 
       {/* 3. 4 STAT CARDS KPI ROW */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3">
         {/* Stat Card 1: Open POs */}
-        <div className="bg-white border border-stone-200 rounded-xl p-5 shadow-sm hover:shadow-md transition-all flex items-start justify-between">
-          <div className="space-y-2">
+        <div className="bg-white border border-stone-200 rounded-lg p-3.5 shadow-sm hover:shadow-md transition-all flex items-start justify-between">
+          <div className="space-y-1">
             <p className="text-xs font-semibold text-stone-550">Open POs</p>
-            <p className="text-2xl font-bold text-stone-900">{openPOCount || 12}</p>
+            <p className="text-xl font-bold text-stone-900">{openPOCount || 12}</p>
             <div className="text-[11px] font-medium">
               <span className="text-stone-500">₹{(openPOTotalValue ? (openPOTotalValue / 100000).toFixed(1) : 48.6)}L total value</span>
               <span className="text-stone-700 font-bold ml-1.5">+3 this week</span>
             </div>
           </div>
-          <div className="size-10 rounded-full bg-stone-50 flex items-center justify-center text-stone-600 shrink-0 border border-stone-200">
-            <ShoppingBag className="size-5" />
+          <div className="size-8 rounded-full bg-stone-50 flex items-center justify-center text-stone-600 shrink-0 border border-stone-200">
+            <ShoppingBag className="size-4" />
           </div>
         </div>
 
         {/* Stat Card 2: Pending Invoices */}
-        <div className="bg-white border border-stone-200 rounded-xl p-5 shadow-sm hover:shadow-md transition-all flex items-start justify-between">
-          <div className="space-y-2">
+        <div className="bg-white border border-stone-200 rounded-lg p-3.5 shadow-sm hover:shadow-md transition-all flex items-start justify-between">
+          <div className="space-y-1">
             <p className="text-xs font-semibold text-stone-550">Pending Invoices</p>
-            <p className="text-2xl font-bold text-stone-900">{pendingInvoicesCount || 4}</p>
+            <p className="text-xl font-bold text-stone-900">{pendingInvoicesCount || 4}</p>
             <div className="text-[11px] font-medium">
               <span className="text-stone-500">₹12.3L awaiting AP</span>
               <span className="text-stone-650 font-bold ml-1.5">2 matched</span>
             </div>
           </div>
-          <div className="size-10 rounded-full bg-stone-50 flex items-center justify-center text-stone-600 shrink-0 border border-stone-200">
-            <Receipt className="size-5" />
+          <div className="size-8 rounded-full bg-stone-50 flex items-center justify-center text-stone-600 shrink-0 border border-stone-200">
+            <Receipt className="size-4" />
           </div>
         </div>
 
         {/* Stat Card 3: Next Payment */}
-        <div className="bg-white border border-stone-200 rounded-xl p-5 shadow-sm hover:shadow-md transition-all flex items-start justify-between">
-          <div className="space-y-2">
+        <div className="bg-white border border-stone-200 rounded-lg p-3.5 shadow-sm hover:shadow-md transition-all flex items-start justify-between">
+          <div className="space-y-1">
             <p className="text-xs font-semibold text-stone-550">Next Payment</p>
-            <p className="text-2xl font-bold text-stone-900">₹8.4L</p>
+            <p className="text-xl font-bold text-stone-900">₹8.4L</p>
             <div className="text-[11px] font-medium">
               <span className="text-stone-500">Due 15-Jun-2025</span>
               <span className="text-stone-700 font-bold ml-1.5">Net 45 &bull; On track</span>
             </div>
           </div>
-          <div className="size-10 rounded-full bg-stone-50 flex items-center justify-center text-stone-600 shrink-0 border border-stone-200">
-            <CreditCard className="size-5" />
+          <div className="size-8 rounded-full bg-stone-50 flex items-center justify-center text-stone-600 shrink-0 border border-stone-200">
+            <CreditCard className="size-4" />
           </div>
         </div>
 
         {/* Stat Card 4: Performance Score */}
-        <div className="bg-white border border-stone-200 rounded-xl p-5 shadow-sm hover:shadow-md transition-all flex items-start justify-between">
-          <div className="space-y-2">
+        <div className="bg-white border border-stone-200 rounded-lg p-3.5 shadow-sm hover:shadow-md transition-all flex items-start justify-between">
+          <div className="space-y-1">
             <p className="text-xs font-semibold text-stone-550">Performance Score</p>
-            <p className="text-2xl font-bold text-stone-900">{state.performance.deliveryOTIF || 87}/100</p>
+            <p className="text-xl font-bold text-stone-900">{state.performance.deliveryOTIF || 87}/100</p>
             <div className="text-[11px] font-medium">
               <span className="text-stone-500">Q1 2025-26</span>
               <span className="text-stone-700 font-bold ml-1.5">+4 from last Q</span>
             </div>
           </div>
-          <div className="size-10 rounded-full bg-stone-50 flex items-center justify-center text-stone-600 shrink-0 border border-stone-200">
-            <Activity className="size-5" />
+          <div className="size-8 rounded-full bg-stone-50 flex items-center justify-center text-stone-600 shrink-0 border border-stone-200">
+            <Activity className="size-4" />
           </div>
         </div>
       </div>
 
       {/* 4. ALERTS & NOTIFICATIONS (2x2 Grid Panel) */}
-      <div className="bg-white border border-stone-200 rounded-xl shadow-sm overflow-hidden">
-        <div className="px-6 py-4 border-b border-stone-200 flex items-center justify-between">
+      <div className="bg-white border border-stone-200 rounded-lg shadow-sm overflow-hidden">
+        <div className="px-4 py-2.5 border-b border-stone-200 flex items-center justify-between">
           <h4 className="font-bold text-sm text-stone-900">Alerts &amp; Notifications</h4>
           <button
             onClick={() => setActiveTab('chats')}
@@ -188,9 +188,9 @@ export default function DashboardView({ state, setActiveTab }) {
         <div className="grid grid-cols-1 md:grid-cols-2 divide-y md:divide-y-0 md:divide-x divide-stone-100">
           <div className="divide-y divide-stone-100">
             {/* ALERT 1 (Match Warning) */}
-            <div className="p-5 flex items-start gap-4 hover:bg-stone-50/50 transition-colors">
-              <div className="size-8.5 rounded-lg bg-stone-100 border border-stone-200 flex items-center justify-center text-stone-550 shrink-0 mt-0.5">
-                <AlertTriangle className="size-4.5" />
+            <div className="p-3.5 flex items-start gap-3 hover:bg-stone-50/50 transition-colors">
+              <div className="size-7 rounded-lg bg-stone-100 border border-stone-200 flex items-center justify-center text-stone-550 shrink-0 mt-0.5">
+                <AlertTriangle className="size-3.5" />
               </div>
               <div className="space-y-1">
                 <h5 className="font-bold text-xs text-stone-800">Invoice INV-2025-0084 has a match warning</h5>
@@ -207,9 +207,9 @@ export default function DashboardView({ state, setActiveTab }) {
             </div>
 
             {/* ALERT 2 (Overdue PO) */}
-            <div className="p-5 flex items-start gap-4 hover:bg-stone-50/50 transition-colors">
-              <div className="size-8.5 rounded-lg bg-stone-100 border border-stone-200 flex items-center justify-center text-stone-550 shrink-0 mt-0.5">
-                <Calendar className="size-4.5" />
+            <div className="p-3.5 flex items-start gap-3 hover:bg-stone-50/50 transition-colors">
+              <div className="size-7 rounded-lg bg-stone-100 border border-stone-200 flex items-center justify-center text-stone-550 shrink-0 mt-0.5">
+                <Calendar className="size-3.5" />
               </div>
               <div className="space-y-1">
                 <h5 className="font-bold text-xs text-stone-800">PO-2025-0071 delivery overdue by 2 days</h5>
@@ -228,9 +228,9 @@ export default function DashboardView({ state, setActiveTab }) {
 
           <div className="divide-y divide-stone-100">
             {/* ALERT 3 (New RFQ) */}
-            <div className="p-5 flex items-start gap-4 hover:bg-stone-50/50 transition-colors">
-              <div className="size-8.5 rounded-lg bg-stone-100 border border-stone-200 flex items-center justify-center text-stone-550 shrink-0 mt-0.5">
-                <Sparkles className="size-4.5" />
+            <div className="p-3.5 flex items-start gap-3 hover:bg-stone-50/50 transition-colors">
+              <div className="size-7 rounded-lg bg-stone-100 border border-stone-200 flex items-center justify-center text-stone-550 shrink-0 mt-0.5">
+                <Sparkles className="size-3.5" />
               </div>
               <div className="space-y-1">
                 <h5 className="font-bold text-xs text-stone-800">New RFQ published: RFQ-2025-0041</h5>
@@ -247,9 +247,9 @@ export default function DashboardView({ state, setActiveTab }) {
             </div>
 
             {/* ALERT 4 (New Message) */}
-            <div className="p-5 flex items-start gap-4 hover:bg-stone-50/50 transition-colors">
-              <div className="size-8.5 rounded-lg bg-stone-100 border border-stone-200 flex items-center justify-center text-stone-550 shrink-0 mt-0.5">
-                <MessageSquare className="size-4.5" />
+            <div className="p-3.5 flex items-start gap-3 hover:bg-stone-50/50 transition-colors">
+              <div className="size-7 rounded-lg bg-stone-100 border border-stone-200 flex items-center justify-center text-stone-550 shrink-0 mt-0.5">
+                <MessageSquare className="size-3.5" />
               </div>
               <div className="space-y-1">
                 <h5 className="font-bold text-xs text-stone-800">New message from Procurement re PO-2025-0068</h5>
@@ -269,11 +269,11 @@ export default function DashboardView({ state, setActiveTab }) {
       </div>
 
       {/* 5. SIDE-BY-SIDE: RECENT POs & RECENT INVOICES */}
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
 
         {/* RECENT PURCHASE ORDERS */}
-        <div className="bg-white border border-stone-200 rounded-xl shadow-sm overflow-hidden flex flex-col justify-between">
-          <div className="px-6 py-4 border-b border-stone-200 flex items-center justify-between">
+        <div className="bg-white border border-stone-200 rounded-lg shadow-sm overflow-hidden flex flex-col justify-between">
+          <div className="px-4 py-2.5 border-b border-stone-200 flex items-center justify-between">
             <h4 className="font-bold text-sm text-stone-900 flex items-center gap-2">
               <span>Recent Purchase Orders</span>
             </h4>
@@ -288,10 +288,10 @@ export default function DashboardView({ state, setActiveTab }) {
             <table className="w-full text-left text-xs border-collapse">
               <thead>
                 <tr className="bg-stone-50/70 border-b border-stone-200 text-stone-400 font-bold text-[10px] uppercase">
-                  <th className="py-2.5 px-6">PO No.</th>
-                  <th className="py-2.5 px-6">Material</th>
-                  <th className="py-2.5 px-6 text-right">Value</th>
-                  <th className="py-2.5 px-6 text-center">Status</th>
+                  <th className="py-2 px-4">PO No.</th>
+                  <th className="py-2 px-4">Material</th>
+                  <th className="py-2 px-4 text-right">Value</th>
+                  <th className="py-2 px-4 text-center">Status</th>
                 </tr>
               </thead>
               <tbody className="divide-y divide-stone-100 text-stone-700">
@@ -302,17 +302,17 @@ export default function DashboardView({ state, setActiveTab }) {
                   { no: 'PO-2025-0065', desc: 'CR Steel Sheets', detail: '500 KG • 10-May-25', val: '42,500', badgeClass: 'bg-stone-100 text-stone-700 border-stone-200', text: 'GRN Received' }
                 ].map((row, idx) => (
                   <tr key={idx} className="hover:bg-stone-50/50 transition-colors">
-                    <td className="py-3.5 px-6 font-mono font-bold text-stone-800 cursor-pointer hover:underline" onClick={() => setActiveTab('pos')}>
+                    <td className="py-2.5 px-4 font-mono font-bold text-stone-800 cursor-pointer hover:underline" onClick={() => setActiveTab('pos')}>
                       {row.no}
                     </td>
-                    <td className="py-3.5 px-6">
+                    <td className="py-2.5 px-4">
                       <p className="font-semibold text-stone-900">{row.desc}</p>
                       <p className="text-[10px] text-stone-500 font-mono mt-0.5">{row.detail}</p>
                     </td>
-                    <td className="py-3.5 px-6 text-right font-mono font-semibold text-stone-800">
+                    <td className="py-2.5 px-4 text-right font-mono font-semibold text-stone-800">
                       ₹ {row.val}
                     </td>
-                    <td className="py-3.5 px-6 text-center">
+                    <td className="py-2.5 px-4 text-center">
                       <span className={`px-2.5 py-0.5 rounded text-[10px] font-bold border ${row.badgeClass}`}>
                         {row.text}
                       </span>
@@ -325,8 +325,8 @@ export default function DashboardView({ state, setActiveTab }) {
         </div>
 
         {/* RECENT INVOICES */}
-        <div className="bg-white border border-stone-200 rounded-xl shadow-sm overflow-hidden flex flex-col justify-between">
-          <div className="px-6 py-4 border-b border-stone-200 flex items-center justify-between">
+        <div className="bg-white border border-stone-200 rounded-lg shadow-sm overflow-hidden flex flex-col justify-between">
+          <div className="px-4 py-2.5 border-b border-stone-200 flex items-center justify-between">
             <h4 className="font-bold text-sm text-stone-900 flex items-center gap-2">
               <span>Recent Invoices</span>
             </h4>
@@ -341,10 +341,10 @@ export default function DashboardView({ state, setActiveTab }) {
             <table className="w-full text-left text-xs border-collapse">
               <thead>
                 <tr className="bg-stone-50/70 border-b border-stone-200 text-stone-400 font-bold text-[10px] uppercase">
-                  <th className="py-2.5 px-6">Invoice</th>
-                  <th className="py-2.5 px-6">PO Ref</th>
-                  <th className="py-2.5 px-6 text-right">Amount</th>
-                  <th className="py-2.5 px-6 text-center">Status</th>
+                  <th className="py-2 px-4">Invoice</th>
+                  <th className="py-2 px-4">PO Ref</th>
+                  <th className="py-2 px-4 text-right">Amount</th>
+                  <th className="py-2 px-4 text-center">Status</th>
                 </tr>
               </thead>
               <tbody className="divide-y divide-stone-100 text-stone-700">
@@ -355,17 +355,17 @@ export default function DashboardView({ state, setActiveTab }) {
                   { no: 'INV-2025-0072', po: 'PO-2025-0055', date: '12-May-25', val: '52,800', badgeClass: 'bg-stone-100 text-stone-700 border-stone-200', text: 'Posted in SAP' }
                 ].map((row, idx) => (
                   <tr key={idx} className="hover:bg-stone-50/50 transition-colors">
-                    <td className="py-3.5 px-6 font-mono font-bold text-stone-850 cursor-pointer hover:underline" onClick={() => setActiveTab('invoices')}>
+                    <td className="py-2.5 px-4 font-mono font-bold text-stone-850 cursor-pointer hover:underline" onClick={() => setActiveTab('invoices')}>
                       {row.no}
                     </td>
-                    <td className="py-3.5 px-6">
+                    <td className="py-2.5 px-4">
                       <p className="font-semibold text-stone-900">{row.po}</p>
                       <p className="text-[10px] text-stone-500 font-mono mt-0.5">{row.date}</p>
                     </td>
-                    <td className="py-3.5 px-6 text-right font-mono font-semibold text-stone-800">
+                    <td className="py-2.5 px-4 text-right font-mono font-semibold text-stone-800">
                       ₹ {row.val}
                     </td>
-                    <td className="py-3.5 px-6 text-center">
+                    <td className="py-2.5 px-4 text-center">
                       <span className={`px-2.5 py-0.5 rounded text-[10px] font-bold border ${row.badgeClass}`}>
                         {row.text}
                       </span>
@@ -379,10 +379,10 @@ export default function DashboardView({ state, setActiveTab }) {
       </div>
 
       {/* 6. SIDE-BY-SIDE: PERFORMANCE BAR INDICATORS & RECENT PAYMENTS */}
-      <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
+      <div className="grid grid-cols-1 lg:grid-cols-12 gap-4">
 
         {/* MY PERFORMANCE SCORING BARS */}
-        <div className="lg:col-span-5 bg-white border border-stone-200 rounded-xl shadow-sm p-6 flex flex-col justify-between min-h-[360px]">
+        <div className="lg:col-span-5 bg-white border border-stone-200 rounded-lg shadow-sm p-4 flex flex-col justify-between min-h-[300px]">
           <div>
             <h4 className="font-bold text-sm text-stone-900 border-b border-stone-100 pb-3 flex items-center gap-2">
               <span>My Performance &mdash; Q1 FY 2025-26</span>
@@ -415,10 +415,10 @@ export default function DashboardView({ state, setActiveTab }) {
           </div>
 
           {/* OVERALL PERFORMANCE CARD SCORE */}
-          <div className="mt-6 bg-stone-50 border border-stone-200 p-4 rounded-xl flex items-center justify-between">
+          <div className="mt-4 bg-stone-50 border border-stone-200 p-3 rounded-lg flex items-center justify-between">
             <div>
               <span className="text-xs font-semibold text-stone-500">Overall Score</span>
-              <p className="text-2xl font-bold text-stone-850 mt-1">
+              <p className="text-xl font-bold text-stone-850 mt-1">
                 87 <span className="text-sm font-normal text-stone-450 font-sans">/ 100</span>
               </p>
             </div>
@@ -429,9 +429,9 @@ export default function DashboardView({ state, setActiveTab }) {
         </div>
 
         {/* RECENT PAYMENTS RECEIVED */}
-        <div className="lg:col-span-7 bg-white border border-stone-200 rounded-xl shadow-sm overflow-hidden flex flex-col justify-between min-h-[360px]">
+        <div className="lg:col-span-7 bg-white border border-stone-200 rounded-lg shadow-sm overflow-hidden flex flex-col justify-between min-h-[300px]">
           <div>
-            <div className="px-6 py-4 border-b border-stone-200 flex items-center justify-between">
+            <div className="px-4 py-2.5 border-b border-stone-200 flex items-center justify-between">
               <h4 className="font-bold text-sm text-stone-900 flex items-center gap-2">
                 <span>Recent Payments Received</span>
               </h4>
@@ -446,12 +446,12 @@ export default function DashboardView({ state, setActiveTab }) {
               <table className="w-full text-left text-xs border-collapse">
                 <thead>
                   <tr className="bg-stone-50/70 border-b border-stone-200 text-stone-400 font-bold text-[10px] uppercase">
-                    <th className="py-2.5 px-6">UTR Reference</th>
-                    <th className="py-2.5 px-6">Invoice</th>
-                    <th className="py-2.5 px-6 text-right">Gross Amt</th>
-                    <th className="py-2.5 px-6 text-right">TDS</th>
-                    <th className="py-2.5 px-6 text-right">Net Received</th>
-                    <th className="py-2.5 px-6">Date</th>
+                    <th className="py-2 px-4">UTR Reference</th>
+                    <th className="py-2 px-4">Invoice</th>
+                    <th className="py-2 px-4 text-right">Gross Amt</th>
+                    <th className="py-2 px-4 text-right">TDS</th>
+                    <th className="py-2 px-4 text-right">Net Received</th>
+                    <th className="py-2 px-4">Date</th>
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-stone-100 text-stone-700 font-mono">
@@ -461,14 +461,14 @@ export default function DashboardView({ state, setActiveTab }) {
                     { utr: 'UTR2025051501', inv: 'INV-2025-0049', gross: '67,200', tds: '672', net: '66,528', date: '15-May-25', method: 'RTGS' }
                   ].map((row, idx) => (
                     <tr key={idx} className="hover:bg-stone-50/50 transition-colors">
-                      <td className="py-3.5 px-6 font-bold text-stone-850 hover:underline cursor-pointer" onClick={() => setActiveTab('payments')}>
+                      <td className="py-2.5 px-4 font-bold text-stone-850 hover:underline cursor-pointer" onClick={() => setActiveTab('payments')}>
                         {row.utr}
                       </td>
-                      <td className="py-3.5 px-6">{row.inv}</td>
-                      <td className="py-3.5 px-6 text-right text-stone-800 font-semibold">₹ {row.gross}</td>
-                      <td className="py-3.5 px-6 text-right text-stone-500 font-semibold">₹ {row.tds}</td>
-                      <td className="py-3.5 px-6 text-right text-stone-900 font-bold">₹ {row.net}</td>
-                      <td className="py-3.5 px-6 font-sans">
+                      <td className="py-2.5 px-4">{row.inv}</td>
+                      <td className="py-2.5 px-4 text-right text-stone-800 font-semibold">₹ {row.gross}</td>
+                      <td className="py-2.5 px-4 text-right text-stone-500 font-semibold">₹ {row.tds}</td>
+                      <td className="py-2.5 px-4 text-right text-stone-900 font-bold">₹ {row.net}</td>
+                      <td className="py-2.5 px-4 font-sans">
                         <p className="text-stone-850 font-semibold">{row.date}</p>
                         <p className="text-[10px] text-stone-400 font-mono">{row.method}</p>
                       </td>
@@ -480,7 +480,7 @@ export default function DashboardView({ state, setActiveTab }) {
           </div>
 
           {/* ACTION BUTTON CLEARING BARS */}
-          <div className="p-6 bg-stone-50 border-t border-stone-200 grid grid-cols-1 sm:grid-cols-2 gap-3">
+          <div className="p-4 bg-stone-50 border-t border-stone-200 grid grid-cols-1 sm:grid-cols-2 gap-2.5">
             <button
               onClick={() => setActiveTab('payments')}
               className="flex items-center justify-center gap-2 px-4 py-2.5 bg-white border border-stone-250 text-stone-700 rounded-lg text-xs font-bold hover:bg-stone-100 transition-colors shadow-sm cursor-pointer"

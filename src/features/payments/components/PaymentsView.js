@@ -97,7 +97,7 @@ export default function PaymentsView({ state }) {
             Vendor Line Item Ledger (SAP FBL1N mappings)
           </h3>
           <div className="relative w-64">
-            <Search className="size-3.5 absolute left-3 top-2 text-gray-400" />
+            <Search className="size-3.5 absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" />
             <input
               type="text" placeholder="Search doc reference..." value={searchTerm}
               onChange={e => setSearchTerm(e.target.value)}

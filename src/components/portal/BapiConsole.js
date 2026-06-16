@@ -34,7 +34,7 @@ export default function BapiConsole({ state, consoleOpen, setConsoleOpen, consol
 
       {/* CONSOLE PAYLOAD LOG FEED */}
       {consoleOpen && (
-        <div className="flex-1 p-4 overflow-y-auto font-mono text-xs leading-relaxed text-stone-700 bg-stone-50 space-y-3 custom-scrollbar">
+        <div ref={consoleEndRef} className="flex-1 p-4 overflow-y-auto font-mono text-xs leading-relaxed text-stone-700 bg-stone-50 space-y-3 custom-scrollbar">
           {state.logs.length === 0 ? (
             <div className="h-full flex items-center justify-center text-stone-400 font-sans">
               Console idle. Complete onboarding or transactional tasks to view integration payloads.
@@ -65,7 +65,7 @@ export default function BapiConsole({ state, consoleOpen, setConsoleOpen, consol
                   <span className={`ml-auto px-2 py-0.5 rounded text-[9px] font-bold border ${
                     log.status === 'SUCCESS' ? 'bg-emerald-50 text-emerald-750 border-emerald-150' :
                     log.status === 'PENDING' ? 'bg-stone-100 text-stone-600 border-stone-200' :
-                    'bg-red-50 text-red-700 border-red-150'
+                    'bg-red-55 text-red-700 border-red-150'
                   }`}>
                     {log.status}
                   </span>
@@ -78,7 +78,6 @@ export default function BapiConsole({ state, consoleOpen, setConsoleOpen, consol
               </div>
             ))
           )}
-          <div ref={consoleEndRef} />
         </div>
       )}
     </div>

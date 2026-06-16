@@ -6,21 +6,19 @@ import { INITIAL_RFQS } from '../constants';
 
 export function useRFQs(profile) {
   const { addSapLog } = useShell();
-  const [rfqs, setRfqs] = useState([]);
-
-  // Hydrate RFQs from localStorage on mount
-  useEffect(() => {
-    try {
-      const saved = localStorage.getItem('sap_vendor_portal_rfqs');
-      if (saved) {
-        setRfqs(JSON.parse(saved));
-      } else {
-        setRfqs(INITIAL_RFQS);
+  const [rfqs, setRfqs] = useState(() => {
+    if (typeof window !== 'undefined') {
+      try {
+        const saved = localStorage.getItem('sap_vendor_portal_rfqs');
+        if (saved) {
+          return JSON.parse(saved);
+        }
+      } catch (e) {
+        console.error('Failed to load RFQs', e);
       }
-    } catch (e) {
-      console.error('Failed to load RFQs', e);
     }
-  }, []);
+    return INITIAL_RFQS;
+  });
 
   const persistLocally = (updated) => {
     try {

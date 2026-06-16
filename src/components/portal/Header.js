@@ -8,40 +8,40 @@ export default function Header() {
   const { sidebarCollapsed, setSidebarCollapsed } = usePortal();
 
   return (
-    <header className="h-16 bg-stone-950 text-orange-400 border-b border-stone-800 px-6 flex items-center justify-between shrink-0 select-none z-10">
+    <header className="h-11 bg-primary text-white border-b border-primary/50 px-4 flex items-center justify-between shrink-0 select-none z-10 shadow-md">
       {/* BRANDING SECTION */}
-      <div className="flex items-center gap-4">
+      <div className="flex items-center gap-3">
         <button
           onClick={() => setSidebarCollapsed(!sidebarCollapsed)}
-          className="text-orange-400/80 hover:text-orange-300 transition-colors cursor-pointer"
+          className="text-white/80 hover:text-white transition-colors cursor-pointer"
           title="Toggle Navigation"
         >
-          <Menu className="size-6" />
+          <Menu className="size-5" />
         </button>
         
-        <div className="flex items-center gap-3">
-          <div className="size-9 rounded-lg bg-orange-400 flex items-center justify-center text-stone-950 font-extrabold text-lg border border-orange-500 shadow-md">
+        <div className="flex items-center gap-2">
+          <div className="size-7 rounded bg-white flex items-center justify-center text-primary font-extrabold text-sm border border-white/20 shadow-sm">
             V
           </div>
           <div>
-            <h1 className="font-bold text-base leading-tight tracking-wide text-orange-400">VendorConnect Portal</h1>
-            <p className="text-[10px] text-orange-500/80 font-mono tracking-wider uppercase">
-              SAP INTEGRATED &bull; GST COMPLIANT &bull; INDIA
+            <h1 className="font-bold text-[13px] leading-tight tracking-wide text-white">VendorConnect Portal</h1>
+            <p className="text-[8px] text-white/70 font-mono tracking-wider uppercase">
+              ENTERPRISE INTEGRATED &bull; GST COMPLIANT &bull; INDIA
             </p>
           </div>
         </div>
       </div>
 
       {/* METADATA CAPSULES */}
-      <div className="flex items-center gap-3">
-        <span className="px-3.5 py-1 text-[11px] font-semibold rounded-md border border-orange-400/20 bg-stone-900 text-orange-400">
+      <div className="flex items-center gap-1.5">
+        <span className="px-2.5 py-0.5 text-[10px] font-semibold rounded border border-white/20 bg-white/10 text-white">
           Indian Enterprise
         </span>
-        <span className="px-3.5 py-1 text-[11px] font-semibold rounded-md border border-orange-400/20 bg-stone-900 text-orange-400 flex items-center gap-1.5">
-          <span className="size-1.5 rounded-full bg-orange-400 animate-pulse"></span>
-          SAP S/4HANA
+        <span className="px-2.5 py-0.5 text-[10px] font-semibold rounded border border-white/20 bg-white/10 text-white flex items-center gap-1">
+          <span className="size-1.5 rounded-full bg-green-400 animate-pulse"></span>
+          ERP CONNECTED
         </span>
-        <span className="px-3.5 py-1 text-[11px] font-semibold rounded-md border border-orange-400/20 bg-stone-900 text-orange-400">
+        <span className="px-2.5 py-0.5 text-[10px] font-semibold rounded border border-white/20 bg-white/10 text-white">
           GST + TDS + MSME
         </span>
       </div>

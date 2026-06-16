@@ -150,7 +150,7 @@ export default function AccountStatement({ state }) {
       {/* SEARCH AND FILTERS */}
       <div className="flex flex-col md:flex-row items-start md:items-center justify-between gap-4">
         <div className="relative flex-1 max-w-md">
-          <Search className="absolute left-3 top-3 size-4 text-stone-400 dark:text-stone-600" />
+          <Search className="absolute left-3 top-1/2 -translate-y-1/2 size-4 text-stone-400 dark:text-stone-600" />
           <input
             type="text"
             placeholder="Search document or reference..."
@@ -184,7 +184,7 @@ export default function AccountStatement({ state }) {
             <option value="90">Last 90 Days</option>
           </select>
 
-          <button className="px-3 py-2 rounded-lg border border-stone-200 dark:border-stone-800 bg-white dark:bg-stone-900 text-stone-900 dark:text-white hover:bg-stone-50 dark:hover:bg-stone-800 transition-colors flex items-center gap-2 text-sm font-medium">
+          <button className="px-3 h-8 rounded-lg border border-stone-200 dark:border-stone-800 bg-white dark:bg-stone-900 text-stone-900 dark:text-white hover:bg-stone-50 dark:hover:bg-stone-800 transition-colors flex items-center gap-2 text-xs font-medium cursor-pointer">
             <Download className="size-4" />
             Export
           </button>

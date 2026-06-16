@@ -87,45 +87,51 @@ export function PortalProvider({ children }) {
 
   // Auto-scroll feeds
   useEffect(() => {
-    chatEndRef.current?.scrollIntoView({ behavior: 'smooth' });
+    if (chatEndRef.current) {
+      chatEndRef.current.scrollTop = chatEndRef.current.scrollHeight;
+    }
   }, [state.chats]);
 
   useEffect(() => {
-    consoleEndRef.current?.scrollIntoView({ behavior: 'smooth' });
+    if (consoleEndRef.current) {
+      consoleEndRef.current.scrollTop = consoleEndRef.current.scrollHeight;
+    }
   }, [state.logs]);
 
   // Sync profile values
   useEffect(() => {
     if (state.profile.companyName) {
-      setCompanyForm({
-        companyName: state.profile.companyName || '',
-        tradeName: state.profile.tradeName || '',
-        businessType: state.profile.businessType || '',
-        incorporationDate: state.profile.incorporationDate || '',
-        gstin: state.profile.gstin || '',
-        gstType: state.profile.gstType || '',
-        pan: state.profile.pan || '',
-        cin: state.profile.cin || '',
-        msmeNumber: state.profile.msmeNumber || '',
-        tdsSection: state.profile.tdsSection || '',
-        email: state.profile.email || '',
-        phone: state.profile.phone || '',
-        address: state.profile.address || '',
-        city: state.profile.city || '',
-        state: state.profile.state || '',
-        postalCode: state.profile.postalCode || '',
-        bankName: state.profile.bankName || '',
-        accountNumber: state.profile.accountNumber || '',
-        ifscCode: state.profile.ifscCode || '',
-        accountName: state.profile.accountName || '',
-        bankBranch: state.profile.bankBranch || '',
-        cancelledCheque: state.profile.cancelledCheque || null,
-        panCardCopy: state.profile.panCardCopy || null,
-        gstCertificate: state.profile.gstCertificate || null,
-        incorporationCertificate: state.profile.incorporationCertificate || null,
-        msmeCertificate: state.profile.msmeCertificate || null,
-        isoCertificate: state.profile.isoCertificate || null,
-        itReturns: state.profile.itReturns || null
+      Promise.resolve().then(() => {
+        setCompanyForm({
+          companyName: state.profile.companyName || '',
+          tradeName: state.profile.tradeName || '',
+          businessType: state.profile.businessType || '',
+          incorporationDate: state.profile.incorporationDate || '',
+          gstin: state.profile.gstin || '',
+          gstType: state.profile.gstType || '',
+          pan: state.profile.pan || '',
+          cin: state.profile.cin || '',
+          msmeNumber: state.profile.msmeNumber || '',
+          tdsSection: state.profile.tdsSection || '',
+          email: state.profile.email || '',
+          phone: state.profile.phone || '',
+          address: state.profile.address || '',
+          city: state.profile.city || '',
+          state: state.profile.state || '',
+          postalCode: state.profile.postalCode || '',
+          bankName: state.profile.bankName || '',
+          accountNumber: state.profile.accountNumber || '',
+          ifscCode: state.profile.ifscCode || '',
+          accountName: state.profile.accountName || '',
+          bankBranch: state.profile.bankBranch || '',
+          cancelledCheque: state.profile.cancelledCheque || null,
+          panCardCopy: state.profile.panCardCopy || null,
+          gstCertificate: state.profile.gstCertificate || null,
+          incorporationCertificate: state.profile.incorporationCertificate || null,
+          msmeCertificate: state.profile.msmeCertificate || null,
+          isoCertificate: state.profile.isoCertificate || null,
+          itReturns: state.profile.itReturns || null
+        });
       });
     }
   }, [state.profile]);

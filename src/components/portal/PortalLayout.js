@@ -30,7 +30,7 @@ export default function PortalLayout({ children }) {
         />
 
         <main className="flex-1 flex flex-col min-w-0 relative h-full">
-          <div className={`flex-1 overflow-y-auto p-3 md:p-4.5 custom-scrollbar transition-all duration-305 ${consoleOpen ? 'pb-72' : 'pb-16'}`}>
+          <div className={`flex-1 overflow-y-auto py-2.5 px-4 md:py-4 md:px-6 custom-scrollbar transition-all duration-305 ${consoleOpen ? 'pb-72' : 'pb-14'}`}>
             {children}
           </div>
 

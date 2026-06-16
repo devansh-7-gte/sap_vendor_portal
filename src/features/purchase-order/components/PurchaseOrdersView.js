@@ -10,22 +10,25 @@ import {
 import { Button } from '@/components/ui/button';
 
 // Enterprise Metadata Field Card (Fiori Inspired)
-function EnterpriseFieldCard({ label, required, mappingCode, isSapView, error, children }) {
+function EnterpriseFieldCard({ label, required, error, labelWidth, children }) {
   return (
-    <div className={`p-4 rounded-xl border bg-white transition-all flex flex-col justify-between min-h-[110px] shadow-sm ${
-      error
-        ? 'border-red-300 bg-red-50/5 focus-within:border-red-400 focus-within:ring-1 focus-within:ring-red-400'
-        : 'border-stone-200 hover:border-stone-300 focus-within:border-stone-500 focus-within:ring-1 focus-within:ring-stone-500'
+    <div className={`h-full py-1.5 px-3 bg-white transition-all flex flex-col sm:flex-row sm:items-center gap-2 select-none ${
+      error ? 'bg-red-50/10' : 'hover:bg-stone-50/30 focus-within:bg-stone-50/50'
     }`}>
-      <div className="flex items-center justify-between gap-2 mb-2.5">
-        <label className="text-xs font-medium text-stone-750 truncate block select-none" title={label}>
-          {label} {required && <span className="text-red-500 font-bold select-none ml-0.5">*</span>}
-        </label>
+      <label className={`text-xs font-bold text-stone-750 ${labelWidth || 'sm:w-56'} shrink-0 whitespace-normal select-none block`} title={label}>
+        {label} {required && <span className="text-red-500 font-bold select-none ml-0.5">*</span>}
+      </label>
+      <div className="flex-1 w-full min-w-0 flex flex-col justify-center">
+        {children}
+        {error && (
+          <span className="text-[10px] font-bold text-red-650 mt-1 select-none">{error}</span>
+        )}
       </div>
-      <div className="flex-1 flex flex-col justify-center">{children}</div>
     </div>
   );
 }
+
+const generateInvoiceNumber = () => `INV-2026-${Math.floor(100000 + Math.random() * 900000)}`;
 
 export default function PurchaseOrdersView({
   state,
@@ -201,7 +204,7 @@ export default function PurchaseOrdersView({
     setActiveGrn(grn);
     setActivePo(po);
     // Prefill fields
-    setVendorInvoiceNo(`INV-2026-${Math.floor(100000 + Math.random() * 900000)}`);
+    setVendorInvoiceNo(generateInvoiceNumber());
     setBillingDate(new Date().toISOString().split('T')[0]);
     setInvoicePostedSuccess(false);
     setCurrentView('invoice_detail');
@@ -907,7 +910,7 @@ export default function PurchaseOrdersView({
               <FileCheck className="size-12 mx-auto text-stone-300 mb-4 animate-bounce-slow" />
               <h4 className="text-sm font-bold text-stone-700">No Pending Receipts for Invoicing</h4>
               <p className="text-xs text-stone-450 mt-1 max-w-sm mx-auto">
-                Once goods receipts are posted by the warehouse and accepted, they will show up here as "Invoice Ready". If all are billed, verify under Invoices Registry.
+                Once goods receipts are posted by the warehouse and accepted, they will show up here as &quot;Invoice Ready&quot;. If all are billed, verify under Invoices Registry.
               </p>
             </div>
           ) : (
@@ -1040,54 +1043,76 @@ export default function PurchaseOrdersView({
             {/* TAB 1: PO Detail View */}
             {detailTab === 'po_detail' && (
               <div className="space-y-6 animate-fade-in">
-                <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4">
-                  <EnterpriseFieldCard
-                    label="PO Number"
-                  >
-                    <span className="font-mono text-stone-850 font-bold text-sm select-all">
-                      {activePo.id}
-                    </span>
-                  </EnterpriseFieldCard>
+                <div className="flex flex-col border border-stone-200 rounded-lg divide-y divide-stone-200 bg-white overflow-hidden shadow-xs">
+                  <div className="flex flex-col lg:flex-row divide-y lg:divide-y-0 lg:divide-x divide-stone-200 bg-white">
+                    <div className="w-[240px] shrink-0">
+                      <EnterpriseFieldCard
+                        label="PO Number"
+                        labelWidth="sm:w-24"
+                      >
+                        <span className="font-mono text-stone-850 font-bold text-sm select-all">
+                          {activePo.id}
+                        </span>
+                      </EnterpriseFieldCard>
+                    </div>
 
-                  <EnterpriseFieldCard
-                    label="PO Date"
-                  >
-                    <span className="font-mono text-stone-850 font-bold text-sm">
-                      {activePo.createdDate}
-                    </span>
-                  </EnterpriseFieldCard>
+                    <div className="w-[230px] shrink-0">
+                      <EnterpriseFieldCard
+                        label="PO Date"
+                        labelWidth="sm:w-20"
+                      >
+                        <span className="font-mono text-stone-850 font-bold text-sm">
+                          {activePo.createdDate}
+                        </span>
+                      </EnterpriseFieldCard>
+                    </div>
 
-                  <EnterpriseFieldCard
-                    label="PO Status"
-                  >
-                    <span className="font-bold text-stone-850 text-sm">
-                      {activePo.status === 'Open' ? 'Open' : activePo.status === 'Acknowledged' ? 'Acknowledged' : 'Closed'}
-                    </span>
-                  </EnterpriseFieldCard>
+                    <div className="w-[220px] shrink-0">
+                      <EnterpriseFieldCard
+                        label="PO Status"
+                        labelWidth="sm:w-20"
+                      >
+                        <span className="font-bold text-stone-850 text-sm">
+                          {activePo.status === 'Open' ? 'Open' : activePo.status === 'Acknowledged' ? 'Acknowledged' : 'Closed'}
+                        </span>
+                      </EnterpriseFieldCard>
+                    </div>
+                  </div>
 
-                  <EnterpriseFieldCard
-                    label="Buyer Company"
-                  >
-                    <span className="font-bold text-stone-850 text-sm">
-                      {activePo.companyCode || '1000'}
-                    </span>
-                  </EnterpriseFieldCard>
+                  <div className="flex flex-col lg:flex-row divide-y lg:divide-y-0 lg:divide-x divide-stone-200 bg-white">
+                    <div className="w-[260px] shrink-0">
+                      <EnterpriseFieldCard
+                        label="Buyer Company"
+                        labelWidth="sm:w-32"
+                      >
+                        <span className="font-bold text-stone-850 text-sm">
+                          {activePo.companyCode || '1000'}
+                        </span>
+                      </EnterpriseFieldCard>
+                    </div>
 
-                  <EnterpriseFieldCard
-                    label="Buyer GSTIN"
-                  >
-                    <span className="font-mono text-stone-850 font-bold text-xs">
-                      {activePo.buyerGstin || '27AABCB1234F1Z5'}
-                    </span>
-                  </EnterpriseFieldCard>
+                    <div className="w-[260px] shrink-0">
+                      <EnterpriseFieldCard
+                        label="Buyer GSTIN"
+                        labelWidth="sm:w-24"
+                      >
+                        <span className="font-mono text-stone-850 font-bold text-xs">
+                          {activePo.buyerGstin || '27AABCB1234F1Z5'}
+                        </span>
+                      </EnterpriseFieldCard>
+                    </div>
 
-                  <EnterpriseFieldCard
-                    label="Plant / Delivery Location"
-                  >
-                    <span className="font-bold text-stone-850 text-xs font-sans">
-                      {activePo.plant || 'PL01'} (Mumbai Plant)
-                    </span>
-                  </EnterpriseFieldCard>
+                    <div className="w-[360px] shrink-0">
+                      <EnterpriseFieldCard
+                        label="Plant / Location"
+                        labelWidth="sm:w-32"
+                      >
+                        <span className="font-bold text-stone-850 text-xs font-sans">
+                          {activePo.plant || 'PL01'} (Mumbai Plant)
+                        </span>
+                      </EnterpriseFieldCard>
+                    </div>
+                  </div>
                 </div>
                 <div className="space-y-4">
                   <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b border-stone-200 pb-2">
@@ -1221,83 +1246,105 @@ export default function PurchaseOrdersView({
                         Submit Inbound Delivery
                       </Button>
                     </div>
-                    <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4">
-                      <EnterpriseFieldCard
-                        label="Linked PO Number"
-                        required
-                      >
-                        <input
-                          type="text"
-                          readOnly
-                          value={activePo.id}
-                          className="w-full bg-stone-50 border border-stone-200 rounded-lg px-2.5 py-1 text-xs outline-none text-stone-700 font-mono font-bold select-none cursor-not-allowed h-8"
-                        />
-                      </EnterpriseFieldCard>
+                    <div className="flex flex-col border border-stone-200 rounded-lg divide-y divide-stone-200 bg-white overflow-hidden shadow-xs">
+                      <div className="flex flex-col lg:flex-row divide-y lg:divide-y-0 lg:divide-x divide-stone-200 bg-white">
+                        <div className="w-[240px] shrink-0">
+                          <EnterpriseFieldCard
+                            label="Linked PO Number"
+                            required
+                            labelWidth="sm:w-32"
+                          >
+                            <input
+                              type="text"
+                              readOnly
+                              value={activePo.id}
+                              className="w-[100px] bg-stone-50 border border-stone-200 rounded-lg px-2.5 py-1 text-xs outline-none text-stone-700 font-mono font-bold select-none cursor-not-allowed h-8"
+                            />
+                          </EnterpriseFieldCard>
+                        </div>
 
-                      <EnterpriseFieldCard
-                        label="Dispatch Date"
-                        required
-                      >
-                        <input
-                          type="date"
-                          required
-                          value={asnForm.shipDate}
-                          onChange={e => setAsnForm({ ...asnForm, shipDate: e.target.value })}
-                          className="w-full bg-white border border-stone-300 focus:border-stone-500 rounded-lg px-2.5 py-1 text-xs outline-none text-stone-900 font-mono font-bold h-8"
-                        />
-                      </EnterpriseFieldCard>
+                        <div className="w-[260px] shrink-0">
+                          <EnterpriseFieldCard
+                            label="Dispatch Date"
+                            required
+                            labelWidth="sm:w-24"
+                          >
+                            <input
+                              type="date"
+                              required
+                              value={asnForm.shipDate}
+                              onChange={e => setAsnForm({ ...asnForm, shipDate: e.target.value })}
+                              className="w-[150px] bg-white border border-stone-300 focus:border-stone-500 rounded-lg px-2.5 py-1 text-xs outline-none text-stone-900 font-mono font-bold h-8"
+                            />
+                          </EnterpriseFieldCard>
+                        </div>
 
-                      <EnterpriseFieldCard
-                        label="Expected Delivery Date"
-                        required
-                      >
-                        <input
-                          type="date"
-                          required
-                          value={asnForm.estimatedDeliveryDate}
-                          onChange={e => setAsnForm({ ...asnForm, estimatedDeliveryDate: e.target.value })}
-                          className="w-full bg-white border border-stone-300 focus:border-stone-500 rounded-lg px-2.5 py-1 text-xs outline-none text-stone-900 font-mono font-bold h-8"
-                        />
-                      </EnterpriseFieldCard>
+                        <div className="w-[320px] shrink-0">
+                          <EnterpriseFieldCard
+                            label="Expected Delivery"
+                            required
+                            labelWidth="sm:w-32"
+                          >
+                            <input
+                              type="date"
+                              required
+                              value={asnForm.estimatedDeliveryDate}
+                              onChange={e => setAsnForm({ ...asnForm, estimatedDeliveryDate: e.target.value })}
+                              className="w-[150px] bg-white border border-stone-300 focus:border-stone-500 rounded-lg px-2.5 py-1 text-xs outline-none text-stone-900 font-mono font-bold h-8"
+                            />
+                          </EnterpriseFieldCard>
+                        </div>
+                      </div>
 
-                      <EnterpriseFieldCard
-                        label="Carrier / Transporter"
-                        required
-                      >
-                        <input
-                          type="text"
-                          required
-                          value={asnForm.carrierName}
-                          onChange={e => setAsnForm({ ...asnForm, carrierName: e.target.value })}
-                          placeholder="e.g. DHL Express"
-                          className="w-full bg-white border border-stone-300 focus:border-stone-500 rounded-lg px-2.5 py-1 text-xs outline-none text-stone-900 font-bold h-8"
-                        />
-                      </EnterpriseFieldCard>
+                      <div className="flex flex-col lg:flex-row divide-y lg:divide-y-0 lg:divide-x divide-stone-200 bg-white">
+                        <div className="w-[320px] shrink-0">
+                          <EnterpriseFieldCard
+                            label="Carrier / Transporter"
+                            required
+                            labelWidth="sm:w-36"
+                          >
+                            <input
+                              type="text"
+                              required
+                              value={asnForm.carrierName}
+                              onChange={e => setAsnForm({ ...asnForm, carrierName: e.target.value })}
+                              placeholder="e.g. DHL Express"
+                              className="w-[150px] bg-white border border-stone-300 focus:border-stone-500 rounded-lg px-2.5 py-1 text-xs outline-none text-stone-900 font-bold h-8"
+                            />
+                          </EnterpriseFieldCard>
+                        </div>
 
-                      <EnterpriseFieldCard
-                        label="Vehicle / Tracking No."
-                      >
-                        <input
-                          type="text"
-                          value={asnForm.vehicleNumber}
-                          onChange={e => setAsnForm({ ...asnForm, vehicleNumber: e.target.value })}
-                          placeholder="e.g. MH-12-XY-4321"
-                          className="w-full bg-white border border-stone-300 focus:border-stone-500 rounded-lg px-2.5 py-1 text-xs outline-none text-stone-900 font-mono font-bold uppercase h-8"
-                        />
-                      </EnterpriseFieldCard>
+                        <div className="w-[320px] shrink-0">
+                          <EnterpriseFieldCard
+                            label="Vehicle / Tracking No."
+                            labelWidth="sm:w-36"
+                          >
+                            <input
+                              type="text"
+                              value={asnForm.vehicleNumber}
+                              onChange={e => setAsnForm({ ...asnForm, vehicleNumber: e.target.value })}
+                              placeholder="e.g. MH-12-XY-4321"
+                              className="w-[150px] bg-white border border-stone-300 focus:border-stone-500 rounded-lg px-2.5 py-1 text-xs outline-none text-stone-900 font-mono font-bold uppercase h-8"
+                            />
+                          </EnterpriseFieldCard>
+                        </div>
 
-                      <EnterpriseFieldCard
-                        label="E-Way Bill Number"
-                      >
-                        <input
-                          type="text"
-                          maxLength={12}
-                          value={ewayBillNo}
-                          onChange={e => setEwayBillNo(e.target.value.replace(/\D/g, ''))}
-                          placeholder="12-digit numeric code"
-                          className="w-full bg-white border border-stone-300 focus:border-stone-500 rounded-lg px-2.5 py-1 text-xs outline-none text-stone-900 font-mono font-bold h-8"
-                        />
-                      </EnterpriseFieldCard>
+                        <div className="w-[320px] shrink-0">
+                          <EnterpriseFieldCard
+                            label="E-Way Bill Number"
+                            labelWidth="sm:w-36"
+                          >
+                            <input
+                              type="text"
+                              maxLength={12}
+                              value={ewayBillNo}
+                              onChange={e => setEwayBillNo(e.target.value.replace(/\D/g, ''))}
+                              placeholder="12-digit numeric code"
+                              className="w-[150px] bg-white border border-stone-300 focus:border-stone-500 rounded-lg px-2.5 py-1 text-xs outline-none text-stone-900 font-mono font-bold h-8"
+                            />
+                          </EnterpriseFieldCard>
+                        </div>
+                      </div>
                     </div>
 
                     {/* Dispatch quantities allocation */}
@@ -1319,44 +1366,55 @@ export default function PurchaseOrdersView({
                                 </span>
                               </div>
 
-                              <div className="grid grid-cols-3 gap-3">
-                                <EnterpriseFieldCard
-                                  label="PO Line Item"
-                                >
-                                  <input
-                                    type="text"
-                                    readOnly
-                                    value={item.line}
-                                    className="w-full bg-stone-50 border border-stone-200 rounded-lg px-2 py-1 text-xs outline-none text-stone-500 font-mono text-right select-none h-8"
-                                  />
-                                </EnterpriseFieldCard>
+                              <div className="flex flex-col border border-stone-200 rounded-lg divide-y divide-stone-200 bg-white overflow-hidden shadow-xs">
+                                <div className="flex flex-col lg:flex-row divide-y lg:divide-y-0 lg:divide-x divide-stone-200 bg-white">
+                                  <div className="w-[160px] shrink-0">
+                                    <EnterpriseFieldCard
+                                      label="Line Item"
+                                      labelWidth="sm:w-16"
+                                    >
+                                      <input
+                                        type="text"
+                                        readOnly
+                                        value={item.line}
+                                        className="w-[50px] bg-stone-50 border border-stone-200 rounded-lg px-2 py-1 text-xs outline-none text-stone-500 font-mono text-right select-none h-8"
+                                      />
+                                    </EnterpriseFieldCard>
+                                  </div>
 
-                                <EnterpriseFieldCard
-                                  label="Dispatched Quantity"
-                                >
-                                  <input
-                                    type="number"
-                                    value={dispatchQuantities[item.line] || ''}
-                                    onChange={e => {
-                                      setDispatchQuantities({
-                                        ...dispatchQuantities,
-                                        [item.line]: e.target.value
-                                      });
-                                    }}
-                                    className="w-full bg-white border border-stone-300 focus:border-stone-500 rounded-lg px-2.5 py-1 text-xs text-right font-mono font-normal outline-none h-8"
-                                  />
-                                </EnterpriseFieldCard>
+                                  <div className="w-[260px] shrink-0">
+                                    <EnterpriseFieldCard
+                                      label="Dispatched Qty"
+                                      labelWidth="sm:w-28"
+                                    >
+                                      <input
+                                        type="number"
+                                        value={dispatchQuantities[item.line] || ''}
+                                        onChange={e => {
+                                          setDispatchQuantities({
+                                            ...dispatchQuantities,
+                                            [item.line]: e.target.value
+                                          });
+                                        }}
+                                        className="w-[90px] bg-white border border-stone-300 focus:border-stone-500 rounded-lg px-2.5 py-1 text-xs text-right font-mono font-normal outline-none h-8"
+                                      />
+                                    </EnterpriseFieldCard>
+                                  </div>
 
-                                <EnterpriseFieldCard
-                                  label="Unit of Measure"
-                                >
-                                  <input
-                                    type="text"
-                                    readOnly
-                                    value={item.uom}
-                                    className="w-full bg-stone-50 border border-stone-200 rounded-lg px-2 py-1 text-xs outline-none text-stone-500 font-mono text-center select-none h-8"
-                                  />
-                                </EnterpriseFieldCard>
+                                  <div className="w-[140px] shrink-0">
+                                    <EnterpriseFieldCard
+                                      label="UoM"
+                                      labelWidth="sm:w-12"
+                                    >
+                                      <input
+                                        type="text"
+                                        readOnly
+                                        value={item.uom}
+                                        className="w-[50px] bg-stone-50 border border-stone-200 rounded-lg px-2 py-1 text-xs outline-none text-stone-500 font-mono text-center select-none h-8"
+                                      />
+                                    </EnterpriseFieldCard>
+                                  </div>
+                                </div>
                               </div>
 
                               {error && (
@@ -1432,30 +1490,41 @@ export default function PurchaseOrdersView({
                         )}
                       </div>
 
-                      <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4">
-                        <EnterpriseFieldCard
-                          label="GRN / Material Document No."
-                        >
-                          <span className="font-mono text-stone-800 font-normal text-sm select-all">
-                            {grn.sapMigoDoc}
-                          </span>
-                        </EnterpriseFieldCard>
+                      <div className="flex flex-col border border-stone-200 rounded-lg divide-y divide-stone-200 bg-white overflow-hidden shadow-xs">
+                        <div className="flex flex-col lg:flex-row divide-y lg:divide-y-0 lg:divide-x divide-stone-200 bg-white">
+                          <div className="w-[360px] shrink-0">
+                            <EnterpriseFieldCard
+                              label="GRN / Material Doc No."
+                              labelWidth="sm:w-48"
+                            >
+                              <span className="font-mono text-stone-850 font-bold text-sm select-all">
+                                {grn.sapMigoDoc}
+                              </span>
+                            </EnterpriseFieldCard>
+                          </div>
 
-                        <EnterpriseFieldCard
-                          label="Posting Date"
-                        >
-                          <span className="font-mono text-stone-800 font-normal text-sm">
-                            {grn.postingDate}
-                          </span>
-                        </EnterpriseFieldCard>
+                          <div className="w-[240px] shrink-0">
+                            <EnterpriseFieldCard
+                              label="Posting Date"
+                              labelWidth="sm:w-24"
+                            >
+                              <span className="font-mono text-stone-850 font-bold text-sm">
+                                {grn.postingDate}
+                              </span>
+                            </EnterpriseFieldCard>
+                          </div>
 
-                        <EnterpriseFieldCard
-                          label="Movement Type"
-                        >
-                          <span className="font-normal text-stone-800 text-sm">
-                            101
-                          </span>
-                        </EnterpriseFieldCard>
+                          <div className="w-[220px] shrink-0">
+                            <EnterpriseFieldCard
+                              label="Movement Type"
+                              labelWidth="sm:w-28"
+                            >
+                              <span className="font-bold text-stone-850 text-sm">
+                                101
+                              </span>
+                            </EnterpriseFieldCard>
+                          </div>
+                        </div>
                       </div>
 
                       {/* Line Status Itemization */}
@@ -1477,30 +1546,41 @@ export default function PurchaseOrdersView({
                                 </span>
                               </div>
 
-                              <div className="grid grid-cols-3 gap-3">
-                                <EnterpriseFieldCard
-                                  label="Accepted Quantity"
-                                >
-                                  <span className="font-normal text-green-700 text-xs font-mono text-right block">
-                                    {item.acceptedQuantity} units
-                                  </span>
-                                </EnterpriseFieldCard>
+                              <div className="flex flex-col border border-stone-200 rounded-lg divide-y divide-stone-200 bg-white overflow-hidden shadow-xs">
+                                <div className="flex flex-col lg:flex-row divide-y lg:divide-y-0 lg:divide-x divide-stone-200 bg-white">
+                                  <div className="w-[180px] shrink-0">
+                                    <EnterpriseFieldCard
+                                      label="Accepted Qty"
+                                      labelWidth="sm:w-24"
+                                    >
+                                      <span className="font-normal text-green-700 text-xs font-mono text-right block">
+                                        {item.acceptedQuantity} units
+                                      </span>
+                                    </EnterpriseFieldCard>
+                                  </div>
 
-                                <EnterpriseFieldCard
-                                  label="Rejected Quantity"
-                                >
-                                  <span className={`font-normal text-xs font-mono text-right block ${item.rejectedQuantity > 0 ? 'text-red-650 font-semibold' : 'text-stone-500'}`}>
-                                    {item.rejectedQuantity || 0} units
-                                  </span>
-                                </EnterpriseFieldCard>
+                                  <div className="w-[180px] shrink-0">
+                                    <EnterpriseFieldCard
+                                      label="Rejected Qty"
+                                      labelWidth="sm:w-24"
+                                    >
+                                      <span className={`font-normal text-xs font-mono text-right block ${item.rejectedQuantity > 0 ? 'text-red-650 font-semibold' : 'text-stone-500'}`}>
+                                        {item.rejectedQuantity || 0} units
+                                      </span>
+                                    </EnterpriseFieldCard>
+                                  </div>
 
-                                <EnterpriseFieldCard
-                                  label="Quality Status"
-                                >
-                                  <span className="font-normal text-stone-800 text-xs text-center block uppercase">
-                                    Q
-                                  </span>
-                                </EnterpriseFieldCard>
+                                  <div className="w-[160px] shrink-0">
+                                    <EnterpriseFieldCard
+                                      label="Quality Status"
+                                      labelWidth="sm:w-24"
+                                    >
+                                      <span className="font-normal text-stone-850 font-bold text-xs text-center block uppercase">
+                                        Q
+                                      </span>
+                                    </EnterpriseFieldCard>
+                                  </div>
+                                </div>
                               </div>
                             </div>
                           ))}
@@ -1543,7 +1623,7 @@ export default function PurchaseOrdersView({
                 <p>PO Reference: {activePo.id}</p>
                 <p>GRN Reference: {activeGrn.id}</p>
                 <p>Invoice Doc Reference: {vendorInvoiceNo.toUpperCase()}</p>
-                <p>SAP MIRO Doc: 510560{Math.floor(1000 + Math.random() * 9000)}</p>
+                <p>SAP MIRO Doc: 510560{String(activeGrn?.id || '').split('').reduce((acc, char) => acc + char.charCodeAt(0), 0) % 9000 + 1000}</p>
               </div>
 
               <div className="p-3 bg-amber-50 border border-amber-200 rounded-lg text-[10px] text-amber-800 leading-normal font-semibold text-left">
@@ -1665,25 +1745,39 @@ export default function PurchaseOrdersView({
                   </div>
 
                   {/* Manual Billing Inputs */}
-                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 border-t border-stone-100 pt-4">
-                    <div className="space-y-1">
-                      <label className="text-[10px] font-bold text-stone-500 uppercase block">Vendor Tax Invoice No. *</label>
-                      <input
-                        type="text"
-                        value={vendorInvoiceNo}
-                        onChange={e => setVendorInvoiceNo(e.target.value)}
-                        placeholder="e.g. INV-2026-8890"
-                        className="w-full bg-stone-50 border border-stone-250 focus:border-stone-500 focus:bg-white rounded-lg px-3 py-1.5 text-xs outline-none text-stone-900 font-mono font-normal uppercase"
-                      />
-                    </div>
-                    <div className="space-y-1">
-                      <label className="text-[10px] font-bold text-stone-500 uppercase block">Document Invoice Date *</label>
-                      <input
-                        type="date"
-                        value={billingDate}
-                        onChange={e => setBillingDate(e.target.value)}
-                        className="w-full bg-stone-50 border border-stone-250 focus:border-stone-500 focus:bg-white rounded-lg px-3 py-1 text-xs outline-none text-stone-900 font-mono"
-                      />
+                  <div className="border-t border-stone-100 pt-4">
+                    <div className="flex flex-col border border-stone-200 rounded-lg divide-y divide-stone-200 bg-white overflow-hidden shadow-xs">
+                      <div className="flex flex-col lg:flex-row divide-y lg:divide-y-0 lg:divide-x divide-stone-200 bg-white">
+                        <div className="w-[320px] shrink-0">
+                          <EnterpriseFieldCard
+                            label="Vendor Tax Invoice No."
+                            required
+                            labelWidth="sm:w-36"
+                          >
+                            <input
+                              type="text"
+                              value={vendorInvoiceNo}
+                              onChange={e => setVendorInvoiceNo(e.target.value)}
+                              placeholder="e.g. INV-2026-8890"
+                              className="w-[150px] bg-white border border-stone-300 focus:border-stone-500 rounded-lg px-2.5 py-1 text-xs outline-none text-stone-900 font-mono font-bold uppercase h-8"
+                            />
+                          </EnterpriseFieldCard>
+                        </div>
+                        <div className="w-[300px] shrink-0">
+                          <EnterpriseFieldCard
+                            label="Invoice Date"
+                            required
+                            labelWidth="sm:w-24"
+                          >
+                            <input
+                              type="date"
+                              value={billingDate}
+                              onChange={e => setBillingDate(e.target.value)}
+                              className="w-[150px] bg-white border border-stone-300 focus:border-stone-500 rounded-lg px-2.5 py-1 text-xs outline-none text-stone-900 font-mono font-bold h-8"
+                            />
+                          </EnterpriseFieldCard>
+                        </div>
+                      </div>
                     </div>
                   </div>
                 </div>

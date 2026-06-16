@@ -6,32 +6,30 @@ const ShellContext = createContext(undefined);
 
 export function ShellProvider({ children }) {
   const [activeTab, setActiveTab] = useState('dashboard');
-  const [sapPayloadLogs, setSapPayloadLogs] = useState([]);
-
-  // Hydrate shell logs from localStorage on mount
-  useEffect(() => {
-    try {
-      const saved = localStorage.getItem('sap_vendor_portal_logs');
-      if (saved) {
-        setSapPayloadLogs(JSON.parse(saved));
-      } else {
-        // Default initial log
-        setSapPayloadLogs([
-          {
-            id: 'LOG-001',
-            timestamp: new Date().toISOString(),
-            type: 'SYS',
-            direction: 'INBOUND',
-            name: 'PORTAL_INITIALIZE',
-            payload: '{"status":"CONNECTED","sapHost":"ecc-prd-app01.sap.internal","client":"100"}',
-            status: 'SUCCESS'
-          }
-        ]);
+  const [sapPayloadLogs, setSapPayloadLogs] = useState(() => {
+    if (typeof window !== 'undefined') {
+      try {
+        const saved = localStorage.getItem('sap_vendor_portal_logs');
+        if (saved) {
+          return JSON.parse(saved);
+        }
+      } catch (e) {
+        console.error('Failed to load SAP logs', e);
       }
-    } catch (e) {
-      console.error('Failed to load SAP logs', e);
     }
-  }, []);
+    // Default initial log
+    return [
+      {
+        id: 'LOG-001',
+        timestamp: new Date().toISOString(),
+        type: 'SYS',
+        direction: 'INBOUND',
+        name: 'PORTAL_INITIALIZE',
+        payload: '{"status":"CONNECTED","sapHost":"ecc-prd-app01.sap.internal","client":"100"}',
+        status: 'SUCCESS'
+      }
+    ];
+  });
 
   // Sync shell logs to localStorage on changes
   useEffect(() => {

@@ -4,6 +4,21 @@ import { useState, useEffect } from 'react';
 import { useShell } from '../../../lib/shell-context';
 import { profileService } from '../services/profileService';
 
+const getOrGenerateClerkId = () => {
+  if (typeof window !== 'undefined') {
+    const saved = localStorage.getItem('clerk_user_id');
+    if (saved) return saved;
+    const generated = `user_${Math.floor(Math.random() * 100000)}`;
+    localStorage.setItem('clerk_user_id', generated);
+    return generated;
+  }
+  return '';
+};
+
+const generateSapVendorCode = () => {
+  return `VND-400${Math.floor(1000 + Math.random() * 9000)}`;
+};
+
 export function useProfile() {
   const { addSapLog } = useShell();
   const [profile, setProfile] = useState({
@@ -73,27 +88,27 @@ export function useProfile() {
   };
 
   const saveDraft = async (profileData) => {
+    const clerkId = profile.clerkId || getOrGenerateClerkId();
     const updated = {
       ...profile,
       ...profileData,
+      clerkId,
       status: 'Draft'
     };
     setProfile(updated);
     persistLocally(updated);
 
     try {
-      if (!updated.clerkId) {
-        updated.clerkId = localStorage.getItem('clerk_user_id') || `user_${Math.floor(Math.random() * 100000)}`;
-        localStorage.setItem('clerk_user_id', updated.clerkId);
-      }
       await profileService.createProfile(updated).catch(() => profileService.updateProfile(updated));
     } catch (e) {}
   };
 
   const submitRegistration = async (profileData) => {
+    const clerkId = profile.clerkId || getOrGenerateClerkId();
     const updated = {
       ...profile,
       ...profileData,
+      clerkId,
       status: 'Pending Approval',
       submittedAt: new Date().toISOString()
     };
@@ -122,10 +137,6 @@ export function useProfile() {
     );
 
     try {
-      if (!updated.clerkId) {
-        updated.clerkId = localStorage.getItem('clerk_user_id') || `user_${Math.floor(Math.random() * 100000)}`;
-        localStorage.setItem('clerk_user_id', updated.clerkId);
-      }
       await profileService.createProfile(updated).catch(() => {});
       await profileService.submitRegistration(updated);
     } catch (err) {
@@ -142,7 +153,7 @@ export function useProfile() {
     setProfile(prev => {
       if (prev.status !== 'Pending Approval') return prev;
 
-      const sapVendorCode = `VND-400${Math.floor(1000 + Math.random() * 9000)}`;
+      const sapVendorCode = generateSapVendorCode();
       const updated = {
         ...prev,
         status: 'Approved',

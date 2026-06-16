@@ -67,7 +67,7 @@ export default function PaymentDashboard({ state, onSelectPayment }) {
     const months = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
     const data = months.map((month, idx) => ({
       month: month.substring(0, 3),
-      amount: Math.floor(Math.random() * 50000) + 20000,
+      amount: ((idx * 8000 + 12000) % 50000) + 20000,
     }));
     return data;
   }, []);

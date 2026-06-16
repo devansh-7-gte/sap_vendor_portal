@@ -3,27 +3,63 @@
 import { useState, useEffect } from 'react';
 import { useShell } from '../../../lib/shell-context';
 
+const generateInboundDeliveryCode = () => {
+  return `1800${Math.floor(100000 + Math.random() * 900000)}`;
+};
+
+const generateGrnId = () => {
+  return `GRN-${Math.floor(5000000 + Math.random() * 4900000)}`;
+};
+
+const generateSapMigoDoc = () => {
+  return `50002${Math.floor(10000 + Math.random() * 90000)}`;
+};
+
+const calculateRejectedQuantity = (received) => {
+  return Math.random() > 0.85 ? Math.min(2, Math.floor(received * 0.1)) : 0;
+};
+
+const generatePoId = () => {
+  return `PO-45000${Math.floor(10000 + Math.random() * 90000)}`;
+};
+
 export function usePOs(profile) {
   const { addSapLog } = useShell();
-  const [pos, setPos] = useState([]);
-  const [asns, setAsns] = useState([]);
-  const [grns, setGrns] = useState([]);
-
-  // Hydrate states from localStorage on mount
-  useEffect(() => {
-    try {
-      const savedPOs = localStorage.getItem('sap_vendor_portal_pos');
-      if (savedPOs) setPos(JSON.parse(savedPOs));
-
-      const savedASNs = localStorage.getItem('sap_vendor_portal_asns');
-      if (savedASNs) setAsns(JSON.parse(savedASNs));
-
-      const savedGRNs = localStorage.getItem('sap_vendor_portal_grns');
-      if (savedGRNs) setGrns(JSON.parse(savedGRNs));
-    } catch (e) {
-      console.error('Failed to load logistics state', e);
+  const [pos, setPos] = useState(() => {
+    if (typeof window !== 'undefined') {
+      try {
+        const savedPOs = localStorage.getItem('sap_vendor_portal_pos');
+        if (savedPOs) return JSON.parse(savedPOs);
+      } catch (e) {
+        console.error('Failed to load POs', e);
+      }
     }
-  }, []);
+    return [];
+  });
+
+  const [asns, setAsns] = useState(() => {
+    if (typeof window !== 'undefined') {
+      try {
+        const savedASNs = localStorage.getItem('sap_vendor_portal_asns');
+        if (savedASNs) return JSON.parse(savedASNs);
+      } catch (e) {
+        console.error('Failed to load ASNs', e);
+      }
+    }
+    return [];
+  });
+
+  const [grns, setGrns] = useState(() => {
+    if (typeof window !== 'undefined') {
+      try {
+        const savedGRNs = localStorage.getItem('sap_vendor_portal_grns');
+        if (savedGRNs) return JSON.parse(savedGRNs);
+      } catch (e) {
+        console.error('Failed to load GRNs', e);
+      }
+    }
+    return [];
+  });
 
   const persistLocally = (key, data) => {
     try {
@@ -70,7 +106,7 @@ export function usePOs(profile) {
       ...asnData,
       status: 'Submitted',
       submittedAt: new Date().toISOString(),
-      sapInboundDelivery: `1800${Math.floor(100000 + Math.random() * 900000)}`
+      sapInboundDelivery: generateInboundDeliveryCode()
     };
 
     addSapLog(
@@ -116,8 +152,8 @@ export function usePOs(profile) {
     const matchedPo = pos.find(p => p.id === asn.poId);
     if (!matchedPo) return;
 
-    const grnId = `GRN-${Math.floor(5000000 + Math.random() * 4900000)}`;
-    const sapMigoDoc = `50002${Math.floor(10000 + Math.random() * 90000)}`;
+    const grnId = generateGrnId();
+    const sapMigoDoc = generateSapMigoDoc();
 
     const newGRN = {
       id: grnId,
@@ -132,7 +168,7 @@ export function usePOs(profile) {
         const poItem = matchedPo.items.find(pi => pi.line === item.line);
         const received = item.shippedQuantity;
         // 98% acceptance rate simulation
-        const rejected = Math.random() > 0.85 ? Math.min(2, Math.floor(received * 0.1)) : 0;
+        const rejected = calculateRejectedQuantity(received);
         const accepted = received - rejected;
         return {
           line: item.line,
@@ -208,7 +244,7 @@ export function usePOs(profile) {
   };
 
   const simulateIncomingPO = () => {
-    const poId = `PO-45000${Math.floor(10000 + Math.random() * 90000)}`;
+    const poId = generatePoId();
     const newPO = {
       id: poId,
       createdDate: new Date().toISOString().split('T')[0],

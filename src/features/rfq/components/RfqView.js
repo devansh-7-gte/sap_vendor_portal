@@ -46,6 +46,19 @@ const EnterpriseCard = ({ label, required, children, error }) => (
   </div>
 );
 
+const EnterpriseFieldCard = ({ label, required, error, children, labelWidth = 'sm:w-56', className = '' }) => (
+  <div className={`h-full py-1.5 px-3 bg-white transition-all flex flex-col sm:flex-row sm:items-center gap-3 select-none ${
+    error ? 'bg-red-50/10' : 'hover:bg-stone-50/30 focus-within:bg-stone-50/50'
+  } ${className}`}>
+    <label className={`text-xs font-bold text-stone-750 shrink-0 whitespace-normal select-none block ${labelWidth}`} title={label}>
+      {label} {required && <span className="text-red-500 font-bold select-none ml-0.5">*</span>}
+    </label>
+    <div className="flex-1 w-full min-w-0 flex flex-col justify-center">
+      {children}
+    </div>
+  </div>
+);
+
 const SkeletonCard = () => (
   <div className="p-4.5 bg-white border border-stone-200 rounded-xl flex flex-col justify-between min-h-[140px] animate-pulse">
     <div className="flex justify-between items-center">
@@ -62,6 +75,41 @@ const SkeletonCard = () => (
     </div>
   </div>
 );
+
+const getInitialRfqForm = () => ({
+  rfqRefNo: '',
+  description: '',
+  rfqType: 'AN',
+  deadlineDate: new Date(Date.now() + 14 * 24 * 60 * 60 * 1000).toISOString().split('T')[0],
+  bindingPeriod: '30',
+  paymentTerms: 'NET 30 Days',
+  purchasingGroup: '001',
+  materialDescription: 'FAST-HEX-M12-050',
+  quantityRequired: '10000',
+  unitOfMeasure: 'EA',
+  currency: 'INR',
+  priceBasis: 'Exclusive of Tax',
+  vendorType: 'Manufacturer',
+  vendorCategory: 'Raw Material',
+  plant: 'PL01 - Delhi',
+  companyCode: '1000',
+  incoterms: 'FOB',
+  remarks: 'Please provide best competitive pricing.'
+});
+
+const getInitialQuoteForm = () => ({
+  rfqId: '',
+  selectedLine: 10,
+  quoteRef: '',
+  quoteDate: new Date().toISOString().split('T')[0],
+  validityDate: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toISOString().split('T')[0],
+  unitPrice: '',
+  gstRate: '18%',
+  discount: '0',
+  deliveryLeadTime: '7',
+  freight: '0',
+  incoterms: 'EXW'
+});
 
 export default function RfqView({
   state,
@@ -82,20 +130,10 @@ export default function RfqView({
   // 2. Tab selector state
   // Procurement tabs: 'monitor', 'me41', 'me47' (Submit Quotation), 'me48'
   const [activeProcTab, setActiveProcTab] = useState('monitor');
+  const [listSearch, setListSearch] = useState('');
 
   // 3. ME41 Create RFQ local form states
-  const [rfqForm, rfqFormSet] = useState({
-    rfqRefNo: '',
-    description: '',
-    rfqType: 'AN',
-    deadlineDate: new Date(Date.now() + 14 * 24 * 60 * 60 * 1000).toISOString().split('T')[0],
-    bindingPeriod: '30',
-    paymentTerms: 'NET 30 Days',
-    purchasingGroup: '001',
-    materialDescription: 'FAST-HEX-M12-050',
-    quantityRequired: '10000',
-    unitOfMeasure: 'EA'
-  });
+  const [rfqForm, rfqFormSet] = useState(getInitialRfqForm);
 
   const [formErrors, setFormErrors] = useState({});
   const [isLoading, setIsLoading] = useState(false);
@@ -107,26 +145,16 @@ export default function RfqView({
   const [materialDropdownOpen, setMaterialDropdownOpen] = useState(false);
 
   // 4. ME47 Submit Quotation form states
-  const [quoteForm, setQuoteForm] = useState({
-    rfqId: '',
-    selectedLine: 10,
-    quoteRef: '',
-    quoteDate: new Date().toISOString().split('T')[0],
-    validityDate: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toISOString().split('T')[0],
-    unitPrice: '',
-    gstRate: '18%',
-    discount: '0',
-    deliveryLeadTime: '7',
-    freight: '0',
-    incoterms: 'EXW'
-  });
+  const [quoteForm, setQuoteForm] = useState(getInitialQuoteForm);
 
   const [quoteErrors, setQuoteErrors] = useState({});
   const [isSapMappingActive, setIsSapMappingActive] = useState(false);
 
   useEffect(() => {
     if (activeProcTab === 'me41' || activeProcTab === 'me47') {
-      setTabLoading(true);
+      Promise.resolve().then(() => {
+        setTabLoading(true);
+      });
       const timer = setTimeout(() => setTabLoading(false), 800);
       return () => clearTimeout(timer);
     }
@@ -303,11 +331,11 @@ export default function RfqView({
         deadlineDate: rfqForm.deadlineDate,
         paymentTerms: rfqForm.paymentTerms,
         purchasingGroup: rfqForm.purchasingGroup,
-        companyCode: '1000',
+        companyCode: rfqForm.companyCode || '1000',
         purchasingOrg: '1000',
-        currency: 'INR',
-        incoterms: 'EXW',
-        deliveryLocation: 'Plant 1000 (Mumbai)',
+        currency: rfqForm.currency || 'INR',
+        incoterms: rfqForm.incoterms || 'FOB',
+        deliveryLocation: rfqForm.plant || 'Plant 1000 (Mumbai)',
         notes: `Binding Period: ${rfqForm.bindingPeriod} Days`,
         items: items,
         invitedVendors: invitedList
@@ -326,7 +354,15 @@ export default function RfqView({
         purchasingGroup: '001',
         materialDescription: 'FAST-HEX-M12-050',
         quantityRequired: '10000',
-        unitOfMeasure: 'EA'
+        unitOfMeasure: 'EA',
+        currency: 'INR',
+        priceBasis: 'Exclusive of Tax',
+        vendorType: 'Manufacturer',
+        vendorCategory: 'Raw Material',
+        plant: 'PL01 - Delhi',
+        companyCode: '1000',
+        incoterms: 'FOB',
+        remarks: 'Please provide best competitive pricing.'
       });
       setAddedItems([
         {
@@ -488,1103 +524,289 @@ export default function RfqView({
   };
 
   return (
-    <div className="space-y-6 max-w-full animate-fade-in pb-20">
+    <div className="space-y-4 max-w-full animate-fade-in pb-16">
 
       {/* PROCUREMENT SUB NAVIGATION */}
-      <div className="flex border-b border-stone-200">
+      <div className="flex border-b border-border select-none bg-white p-1 rounded-sm shadow-xs">
         <button
-          onClick={() => setActiveProcTab('monitor')}
-          className={`pb-3 px-5 text-xs font-bold border-b-2 transition-all flex items-center gap-2 ${activeProcTab === 'monitor'
-            ? 'border-stone-850 text-stone-900'
-            : 'border-transparent text-stone-450 hover:text-stone-750'
+          onClick={() => { setActiveProcTab('monitor'); setListSearch(''); }}
+          className={`pb-2.5 px-5 text-xs font-bold border-b-2 transition-all cursor-pointer flex items-center gap-2 ${activeProcTab === 'monitor'
+            ? 'border-primary text-primary'
+            : 'border-transparent text-stone-400 hover:text-stone-750'
             }`}
         >
           <ClipboardList className="size-4" /> RFQ Monitor &amp; History
         </button>
         <button
-          onClick={() => setActiveProcTab('me41')}
-          className={`pb-3 px-5 text-xs font-bold border-b-2 transition-all flex items-center gap-2 ${activeProcTab === 'me41'
-            ? 'border-stone-850 text-stone-900'
-            : 'border-transparent text-stone-450 hover:text-stone-750'
+          onClick={() => { setActiveProcTab('me41'); setListSearch(''); }}
+          className={`pb-2.5 px-5 text-xs font-bold border-b-2 transition-all cursor-pointer flex items-center gap-2 ${activeProcTab === 'me41'
+            ? 'border-primary text-primary'
+            : 'border-transparent text-stone-400 hover:text-stone-750'
             }`}
         >
           <Plus className="size-4" /> Create RFQ (ME41)
         </button>
         <button
-          onClick={() => setActiveProcTab('me47')}
-          className={`pb-3 px-5 text-xs font-bold border-b-2 transition-all flex items-center gap-2 ${activeProcTab === 'me47'
-            ? 'border-stone-850 text-stone-900'
-            : 'border-transparent text-stone-450 hover:text-stone-750'
+          onClick={() => { setActiveProcTab('me47'); setListSearch(''); }}
+          className={`pb-2.5 px-5 text-xs font-bold border-b-2 transition-all cursor-pointer flex items-center gap-2 ${activeProcTab === 'me47'
+            ? 'border-primary text-primary'
+            : 'border-transparent text-stone-400 hover:text-stone-750'
             }`}
         >
           <Percent className="size-4" /> Submit Quotation (ME47)
         </button>
         <button
-          onClick={() => setActiveProcTab('me48')}
-          className={`pb-3 px-5 text-xs font-bold border-b-2 transition-all flex items-center gap-2 ${activeProcTab === 'me48'
-            ? 'border-stone-850 text-stone-900'
-            : 'border-transparent text-stone-450 hover:text-stone-750'
+          onClick={() => { setActiveProcTab('me48'); setListSearch(''); }}
+          className={`pb-2.5 px-5 text-xs font-bold border-b-2 transition-all cursor-pointer flex items-center gap-2 ${activeProcTab === 'me48'
+            ? 'border-primary text-primary'
+            : 'border-transparent text-stone-400 hover:text-stone-750'
             }`}
         >
           <Layers className="size-4" /> Evaluate &amp; Award (ME48)
         </button>
       </div>
 
-      {/* PROCUREMENT SUB-TAB: MONITOR */}
-      {activeProcTab === 'monitor' && (
-        <div className="space-y-4">
-          <div className="flex items-center justify-between">
-            <div>
-              <h3 className="text-sm font-bold text-stone-900">RFQ Purchasing Records</h3>
-              <p className="text-[11px] text-stone-500 mt-0.5">Active requests for quotation (SAP database records)</p>
-            </div>
-          </div>
-
-          <div className="grid grid-cols-1 gap-4">
-            {state.rfqs.map(rfq => (
-              <div key={rfq.id} className="p-5 bg-white border border-stone-200 rounded-xl shadow-xs space-y-4 hover:border-stone-300 transition-colors">
-                <div className="flex flex-wrap items-center justify-between gap-3">
-                  <div className="space-y-1">
-                    <div className="flex items-center gap-2.5">
-                      <span className="text-xs font-bold font-mono text-stone-700 bg-stone-100 border border-stone-200 px-2 py-0.5 rounded">
-                        {rfq.id}
-                      </span>
-                      <span className={`px-2.5 py-0.5 rounded-full text-[10px] font-bold border ${getRfqStatusBadge(rfq.status)}`}>
-                        {rfq.status}
-                      </span>
-                    </div>
-                    <h4 className="font-bold text-xs text-stone-900 pt-1">{rfq.description}</h4>
-                  </div>
-
-                  <div className="text-right text-xs">
-                    <p className="text-stone-450 font-medium">Deadline: <span className="text-stone-750 font-bold font-mono">{rfq.deadlineDate}</span></p>
-                    <p className="text-[10px] text-stone-400 font-mono mt-0.5">Purchasing Org: {rfq.purchasingOrg} / Grp: {rfq.purchasingGroup}</p>
-                  </div>
-                </div>
-
-                {/* Timeline Tracker */}
-                <div className="bg-stone-50/50 border border-stone-150 p-4 rounded-xl space-y-3">
-                  <h5 className="text-[9px] font-bold text-stone-400 uppercase tracking-wider">RFQ Audit Workflow &amp; SAP Status Tracking</h5>
-                  <div className="grid grid-cols-2 md:grid-cols-4 gap-3 text-xs">
-                    <div className="p-2 border border-stone-200 rounded-lg bg-white">
-                      <span className="text-[9px] text-stone-400 uppercase block font-semibold">ME41 Create</span>
-                      <span className="font-bold text-stone-900 flex items-center gap-1 mt-1">
-                        <CheckCircle2 className="size-3.5 text-emerald-600" /> Published
-                      </span>
-                      <span className="text-[9px] font-mono text-stone-500 block mt-0.5">{rfq.createdDate}</span>
-                    </div>
-
-                    <div className="p-2 border border-stone-200 rounded-lg bg-white">
-                      <span className="text-[9px] text-stone-400 uppercase block font-semibold">ME47 Quotation</span>
-                      <span className={`font-bold mt-1 flex items-center gap-1 ${rfq.bids?.length > 0 ? 'text-stone-900' : 'text-stone-400'}`}>
-                        {rfq.bids?.length > 0 ? (
-                          <>
-                            <CheckCircle2 className="size-3.5 text-emerald-600" /> {rfq.bids.length} Bid(s) Recd
-                          </>
-                        ) : (
-                          <>
-                            <Clock className="size-3.5 text-stone-450 animate-pulse" /> Pending Bids
-                          </>
-                        )}
-                      </span>
-                      <span className="text-[9px] font-mono text-stone-500 block mt-0.5">Deadline: {rfq.deadlineDate}</span>
-                    </div>
-
-                    <div className="p-2 border border-stone-200 rounded-lg bg-white">
-                      <span className="text-[9px] text-stone-400 uppercase block font-semibold">ME48 Evaluation</span>
-                      <span className={`font-bold mt-1 flex items-center gap-1 ${rfq.status === 'Awarded' || rfq.status === 'Under Review' ? 'text-stone-900' : 'text-stone-400'}`}>
-                        {rfq.status === 'Awarded' ? (
-                          <>
-                            <CheckCircle2 className="size-3.5 text-emerald-600" /> Evaluated
-                          </>
-                        ) : rfq.bids?.length > 0 ? (
-                          <>
-                            <Clock className="size-3.5 text-amber-500 animate-pulse" /> Review Ready
-                          </>
-                        ) : (
-                          'Pending Review'
-                        )}
-                      </span>
-                      <span className="text-[9px] text-stone-505 block mt-0.5">Score weights active</span>
-                    </div>
-
-                    <div className="p-2 border border-stone-200 rounded-lg bg-white">
-                      <span className="text-[9px] text-stone-400 uppercase block font-semibold">ME58 PO Generation</span>
-                      <span className={`font-bold mt-1 flex items-center gap-1 ${rfq.status === 'Awarded' ? 'text-stone-900' : 'text-stone-400'}`}>
-                        {rfq.status === 'Awarded' ? (
-                          <>
-                            <CheckCircle2 className="size-3.5 text-emerald-600" /> PO Synced
-                          </>
-                        ) : (
-                          'PO Pending'
-                        )}
-                      </span>
-                      <span className="text-[9px] font-mono text-stone-500 block mt-0.5">
-                        {rfq.status === 'Awarded' ? 'Conversion Completed' : 'Pending Award'}
-                      </span>
-                    </div>
-                  </div>
-                </div>
-
-                {/* Items brief */}
-                <div className="flex justify-between items-center pt-2 border-t border-stone-100 text-xs">
-                  <p className="text-stone-500 font-medium">
-                    Contains <strong className="text-stone-850 font-bold">{rfq.items.length} materials</strong> lines &bull; Delivery location: {rfq.deliveryLocation}
-                  </p>
-
-                  <div className="space-x-3">
-                    {rfq.bids?.length > 0 && rfq.status !== 'Awarded' && (
-                      <Button
-                        onClick={() => {
-                          setSelectedRfqEvalId(rfq.id);
-                          setActiveProcTab('me48');
-                        }}
-                        variant="outline"
-                        className="border-stone-300 text-stone-750 hover:bg-stone-100 font-bold text-xs"
-                      >
-                        Open Bid Evaluation Matrix ({rfq.bids.length} Bids)
-                      </Button>
-                    )}
-                    {rfq.status === 'Awarded' && (
-                      <span className="font-mono text-[10px] text-emerald-700 bg-emerald-50 border border-emerald-100 px-2.5 py-1 rounded font-bold">
-                        Awarded to {rfq.awardedVendorName || 'Synced Vendor'}
-                      </span>
-                    )}
-                  </div>
-                </div>
-              </div>
-            ))}
-          </div>
-        </div>
-      )}
-      {/* PROCUREMENT SUB-TAB: ME41 (Create RFQ Form) */}
-      {activeProcTab === 'me41' && (
-        <div className="space-y-6">
-          {tabLoading ? (
-            <div className="space-y-6 animate-fade-in">
-              <div>
-                <div className="h-4.5 w-48 bg-stone-200 rounded animate-pulse mb-1.5" />
-                <div className="h-3 w-80 bg-stone-150 rounded animate-pulse" />
-              </div>
-
-              <div className="space-y-3">
-                <div className="h-4.5 w-28 bg-stone-200 rounded animate-pulse" />
-                <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                  <SkeletonCard />
-                  <SkeletonCard />
-                  <div className="md:col-span-3">
-                    <SkeletonCard />
-                  </div>
-                </div>
-              </div>
-
-              <div className="space-y-3">
-                <div className="h-4.5 w-36 bg-stone-200 rounded animate-pulse" />
-                <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                  <SkeletonCard />
-                  <SkeletonCard />
-                  <SkeletonCard />
-                </div>
+      {activeProcTab !== 'me41' && activeProcTab !== 'me47' && activeProcTab !== 'me48' ? (
+        <div className="flex border border-border bg-white rounded-sm shadow-md overflow-hidden min-h-[500px]">
+          {/* LEFT SIDEBAR PANEL: RFQ LIST */}
+          <div className="w-80 shrink-0 border-r border-border bg-white flex flex-col h-[calc(100vh-13.5rem)]">
+            <div className="p-3 border-b border-border bg-stone-50">
+              <h3 className="text-xs font-bold text-stone-900 uppercase tracking-wider mb-2">RFQ List</h3>
+              <div className="relative">
+                <Search className="absolute left-2.5 top-2 size-3.5 text-stone-400" />
+                <input
+                  type="text"
+                  placeholder="Search RFQs..."
+                  value={listSearch}
+                  onChange={e => setListSearch(e.target.value)}
+                  className="w-full bg-white border border-stone-300 focus:border-primary rounded py-1 pl-8 pr-3 text-xs outline-none text-stone-900"
+                />
               </div>
             </div>
-          ) : (
-            <form onSubmit={handlePublishRFQSubmit} className="space-y-6 relative">
-
-              {isLoading && (
-                <div className="absolute inset-0 bg-stone-100/75 backdrop-blur-xs flex flex-col items-center justify-center z-30 rounded-xl min-h-[400px]">
-                  <div className="size-10 border-4 border-stone-850 border-t-transparent rounded-full animate-spin mb-4" />
-                  <p className="text-xs font-bold text-stone-900 uppercase tracking-widest font-mono">BAPI_RFQ_CREATE Posting to SAP ERP...</p>
-                  <p className="text-[10px] text-stone-500 mt-1">Establishing RFC connection &amp; writing database records</p>
-                </div>
-              )}
-
-              {/* 1. RFQ HEADER */}
-              <div className="space-y-4">
-                <SectionHeader title="RFQ Header" icon={FileText} />
-
-                <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                  <div className="md:col-span-2">
-                    <EnterpriseCard
-                      label="RFQ Reference No."
-                      required
-                      dataType="CHAR"
-                      length="LEN 10"
-                      tableField="EKKO-EBELN"
-                      error={formErrors.rfqRefNo}
-                    >
-                      <input
-                        type="text"
-                        required
-                        placeholder="e.g. RFQ-10029"
-                        value={rfqForm.rfqRefNo}
-                        onChange={e => {
-                          rfqFormSet({ ...rfqForm, rfqRefNo: e.target.value });
-                          if (formErrors.rfqRefNo) setFormErrors({ ...formErrors, rfqRefNo: false });
-                        }}
-                        className="w-full bg-white border border-stone-300 focus:border-stone-800 focus:ring-1 focus:ring-stone-800 rounded-lg py-2 px-3 text-xs outline-none text-stone-900 transition-all font-mono uppercase font-bold"
-                      />
-                    </EnterpriseCard>
-                  </div>
-
-                  <EnterpriseCard
-                    label="Document Type"
-                    required
-                    dataType="CHAR"
-                    length="LEN 4"
-                    tableField="EKKO-BSART"
-                    error={formErrors.rfqType}
-                  >
-                    <select
-                      value={rfqForm.rfqType}
-                      onChange={e => {
-                        rfqFormSet({ ...rfqForm, rfqType: e.target.value });
-                        if (formErrors.rfqType) setFormErrors({ ...formErrors, rfqType: false });
-                      }}
-                      className="w-full bg-white border border-stone-300 focus:border-stone-800 focus:ring-1 focus:ring-stone-800 rounded-lg py-2 px-3 text-xs outline-none text-stone-900 transition-all font-semibold"
-                    >
-                      <option value="AN">AN - Standard RFQ</option>
-                      <option value="AB">AB - Outline Agreement RFQ</option>
-                    </select>
-                  </EnterpriseCard>
-
-                  <div className="md:col-span-3">
-                    <EnterpriseCard
-                      label="RFQ Description"
-                      required
-                      dataType="CHAR"
-                      length="LEN 40"
-                      tableField="EKKO-TXZ01"
-                      error={formErrors.description}
-                    >
-                      <textarea
-                        rows={2}
-                        required
-                        placeholder="Describe the RFQ purchase target..."
-                        value={rfqForm.description}
-                        onChange={e => {
-                          rfqFormSet({ ...rfqForm, description: e.target.value });
-                          if (formErrors.description) setFormErrors({ ...formErrors, description: false });
-                        }}
-                        className="w-full bg-white border border-stone-300 focus:border-stone-800 focus:ring-1 focus:ring-stone-800 rounded-lg py-2 px-3 text-xs outline-none text-stone-900 transition-all resize-none"
-                      />
-                    </EnterpriseCard>
-                  </div>
-                </div>
-              </div>
-
-              {/* 2. SCHEDULE & TERMS */}
-              <div className="space-y-4">
-                <SectionHeader title="Schedule & Terms" icon={Calendar} />
-
-                <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                  <EnterpriseCard
-                    label="Quotation Deadline"
-                    required
-                    dataType="DATE"
-                    length="LEN 8"
-                    tableField="EKKO-ANGDT"
-                    error={formErrors.deadlineDate}
-                  >
-                    <div className="relative w-full">
-                      <input
-                        type="date"
-                        required
-                        value={rfqForm.deadlineDate}
-                        onChange={e => {
-                          rfqFormSet({ ...rfqForm, deadlineDate: e.target.value });
-                          if (formErrors.deadlineDate) setFormErrors({ ...formErrors, deadlineDate: false });
-                        }}
-                        className="w-full bg-white border border-stone-300 focus:border-stone-800 focus:ring-1 focus:ring-stone-800 rounded-lg py-2 pl-3 pr-10 text-xs outline-none text-stone-900 transition-all font-mono"
-                      />
-                      <Calendar className="absolute right-3 top-1/2 -translate-y-1/2 size-4 text-stone-400 pointer-events-none" />
-                    </div>
-                  </EnterpriseCard>
-
-                  <EnterpriseCard
-                    label="Binding Period (Days)"
-                    dataType="NUMC"
-                    length="LEN 3"
-                    tableField="EKKO-BNDDT"
-                    error={formErrors.bindingPeriod}
-                  >
-                    <input
-                      type="number"
-                      min="1"
-                      value={rfqForm.bindingPeriod}
-                      onChange={e => {
-                        rfqFormSet({ ...rfqForm, bindingPeriod: e.target.value });
-                        if (formErrors.bindingPeriod) setFormErrors({ ...formErrors, bindingPeriod: false });
-                      }}
-                      className="w-full bg-white border border-stone-300 focus:border-stone-800 focus:ring-1 focus:ring-stone-800 rounded-lg py-2 px-3 text-xs outline-none text-stone-900 transition-all font-mono font-bold"
-                    />
-                  </EnterpriseCard>
-
-                  <EnterpriseCard
-                    label="Payment Terms"
-                    dataType="CHAR"
-                    length="LEN 4"
-                    tableField="EKKO-ZTERM"
-                  >
-                    <select
-                      value={rfqForm.paymentTerms}
-                      onChange={e => rfqFormSet({ ...rfqForm, paymentTerms: e.target.value })}
-                      className="w-full bg-white border border-stone-300 focus:border-stone-800 focus:ring-1 focus:ring-stone-800 rounded-lg py-2 px-3 text-xs outline-none text-stone-900 transition-all font-semibold"
-                    >
-                      <option value="NET 30 Days">NET 30 Days</option>
-                      <option value="NET 45 Days">NET 45 Days</option>
-                      <option value="NET 60 Days">NET 60 Days</option>
-                      <option value="Immediate">Immediate / COD</option>
-                    </select>
-                  </EnterpriseCard>
-                </div>
-              </div>
-
-              {/* 3. VENDOR SELECTION */}
-              <div className="space-y-4">
-                <SectionHeader title="Vendor Selection" icon={User} />
-
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                  <EnterpriseCard
-                    label="Vendors to Invite"
-                    required
-                    dataType="CHAR"
-                    length="LEN 10"
-                    tableField="EKKO-LIFNR"
-                    error={formErrors.selectedVendors}
-                  >
-                    <div className="w-full relative">
-                      <div className="flex flex-wrap gap-1.5 p-1.5 border border-stone-300 rounded-lg bg-white min-h-[38px] focus-within:border-stone-800 focus-within:ring-1 focus-within:ring-stone-800 transition-all">
-                        {selectedVendors.map(vid => {
-                          const v = vendorMasterList.find(vm => vm.id === vid);
-                          return (
-                            <span key={vid} className="inline-flex items-center gap-1 bg-stone-100 text-stone-800 text-[11px] font-semibold px-2 py-0.5 rounded-md border border-stone-200">
-                              {v ? v.name : vid} ({vid})
-                              <button
-                                type="button"
-                                onClick={() => {
-                                  const filtered = selectedVendors.filter(id => id !== vid);
-                                  setSelectedVendors(filtered);
-                                  if (filtered.length === 0) setFormErrors({ ...formErrors, selectedVendors: true });
-                                }}
-                                className="text-stone-400 hover:text-stone-605 focus:outline-none ml-0.5 cursor-pointer"
-                              >
-                                <X className="size-3" />
-                              </button>
-                            </span>
-                          );
-                        })}
-                        <input
-                          type="text"
-                          placeholder={selectedVendors.length === 0 ? "Search vendors to invite..." : ""}
-                          value={vendorSearch}
-                          onChange={e => {
-                            setVendorSearch(e.target.value);
-                            setVendorDropdownOpen(true);
-                          }}
-                          onFocus={() => setVendorDropdownOpen(true)}
-                          className="flex-1 bg-transparent border-0 outline-none text-xs text-stone-900 p-1 min-w-[120px]"
-                        />
-                        <button
-                          type="button"
-                          onClick={() => setVendorDropdownOpen(!vendorDropdownOpen)}
-                          className="text-stone-400 hover:text-stone-650 focus:outline-none px-1"
-                        >
-                          <ChevronDown className="size-4" />
-                        </button>
-                      </div>
-
-                      {vendorDropdownOpen && (
-                        <>
-                          <div className="fixed inset-0 z-5" onClick={() => setVendorDropdownOpen(false)} />
-                          <div className="absolute z-10 w-full mt-1 bg-white border border-stone-200 rounded-lg shadow-lg max-h-48 overflow-y-auto">
-                            {vendorMasterList
-                              .filter(v => v.name.toLowerCase().includes(vendorSearch.toLowerCase()) || v.id.toLowerCase().includes(vendorSearch.toLowerCase()))
-                              .map(vendor => {
-                                const isSelected = selectedVendors.includes(vendor.id);
-                                return (
-                                  <div
-                                    key={vendor.id}
-                                    onClick={() => {
-                                      if (isSelected) {
-                                        const filtered = selectedVendors.filter(id => id !== vendor.id);
-                                        setSelectedVendors(filtered);
-                                        if (filtered.length === 0) setFormErrors({ ...formErrors, selectedVendors: true });
-                                      } else {
-                                        setSelectedVendors([...selectedVendors, vendor.id]);
-                                        if (formErrors.selectedVendors) setFormErrors({ ...formErrors, selectedVendors: false });
-                                      }
-                                      setVendorSearch('');
-                                    }}
-                                    className={`px-3 py-2 text-xs cursor-pointer hover:bg-stone-50 flex items-center justify-between border-b border-stone-100 last:border-0 ${isSelected ? 'bg-stone-50/70 font-semibold' : ''
-                                      }`}
-                                  >
-                                    <div>
-                                      <span className="font-bold text-stone-955">{vendor.name}</span>
-                                      <span className="font-mono text-stone-400 ml-2">({vendor.id})</span>
-                                    </div>
-                                    {isSelected && <span className="text-stone-700 text-xs">✓</span>}
-                                  </div>
-                                );
-                              })}
-                          </div>
-                        </>
-                      )}
-                    </div>
-                  </EnterpriseCard>
-
-                  <EnterpriseCard
-                    label="Purchasing Group"
-                    required
-                    dataType="CHAR"
-                    length="LEN 3"
-                    tableField="EKKO-EKGRP"
-                    error={formErrors.purchasingGroup}
-                  >
-                    <select
-                      value={rfqForm.purchasingGroup}
-                      onChange={e => {
-                        rfqFormSet({ ...rfqForm, purchasingGroup: e.target.value });
-                        if (formErrors.purchasingGroup) setFormErrors({ ...formErrors, purchasingGroup: false });
-                      }}
-                      className="w-full bg-white border border-stone-300 focus:border-stone-850 focus:ring-1 focus:ring-stone-850 rounded-lg py-2 px-3 text-xs outline-none text-stone-900 transition-all font-semibold"
-                    >
-                      <option value="001">001 - Raw Materials</option>
-                      <option value="002">002 - Steel & Piping</option>
-                      <option value="003">003 - Fasteners</option>
-                      <option value="100">100 - General Services</option>
-                    </select>
-                  </EnterpriseCard>
-                </div>
-              </div>              {/* 4. LINE ITEMS */}
-              <div className="space-y-4">
-                <SectionHeader title="Line Items Entry" icon={ClipboardList} />
-
-                <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                  <div className="md:col-span-3">
-                    <EnterpriseCard
-                      label="Material / Item Description"
-                      dataType="CHAR"
-                      length="LEN 18"
-                      tableField="EKPO-MATNR/TXZ01"
-                      error={formErrors.materialDescription}
-                    >
-                      <div className="w-full relative">
-                        <div className="relative flex items-center">
-                          <input
-                            type="text"
-                            placeholder="Select material code or type custom description..."
-                            value={rfqForm.materialDescription}
-                            onChange={e => {
-                              rfqFormSet({ ...rfqForm, materialDescription: e.target.value });
-                              setMaterialDropdownOpen(true);
-                              if (formErrors.materialDescription) setFormErrors({ ...formErrors, materialDescription: false });
-                            }}
-                            onFocus={() => setMaterialDropdownOpen(true)}
-                            className="w-full bg-white border border-stone-300 focus:border-stone-850 focus:ring-1 focus:ring-stone-850 rounded-lg py-2 pl-3 pr-10 text-xs outline-none text-stone-900 transition-all"
-                          />
-                          <button
-                            type="button"
-                            onClick={() => setMaterialDropdownOpen(!materialDropdownOpen)}
-                            className="absolute right-3 text-stone-400 hover:text-stone-605 focus:outline-none cursor-pointer"
-                          >
-                            <ChevronDown className="size-4" />
-                          </button>
-                        </div>
-
-                        {materialDropdownOpen && (
-                          <>
-                            <div className="fixed inset-0 z-5" onClick={() => setMaterialDropdownOpen(false)} />
-                            <div className="absolute z-10 w-full mt-1 bg-white border border-stone-200 rounded-lg shadow-lg max-h-48 overflow-y-auto">
-                              {materialMasterList
-                                .filter(m => m.code.toLowerCase().includes(rfqForm.materialDescription.toLowerCase()) || m.desc.toLowerCase().includes(rfqForm.materialDescription.toLowerCase()))
-                                .map(mat => (
-                                  <div
-                                    key={mat.code}
-                                    onClick={() => {
-                                      rfqFormSet({
-                                        ...rfqForm,
-                                        materialDescription: mat.code,
-                                        unitOfMeasure: mat.uom
-                                      });
-                                      setMaterialDropdownOpen(false);
-                                      if (formErrors.materialDescription) setFormErrors({ ...formErrors, materialDescription: false });
-                                    }}
-                                    className="px-3 py-2 text-xs cursor-pointer hover:bg-stone-50 border-b border-stone-100 last:border-0"
-                                  >
-                                    <div className="font-bold text-stone-955">{mat.code}</div>
-                                    <div className="text-stone-500 text-[10px] truncate">{mat.desc}</div>
-                                  </div>
-                                ))}
-                            </div>
-                          </>
-                        )}
-                      </div>
-                    </EnterpriseCard>
-                  </div>
-
-                  <EnterpriseCard
-                    label="Quantity Required"
-                    dataType="QUAN"
-                    length="LEN 13"
-                    tableField="EKPO-MENGE"
-                    error={formErrors.quantityRequired}
-                  >
-                    <input
-                      type="number"
-                      min="1"
-                      placeholder="e.g. 10000"
-                      value={rfqForm.quantityRequired}
-                      onChange={e => {
-                        rfqFormSet({ ...rfqForm, quantityRequired: e.target.value });
-                        if (formErrors.quantityRequired) setFormErrors({ ...formErrors, quantityRequired: false });
-                      }}
-                      className="w-full bg-white border border-stone-300 focus:border-stone-850 focus:ring-1 focus:ring-stone-850 rounded-lg py-2 px-3 text-xs outline-none text-stone-900 transition-all font-mono font-bold"
-                    />
-                  </EnterpriseCard>
-
-                  <EnterpriseCard
-                    label="Unit of Measure"
-                    dataType="UNIT"
-                    length="LEN 3"
-                    tableField="EKPO-MEINS"
-                    error={formErrors.unitOfMeasure}
-                  >
-                    <select
-                      value={rfqForm.unitOfMeasure}
-                      onChange={e => {
-                        rfqFormSet({ ...rfqForm, unitOfMeasure: e.target.value });
-                        if (formErrors.unitOfMeasure) setFormErrors({ ...formErrors, unitOfMeasure: false });
-                      }}
-                      className="w-full bg-white border border-stone-300 focus:border-stone-850 focus:ring-1 focus:ring-stone-850 rounded-lg py-2 px-3 text-xs outline-none text-stone-900 transition-all font-semibold"
-                    >
-                      <option value="EA">EA - Each</option>
-                      <option value="PC">PC - Piece</option>
-                      <option value="KG">KG - Kilogram</option>
-                      <option value="MTR">MTR - Meter</option>
-                      <option value="NOS">NOS - Number</option>
-                    </select>
-                  </EnterpriseCard>
-
-                  <div className="flex items-end justify-end p-2.5">
+            <div className="flex-1 overflow-y-auto custom-scrollbar divide-y divide-stone-100">
+              {state.rfqs
+                .filter(r => r.id.toLowerCase().includes(listSearch.toLowerCase()) || r.description.toLowerCase().includes(listSearch.toLowerCase()))
+                .map(rfq => {
+                  const isSelected = selectedRfqId === rfq.id || (!selectedRfqId && state.rfqs[0]?.id === rfq.id);
+                  
+                  return (
                     <button
+                      key={rfq.id}
                       type="button"
-                      onClick={handleAddLineItem}
-                      className="w-full bg-stone-800 hover:bg-black text-white hover:text-white font-bold text-xs py-2 px-4 rounded-lg flex items-center justify-center gap-1.5 transition-colors cursor-pointer"
+                      onClick={() => {
+                        setSelectedRfqId(rfq.id);
+                      }}
+                      className={`w-full text-left p-3.5 transition-colors cursor-pointer block ${
+                        isSelected 
+                          ? 'bg-blue-50/70 border-l-4 border-primary' 
+                          : 'hover:bg-stone-50'
+                      }`}
                     >
-                      <Plus className="size-4" /> Add Line Item
+                      <div className="flex items-center justify-between mb-1">
+                        <span className="font-mono text-xs font-bold text-stone-900">{rfq.id}</span>
+                        <span className={`px-2 py-0.5 rounded text-[9px] font-bold border ${getRfqStatusBadge(rfq.status)}`}>
+                          {rfq.status}
+                        </span>
+                      </div>
+                      <p className="text-xs font-bold text-stone-800 truncate" title={rfq.description}>{rfq.description}</p>
+                      <div className="flex items-center justify-between mt-2 text-[10px] text-stone-400 font-mono">
+                        <span>Org: {rfq.purchasingOrg}</span>
+                        <span>Date: {rfq.createdDate}</span>
+                      </div>
                     </button>
+                  );
+                })}
+              {state.rfqs.filter(r => r.id.toLowerCase().includes(listSearch.toLowerCase()) || r.description.toLowerCase().includes(listSearch.toLowerCase())).length === 0 && (
+                <p className="p-4 text-xs text-stone-400 text-center select-none">No RFQ records found</p>
+              )}
+            </div>
+          </div>
+
+          {/* RIGHT SIDE DETAILS PANEL */}
+          <div className="flex-1 flex flex-col min-w-0 bg-stone-50/20 overflow-hidden h-[calc(100vh-13.5rem)]">
+            
+            {/* TABS: MONITOR VIEW */}
+            {activeProcTab === 'monitor' && (() => {
+              const activeRfq = state.rfqs.find(r => r.id === selectedRfqId) || state.rfqs[0];
+              if (!activeRfq) {
+                return (
+                  <div className="flex-1 flex items-center justify-center p-8 text-stone-400 text-xs">
+                    Select an RFQ from the left list to view details
+                  </div>
+                );
+              }
+              return (
+                <div className="flex-1 flex flex-col overflow-hidden">
+                  {/* Detail Header */}
+                  <div className="p-4 border-b border-border bg-stone-50/70 flex items-center justify-between">
+                    <div>
+                      <h3 className="text-xs font-bold text-stone-900 uppercase">
+                        (RFQ-{activeRfq.id}) / (Cat.-{activeRfq.description}) / (Typ-{activeRfq.rfqType})
+                      </h3>
+                      <p className="text-[10px] text-stone-550 font-mono mt-0.5">
+                        Vendor: {currentVendorCode} &bull; Created: {activeRfq.createdDate} &bull; Org: {activeRfq.purchasingOrg}
+                      </p>
+                    </div>
+                    <span className={`px-2.5 py-0.5 rounded text-[10px] font-bold border ${getRfqStatusBadge(activeRfq.status)}`}>
+                      {activeRfq.status}
+                    </span>
                   </div>
 
-                  {/* Dynamic Items Table */}
-                  <div className="md:col-span-3 space-y-2 pt-2">
-                    <label className="text-[10px] font-bold text-stone-400 uppercase tracking-wider block">Currently Added Items ({addedItems.length})</label>
-                    {addedItems.length === 0 ? (
-                      <div className="p-6 rounded-xl border border-dashed border-stone-300 bg-stone-50/50 text-center text-xs text-stone-500 shadow-sm">
-                        No items added to this RFQ yet. Enter details above and click "Add Line Item".
-                      </div>
-                    ) : (
-                      <div className="border border-stone-200 rounded-xl overflow-hidden bg-white shadow-xs">
+                  {/* Scrollable Content */}
+                  <div className="flex-1 overflow-y-auto p-4 custom-scrollbar space-y-6 bg-white">
+                    {/* RAW DETAILS */}
+                    <div>
+                      <SectionHeader title="RAW Details" icon={FileText} />
+                      <div className="border border-border rounded-sm overflow-hidden bg-white">
                         <table className="w-full text-left text-xs border-collapse">
                           <thead>
-                            <tr className="bg-stone-50 border-b border-stone-200 font-bold text-[9px] text-stone-505 uppercase tracking-wider">
-                              <th className="py-2.5 px-4 w-12">Line</th>
-                              <th className="py-2.5 px-4">Material / Item Description</th>
-                              <th className="py-2.5 px-4 text-right">Quantity</th>
-                              <th className="py-2.5 px-4 text-center">UoM</th>
-                              <th className="py-2.5 px-4 text-right">Target Price (₹)</th>
-                              <th className="py-2.5 px-4 text-center">Actions</th>
+                            <tr className="bg-stone-50 border-b border-border font-bold text-[9px] text-stone-900 uppercase">
+                              <th className="py-2.5 px-4 w-12 text-stone-900">Line</th>
+                              <th className="py-2.5 px-4 text-stone-900">Material Code</th>
+                              <th className="py-2.5 px-4 text-stone-900">Description</th>
+                              <th className="py-2.5 px-4 text-right text-stone-900">Qty Required</th>
+                              <th className="py-2.5 px-4 text-center text-stone-900">UoM</th>
+                              <th className="py-2.5 px-4 text-right text-stone-900">Target Ref Price</th>
+                              <th className="py-2.5 px-4 text-stone-900 font-mono">Delivery Date</th>
                             </tr>
                           </thead>
-                          <tbody className="divide-y divide-stone-100 text-[11px] text-stone-700">
-                            {addedItems.map((item, idx) => (
+                          <tbody className="divide-y divide-stone-150 text-stone-700">
+                            {activeRfq.items.map((item, idx) => (
                               <tr key={idx} className="hover:bg-stone-50/20">
-                                <td className="py-2.5 px-4 font-mono font-bold text-stone-450">{(idx + 1) * 10}</td>
-                                <td className="py-2.5 px-4">
-                                  <p className="font-semibold text-stone-900">{item.description}</p>
-                                  <p className="text-[10px] text-stone-400 font-mono mt-0.5">{item.materialCode}</p>
-                                </td>
-                                <td className="py-2.5 px-4 text-right font-mono font-semibold">{item.quantity.toLocaleString()}</td>
-                                <td className="py-2.5 px-4 text-center font-semibold">{item.uom}</td>
+                                <td className="py-2.5 px-4 font-mono font-bold text-stone-500">{(idx + 1) * 10}</td>
+                                <td className="py-2.5 px-4 font-mono font-bold text-stone-900">{item.materialCode}</td>
+                                <td className="py-2.5 px-4 font-semibold">{item.description}</td>
+                                <td className="py-2.5 px-4 text-right font-mono font-bold">{item.quantity.toLocaleString()}</td>
+                                <td className="py-2.5 px-4 text-center font-bold">{item.uom}</td>
                                 <td className="py-2.5 px-4 text-right font-mono text-stone-600">₹{item.targetPrice.toFixed(2)}</td>
-                                <td className="py-2.5 px-4 text-center">
-                                  <button
-                                    type="button"
-                                    onClick={() => handleRemoveLineItem(idx)}
-                                    className="text-stone-400 hover:text-red-650 p-1.5 rounded transition-colors cursor-pointer"
-                                    title="Remove Item"
-                                  >
-                                    <Trash2 className="size-4" />
-                                  </button>
-                                </td>
+                                <td className="py-2.5 px-4 font-mono text-stone-500">{item.deliveryDate}</td>
                               </tr>
                             ))}
                           </tbody>
                         </table>
                       </div>
-                    )}
-                  </div>
+                    </div>
 
-                </div>
-              </div>
-
-              {/* STICKY BOTTOM ACTION BAR */}
-              <div className="sticky bottom-0 left-0 right-0 bg-white/95 backdrop-blur-xs border border-stone-250/70 p-4 rounded-xl flex items-center justify-between gap-4 shadow-lg z-10 mt-8 transition-all duration-150 hover:shadow-xl">
-                <div>
-                  <span className="text-[9px] font-bold text-stone-400 uppercase tracking-widest block font-mono">SAP Draft Session</span>
-                  <p className="text-xs font-semibold text-stone-800">ME41 RFQ Document Creation</p>
-                </div>
-
-                <div className="flex gap-3">
-                  <Button
-                    type="button"
-                    onClick={() => {
-                      alert('Draft saved in local memory.');
-                    }}
-                    variant="outline"
-                    className="border-stone-300 text-stone-700 hover:bg-stone-50 font-bold text-xs"
-                  >
-                    Save Draft
-                  </Button>
-                  <Button
-                    type="submit"
-                    variant="default"
-                    className="bg-stone-850 hover:bg-black text-stone-700 hover:text-white font-bold text-xs px-8 rounded-lg"
-                  >
-                    Preview &amp; Post RFQ
-                  </Button>
-                </div>
-              </div>
-
-            </form>
-          )}
-        </div>
-      )}
-
-      {/* PROCUREMENT SUB-TAB: ME47 (Submit Quotation Form) */}
-      {activeProcTab === 'me47' && (
-        <div className="space-y-6">
-          {tabLoading ? (
-            <div className="space-y-6 animate-fade-in">
-              <div>
-                <div className="h-4.5 w-48 bg-stone-200 rounded animate-pulse mb-1.5" />
-                <div className="h-3 w-80 bg-stone-150 rounded animate-pulse" />
-              </div>
-
-              <div className="space-y-3">
-                <div className="h-4.5 w-28 bg-stone-200 rounded animate-pulse" />
-                <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                  <SkeletonCard />
-                  <SkeletonCard />
-                  <SkeletonCard />
-                </div>
-              </div>
-
-              <div className="space-y-3">
-                <div className="h-4.5 w-36 bg-stone-200 rounded animate-pulse" />
-                <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                  <SkeletonCard />
-                  <SkeletonCard />
-                  <SkeletonCard />
-                </div>
-              </div>
-            </div>
-          ) : (
-            <form onSubmit={handleQuotationSubmit} className="space-y-6 relative">
-
-              {isLoading && (
-                <div className="absolute inset-0 bg-stone-100/75 backdrop-blur-xs flex flex-col items-center justify-center z-30 rounded-xl min-h-[400px]">
-                  <div className="size-10 border-4 border-stone-850 border-t-transparent rounded-full animate-spin mb-4" />
-                  <p className="text-xs font-bold text-stone-900 uppercase tracking-widest font-mono">BAPI_QUOTATION_CREATE Posting to SAP ERP...</p>
-                  <p className="text-[10px] text-stone-500 mt-1">Updating Info Records &amp; synchronization with SAP database (ME47)...</p>
-                </div>
-              )}
-
-              {/* macOS-style Window Address Bar Wrapper */}
-              {/* <div className="bg-stone-900 border border-stone-800 rounded-xl overflow-hidden shadow-md p-3 flex items-center gap-3">
-                <div className="flex gap-1.5 shrink-0 pl-1">
-                  <div className="size-2.5 rounded-full bg-[#ff5f56]" />
-                  <div className="size-2.5 rounded-full bg-[#ffbd2e]" />
-                  <div className="size-2.5 rounded-full bg-[#27c93f]" />
-                </div>
-                <div className="flex-1 bg-stone-800/80 border border-stone-700/50 rounded-md py-1 px-3 flex items-center justify-between text-[10px] font-mono text-stone-400">
-                  <div className="flex items-center gap-1 truncate">
-                    <span className="text-stone-500">https://</span>
-                    <span>vendorportal.app</span>
-                    <span className="text-stone-500">/</span>
-                    <span>rfq</span>
-                    <span className="text-stone-500">/</span>
-                    <span className="text-stone-200 font-bold">qt</span>
-                  </div>
-                  <span className="text-[9px] text-stone-500 uppercase tracking-widest shrink-0 font-semibold pl-2">ME47 Maintain Quotation</span>
-                </div>
-              </div> */}
-
-              {/* Header Title with Toggles */}
-              <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
-                <div>
-                  <div className="flex items-center gap-2.5">
-                    <h3 className="text-sm font-bold text-stone-900">Maintain Quotation (ME47)</h3>
-
-                  </div>
-                  <p className="text-[11px] text-stone-500 mt-0.5">Submit proposal prices, discount structures and delivery timelines directly to SAP</p>
-                </div>
-
-                {/* Form View / SAP Mapping Toggle Removed */}
-              </div>
-
-              {/* RFQ Selection Dropdown and Details */}
-              {(() => {
-                const selectedRfq = state.rfqs.find(r => r.id === quoteForm.rfqId);
-                return (
-                  <div className={`p-4.5 bg-white border rounded-xl shadow-xs space-y-4 ${quoteErrors.rfqId ? 'border-red-500 ring-1 ring-red-500/50 bg-red-50/5' : 'border-stone-200'
-                    }`}>
-                    <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
-                      <div>
-                        <h4 className="text-[11px] font-bold text-stone-750 uppercase tracking-wider font-mono">Select RFQ Document</h4>
-                        <p className="text-[10px] text-stone-400 mt-0.5">Choose an active RFQ from the SAP ERP system to quote for</p>
-                      </div>
-                      <div>
-                        <select
-                          value={quoteForm.rfqId}
-                          onChange={e => {
-                            const selectedId = e.target.value;
-                            const rfq = state.rfqs.find(r => r.id === selectedId);
-                            setQuoteForm({
-                              ...quoteForm,
-                              rfqId: selectedId,
-                              selectedLine: rfq && rfq.items.length > 0 ? rfq.items[0].line : 10
-                            });
-                            if (quoteErrors.rfqId) setQuoteErrors({ ...quoteErrors, rfqId: false });
-                          }}
-                          className={`bg-white border rounded-lg px-3 py-2 text-xs outline-none font-semibold text-stone-900 transition-all ${quoteErrors.rfqId ? 'border-red-500 focus:border-red-600' : 'border-stone-300 focus:border-stone-850'
-                            }`}
-                        >
-                          <option value="">-- Choose RFQ Document --</option>
-                          {state.rfqs.map(r => (
-                            <option key={r.id} value={r.id}>
-                              {r.id} - {r.description} ({r.status})
-                            </option>
-                          ))}
-                        </select>
+                    {/* OTHER DETAILS (INVITED VENDORS) */}
+                    <div>
+                      <SectionHeader title="Invited Vendors (Other Details)" icon={User} />
+                      <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+                        {activeRfq.invitedVendors?.map(v => (
+                          <div key={v.id} className="p-3 bg-stone-50/50 border border-border rounded-sm flex items-center justify-between text-xs">
+                            <div>
+                              <p className="font-bold text-stone-900">{v.name}</p>
+                              <p className="text-[10px] text-stone-500 font-mono mt-0.5">Code: {v.id}</p>
+                            </div>
+                            <span className="px-2 py-0.5 rounded text-[9px] font-bold bg-stone-100 text-stone-700 border border-stone-250">
+                              Rating: {v.rating}
+                            </span>
+                          </div>
+                        ))}
                       </div>
                     </div>
 
-                    {selectedRfq && (
-                      <div className="bg-stone-50/50 border border-stone-200 p-4 rounded-xl space-y-3 mt-2">
-                        <div className="flex items-center justify-between border-b border-stone-150 pb-2">
-                          <h5 className="text-[9px] font-bold text-stone-400 uppercase tracking-wider">RFQ Line Item Details (Selected for Quotation)</h5>
-                          <span className="font-mono text-[9px] text-stone-600 font-bold bg-stone-200/60 px-2 py-0.5 rounded">
-                            Status: {selectedRfq.status}
+                    {/* PROCESS DETAILS (AUDIT WORKFLOW STATUS) */}
+                    <div>
+                      <SectionHeader title="Audit Process Details & SAP Status Tracking" icon={Layers} />
+                      <div className="grid grid-cols-2 md:grid-cols-4 gap-3 text-xs">
+                        <div className="p-3 border border-border rounded-sm bg-stone-50/30">
+                          <span className="text-[9px] text-stone-500 uppercase block font-bold">ME41 Create</span>
+                          <span className="font-bold text-stone-900 flex items-center gap-1.5 mt-1.5">
+                            <CheckCircle2 className="size-3.5 text-green-600" /> Published
                           </span>
+                          <span className="text-[9px] font-mono text-stone-500 block mt-1">{activeRfq.createdDate}</span>
                         </div>
 
-                        {/* Line Item selector if multiple items */}
-                        {selectedRfq.items.length > 1 && (
-                          <div className="flex flex-wrap items-center gap-2 py-1">
-                            <span className="text-[9px] font-bold text-stone-450 uppercase tracking-wider mr-1">Select Line Item:</span>
-                            {selectedRfq.items.map(item => (
-                              <button
-                                key={item.line}
-                                type="button"
-                                onClick={() => setQuoteForm({ ...quoteForm, selectedLine: item.line })}
-                                className={`px-3 py-1 text-xs font-mono font-bold rounded-lg border transition-all ${Number(quoteForm.selectedLine) === item.line
-                                  ? 'bg-stone-850 text-stone-50 border-stone-850'
-                                  : 'bg-white text-stone-700 border-stone-200 hover:bg-stone-50'
-                                  }`}
-                              >
-                                Line {item.line}: {item.materialCode}
-                              </button>
-                            ))}
-                          </div>
-                        )}
+                        <div className="p-3 border border-border rounded-sm bg-stone-50/30">
+                          <span className="text-[9px] text-stone-500 uppercase block font-bold">ME47 Quotation</span>
+                          <span className={`font-bold mt-1.5 flex items-center gap-1.5 ${activeRfq.bids?.length > 0 ? 'text-stone-900' : 'text-stone-400'}`}>
+                            {activeRfq.bids?.length > 0 ? (
+                              <>
+                                <CheckCircle2 className="size-3.5 text-green-600" /> {activeRfq.bids.length} Bid(s) Recd
+                              </>
+                            ) : (
+                              <>
+                                <Clock className="size-3.5 text-stone-400 animate-pulse" /> Pending Bids
+                              </>
+                            )}
+                          </span>
+                          <span className="text-[9px] font-mono text-stone-500 block mt-1">Deadline: {activeRfq.deadlineDate}</span>
+                        </div>
 
-                        {/* Selected Item Info Card */}
-                        {(() => {
-                          const selectedItem = selectedRfq.items.find(item => item.line === Number(quoteForm.selectedLine)) || selectedRfq.items[0];
-                          if (!selectedItem) return null;
-                          return (
-                            <div className="grid grid-cols-2 md:grid-cols-4 gap-4 pt-1 text-xs font-sans text-stone-750">
-                              <div>
-                                <span className="text-[9px] text-stone-400 block font-semibold uppercase">Material Code</span>
-                                <span className="font-bold text-stone-900 font-mono">{selectedItem.materialCode}</span>
-                              </div>
-                              <div>
-                                <span className="text-[9px] text-stone-400 block font-semibold uppercase">Description</span>
-                                <span className="font-bold text-stone-900 truncate block max-w-[200px]">{selectedItem.description}</span>
-                              </div>
-                              <div>
-                                <span className="text-[9px] text-stone-400 block font-semibold uppercase">Required Quantity</span>
-                                <span className="font-bold text-stone-900 font-mono">{selectedItem.quantity.toLocaleString()} {selectedItem.uom}</span>
-                              </div>
-                              <div>
-                                <span className="text-[9px] text-stone-400 block font-semibold uppercase">Target Price Reference</span>
-                                <span className="font-bold text-stone-900 font-mono">₹{selectedItem.targetPrice?.toFixed(2)}</span>
-                              </div>
-                            </div>
-                          );
-                        })()}
+                        <div className="p-3 border border-border rounded-sm bg-stone-50/30">
+                          <span className="text-[9px] text-stone-500 uppercase block font-bold">ME48 Evaluation</span>
+                          <span className={`font-bold mt-1.5 flex items-center gap-1.5 ${activeRfq.status === 'Awarded' || activeRfq.status === 'Under Review' ? 'text-stone-900' : 'text-stone-400'}`}>
+                            {activeRfq.status === 'Awarded' ? (
+                              <>
+                                <CheckCircle2 className="size-3.5 text-green-600" /> Evaluated
+                              </>
+                            ) : activeRfq.bids?.length > 0 ? (
+                              <>
+                                <Clock className="size-3.5 text-amber-500 animate-pulse" /> Review Ready
+                              </>
+                            ) : (
+                              'Pending Review'
+                            )}
+                          </span>
+                          <span className="text-[9px] text-stone-500 block mt-1">Score weights active</span>
+                        </div>
+
+                        <div className="p-3 border border-border rounded-sm bg-stone-50/30">
+                          <span className="text-[9px] text-stone-500 uppercase block font-bold">ME58 PO Generation</span>
+                          <span className={`font-bold mt-1.5 flex items-center gap-1.5 ${activeRfq.status === 'Awarded' ? 'text-stone-900' : 'text-stone-400'}`}>
+                            {activeRfq.status === 'Awarded' ? (
+                              <>
+                                <CheckCircle2 className="size-3.5 text-green-600" /> PO Synced
+                              </>
+                            ) : (
+                              'PO Pending'
+                            )}
+                          </span>
+                          <span className="text-[9px] font-mono text-stone-500 block mt-1">
+                            {activeRfq.status === 'Awarded' ? 'Conversion Completed' : 'Pending Award'}
+                          </span>
+                        </div>
                       </div>
-                    )}
+                    </div>
+
+                    <div className="flex justify-between items-center pt-3 border-t border-border text-xs text-stone-500">
+                      <p className="font-semibold">
+                        Delivery Location: {activeRfq.deliveryLocation}
+                      </p>
+                      <div>
+                        {activeRfq.bids?.length > 0 && activeRfq.status !== 'Awarded' && (
+                          <Button
+                            onClick={() => {
+                              setSelectedRfqEvalId(activeRfq.id);
+                              setActiveProcTab('me48');
+                            }}
+                            className="bg-transparent hover:bg-blue-50/50 text-primary border border-primary/50 font-bold text-xs h-8.5 rounded cursor-pointer"
+                          >
+                            Open Bid Evaluation Matrix ({activeRfq.bids.length} Bids)
+                          </Button>
+                        )}
+                        {activeRfq.status === 'Awarded' && (
+                          <span className="font-mono text-[10px] text-green-700 bg-green-50 border border-green-200 px-2.5 py-1 rounded font-bold">
+                            Awarded to {activeRfq.awardedVendorName || 'Synced Vendor'}
+                          </span>
+                        )}
+                      </div>
+                    </div>
                   </div>
-                );
-              })()}
-
-              {/* 1. QUOTATION HEADER */}
-              <div className="space-y-4">
-                <SectionHeader title="Quotation Header" icon={FileText} />
-
-                <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                  <EnterpriseCard
-                    label="Your Quote Reference"
-                    dataType="CHAR"
-                    length="LEN 12"
-                    tableField="EKKO-IHREZ"
-                    highlightTableField={isSapMappingActive}
-                  >
-                    <input
-                      type="text"
-                      placeholder="e.g. QT-2026-001"
-                      value={quoteForm.quoteRef}
-                      onChange={e => setQuoteForm({ ...quoteForm, quoteRef: e.target.value })}
-                      className="w-full bg-white border border-stone-300 focus:border-stone-800 focus:ring-1 focus:ring-stone-800 rounded-lg py-2 px-3 text-xs outline-none text-stone-900 transition-all font-mono uppercase"
-                    />
-                  </EnterpriseCard>
-
-                  <EnterpriseCard
-                    label="Quotation Date"
-                    required
-                    dataType="DATS"
-                    length="LEN 8"
-                    tableField="EKKO-ANGDT"
-                    error={quoteErrors.quoteDate}
-                    highlightTableField={isSapMappingActive}
-                  >
-                    <div className="relative w-full">
-                      <input
-                        type="date"
-                        required
-                        value={quoteForm.quoteDate}
-                        onChange={e => {
-                          setQuoteForm({ ...quoteForm, quoteDate: e.target.value });
-                          if (quoteErrors.quoteDate) setQuoteErrors({ ...quoteErrors, quoteDate: false });
-                        }}
-                        className="w-full bg-white border border-stone-300 focus:border-stone-800 focus:ring-1 focus:ring-stone-800 rounded-lg py-2 pl-3 pr-10 text-xs outline-none text-stone-900 transition-all font-mono"
-                      />
-                      <Calendar className="absolute right-3 top-1/2 -translate-y-1/2 size-4 text-stone-400 pointer-events-none" />
-                    </div>
-                  </EnterpriseCard>
-
-                  <EnterpriseCard
-                    label="Validity Date"
-                    required
-                    dataType="DATS"
-                    length="LEN 8"
-                    tableField="EKKO-BNDDT"
-                    error={quoteErrors.validityDate}
-                    highlightTableField={isSapMappingActive}
-                  >
-                    <div className="relative w-full">
-                      <input
-                        type="date"
-                        required
-                        value={quoteForm.validityDate}
-                        onChange={e => {
-                          setQuoteForm({ ...quoteForm, validityDate: e.target.value });
-                          if (quoteErrors.validityDate) setQuoteErrors({ ...quoteErrors, validityDate: false });
-                        }}
-                        className="w-full bg-white border border-stone-300 focus:border-stone-800 focus:ring-1 focus:ring-stone-800 rounded-lg py-2 pl-3 pr-10 text-xs outline-none text-stone-900 transition-all font-mono"
-                      />
-                      <Calendar className="absolute right-3 top-1/2 -translate-y-1/2 size-4 text-stone-400 pointer-events-none" />
-                    </div>
-                  </EnterpriseCard>
                 </div>
-              </div>
-
-              {/* 2. LINE ITEM PRICING */}
-              <div className="space-y-4">
-                <SectionHeader title="Line Item Pricing" icon={Percent} />
-
-                <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                  <EnterpriseCard
-                    label="Unit Price (₹)"
-                    required
-                    dataType="CURR"
-                    length="LEN 11"
-                    tableField="EKPO-PREIS"
-                    error={quoteErrors.unitPrice}
-                    highlightTableField={isSapMappingActive}
-                  >
-                    <input
-                      type="number"
-                      min="0.01"
-                      step="0.01"
-                      required
-                      placeholder="0.00"
-                      value={quoteForm.unitPrice}
-                      onChange={e => {
-                        setQuoteForm({ ...quoteForm, unitPrice: e.target.value });
-                        if (quoteErrors.unitPrice) setQuoteErrors({ ...quoteErrors, unitPrice: false });
-                      }}
-                      className="w-full bg-white border border-stone-300 focus:border-stone-800 focus:ring-1 focus:ring-stone-800 rounded-lg py-2 px-3 text-xs outline-none text-stone-900 transition-all font-mono font-normal"
-                    />
-                  </EnterpriseCard>
-
-                  <EnterpriseCard
-                    label="GST Rate (%)"
-                    required
-                    dataType="CHAR"
-                    length="LEN 2"
-                    tableField="EKPO-MWSKZ"
-                    error={quoteErrors.gstRate}
-                    highlightTableField={isSapMappingActive}
-                  >
-                    <select
-                      value={quoteForm.gstRate}
-                      onChange={e => {
-                        setQuoteForm({ ...quoteForm, gstRate: e.target.value });
-                        if (quoteErrors.gstRate) setQuoteErrors({ ...quoteErrors, gstRate: false });
-                      }}
-                      className="w-full bg-white border border-stone-300 focus:border-stone-800 focus:ring-1 focus:ring-stone-800 rounded-lg py-2 px-3 text-xs outline-none text-stone-900 transition-all font-semibold"
-                    >
-                      <option value="18%">18% - G1</option>
-                      <option value="12%">12% - G2</option>
-                      <option value="5%">5% - G3</option>
-                      <option value="28%">28% - G4</option>
-                      <option value="Exempt">Exempt - G0</option>
-                    </select>
-                  </EnterpriseCard>
-
-                  <EnterpriseCard
-                    label="Discount (%)"
-                    dataType="DEC"
-                    length="LEN 5"
-                    tableField="KONV-SKVAL"
-                    highlightTableField={isSapMappingActive}
-                  >
-                    <input
-                      type="number"
-                      min="0"
-                      max="100"
-                      step="0.01"
-                      placeholder="0"
-                      value={quoteForm.discount}
-                      onChange={e => setQuoteForm({ ...quoteForm, discount: e.target.value })}
-                      className="w-full bg-white border border-stone-300 focus:border-stone-800 focus:ring-1 focus:ring-stone-800 rounded-lg py-2 px-3 text-xs outline-none text-stone-900 transition-all font-mono"
-                    />
-                  </EnterpriseCard>
-                </div>
-              </div>
-
-              {/* 3. DELIVERY TERMS */}
-              <div className="space-y-4">
-                <SectionHeader title="Delivery Terms" icon={Clock} />
-
-                <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                  <EnterpriseCard
-                    label="Delivery Lead Time (Days)"
-                    required
-                    dataType="NUMC"
-                    length="LEN 5"
-                    tableField="EKPO-PLIFZ"
-                    error={quoteErrors.deliveryLeadTime}
-                    highlightTableField={isSapMappingActive}
-                  >
-                    <input
-                      type="number"
-                      min="1"
-                      required
-                      placeholder="7"
-                      value={quoteForm.deliveryLeadTime}
-                      onChange={e => {
-                        setQuoteForm({ ...quoteForm, deliveryLeadTime: e.target.value });
-                        if (quoteErrors.deliveryLeadTime) setQuoteErrors({ ...quoteErrors, deliveryLeadTime: false });
-                      }}
-                      className="w-full bg-white border border-stone-300 focus:border-stone-800 focus:ring-1 focus:ring-stone-800 rounded-lg py-2 px-3 text-xs outline-none text-stone-900 transition-all font-mono font-normal"
-                    />
-                  </EnterpriseCard>
-
-                  <EnterpriseCard
-                    label="Freight / Packing (₹)"
-                    dataType="CURR"
-                    length="LEN 11"
-                    tableField="EKPO-APRPV"
-                    highlightTableField={isSapMappingActive}
-                  >
-                    <input
-                      type="number"
-                      min="0"
-                      step="0.01"
-                      placeholder="0"
-                      value={quoteForm.freight}
-                      onChange={e => setQuoteForm({ ...quoteForm, freight: e.target.value })}
-                      className="w-full bg-white border border-stone-300 focus:border-stone-800 focus:ring-1 focus:ring-stone-800 rounded-lg py-2 px-3 text-xs outline-none text-stone-900 transition-all font-mono"
-                    />
-                  </EnterpriseCard>
-
-                  <EnterpriseCard
-                    label="Incoterms"
-                    dataType="CHAR"
-                    length="LEN 3"
-                    tableField="EKKO-INCO1"
-                    highlightTableField={isSapMappingActive}
-                  >
-                    <select
-                      value={quoteForm.incoterms}
-                      onChange={e => setQuoteForm({ ...quoteForm, incoterms: e.target.value })}
-                      className="w-full bg-white border border-stone-300 focus:border-stone-800 focus:ring-1 focus:ring-stone-800 rounded-lg py-2 px-3 text-xs outline-none text-stone-900 transition-all font-semibold"
-                    >
-                      <option value="EXW">EXW - Ex Works</option>
-                      <option value="FOB">FOB - Free on Board</option>
-                      <option value="CIF">CIF - Cost, Insurance &amp; Freight</option>
-                      <option value="FOR">FOR - Free on Rail</option>
-                      <option value="DDP">DDP - Delivered Duty Paid</option>
-                    </select>
-                  </EnterpriseCard>
-                </div>
-              </div>
-
-              {/* STICKY BOTTOM ACTION BAR */}
-              <div className="sticky bottom-0 left-0 right-0 bg-white/95 backdrop-blur-xs border border-stone-250/70 p-4 rounded-xl flex items-center justify-between gap-4 shadow-lg z-10 mt-8 transition-all duration-150 hover:shadow-xl">
-                <div>
-                  <span className="text-[9px] font-bold text-stone-400 uppercase tracking-widest block font-mono">SAP Info Record Session</span>
-                  <p className="text-xs font-semibold text-stone-800">ME47 Maintain Quotation Bids</p>
-                </div>
-
-                <div className="flex gap-3">
-                  <Button
-                    type="button"
-                    onClick={() => {
-                      alert('Quotation Draft saved in local memory.');
-                    }}
-                    variant="outline"
-                    className="border-stone-300 text-stone-700 hover:bg-stone-50 font-bold text-xs"
-                  >
-                    Save Draft
-                  </Button>
-                  <Button
-                    type="submit"
-                    variant="default"
-                    className="bg-stone-850 hover:bg-black text-stone-700 hover:text-white font-bold text-xs px-8 rounded-lg"
-                  >
-                    Submit Quotation
-                  </Button>
-                </div>
-              </div>
-
-            </form>
-          )}
+              );
+            })()}            {/* TABS: ME48 EVALUATION & Comparative analysis is now handled as a standalone page below */}
+          </div>
         </div>
-      )}
-
-      {/* PROCUREMENT SUB-TAB: ME48 (Quotation Evaluation dashboard) */}
-      {activeProcTab === 'me48' && (
+      ) : activeProcTab === 'me48' ? (
+        /* TAB: ME48 (Quotation Evaluation dashboard) */
         <div className="space-y-6">
 
           {/* Selection RFQ card */}
-          <div className="p-5 bg-white border border-stone-200 rounded-xl shadow-xs space-y-4">
+          <div className="p-5 bg-white border border-stone-200 rounded-sm shadow-md space-y-4">
             <div className="flex flex-wrap items-center justify-between gap-4">
               <div>
-                <h3 className="text-xs font-bold text-stone-450 tracking-wider uppercase">Select RFQ for Comparative Analysis</h3>
+                <h3 className="text-xs font-bold text-stone-500 tracking-wider uppercase">Select RFQ for Comparative Analysis</h3>
                 <p className="text-[11px] text-stone-500 mt-0.5">Select a quoted or submitted RFQ to view the full bids comparison matrix</p>
               </div>
 
@@ -1592,7 +814,7 @@ export default function RfqView({
                 <select
                   value={selectedRfqEvalId}
                   onChange={e => setSelectedRfqEvalId(e.target.value)}
-                  className="bg-white border border-stone-300 rounded-lg px-3 py-1.5 text-xs outline-none font-semibold text-stone-900"
+                  className="bg-white border border-stone-300 rounded px-3 py-1.5 text-xs outline-none font-semibold text-stone-900 cursor-pointer"
                 >
                   <option value="">-- Choose RFQ --</option>
                   {state.rfqs.filter(r => r.bids && r.bids.length > 0).map(r => (
@@ -1617,9 +839,9 @@ export default function RfqView({
             return (
               <div className="space-y-6 animate-fade-in">
 
-                {/* Top KPI Cards (Fiori standards) */}
+                {/* Top KPI Cards */}
                 <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
-                  <div className="p-4 bg-white border border-stone-200 rounded-xl shadow-xs">
+                  <div className="p-4 bg-white border border-stone-200 rounded-sm shadow-md">
                     <span className="text-[10px] font-bold text-stone-400 uppercase tracking-wider block">Total Bidders</span>
                     <div className="flex items-baseline gap-2 mt-1">
                       <span className="text-2xl font-bold text-stone-900">{scoredVendors.length}</span>
@@ -1627,14 +849,14 @@ export default function RfqView({
                     </div>
                   </div>
 
-                  <div className="p-4 bg-white border border-stone-200 rounded-xl shadow-xs">
+                  <div className="p-4 bg-white border border-stone-200 rounded-sm shadow-md">
                     <span className="text-[10px] font-bold text-stone-400 uppercase tracking-wider block">Lowest Bid Received</span>
                     <div className="flex items-baseline gap-2 mt-1">
                       <span className="text-2xl font-bold text-emerald-700 font-mono">₹{lowestTotalCost.toLocaleString()}</span>
                     </div>
                   </div>
 
-                  <div className="p-4 bg-white border border-stone-200 rounded-xl shadow-xs">
+                  <div className="p-4 bg-white border border-stone-200 rounded-sm shadow-md">
                     <span className="text-[10px] font-bold text-stone-400 uppercase tracking-wider block">Average Bid Value</span>
                     <div className="flex items-baseline gap-2 mt-1">
                       <span className="text-2xl font-bold text-stone-900 font-mono">
@@ -1643,7 +865,7 @@ export default function RfqView({
                     </div>
                   </div>
 
-                  <div className="p-4 bg-white border border-stone-200 rounded-xl shadow-xs">
+                  <div className="p-4 bg-white border border-stone-200 rounded-sm shadow-md">
                     <span className="text-[10px] font-bold text-stone-400 uppercase tracking-wider block">Expected Savings %</span>
                     <div className="flex items-baseline gap-2 mt-1">
                       {(() => {
@@ -1661,10 +883,10 @@ export default function RfqView({
                 </div>
 
                 {/* Comparison Matrix Grid */}
-                <div className="p-6 bg-white border border-stone-200 rounded-xl shadow-xs space-y-4">
-                  <div className="flex items-center justify-between border-b border-stone-100 pb-2">
+                <div className="p-6 bg-white border border-stone-200 rounded-sm shadow-md space-y-4">
+                  <div className="flex items-center justify-between border-b border-stone-150 pb-2">
                     <h4 className="font-bold text-xs text-stone-900">ME48 Comparative Evaluation Matrix</h4>
-                    <span className="text-[9px] text-stone-400 uppercase font-mono font-bold">
+                    <span className="text-[9px] text-stone-450 uppercase font-mono font-bold">
                       Formula: Price 40% | Tech 30% | Delivery 20% | Rating 10%
                     </span>
                   </div>
@@ -1672,10 +894,10 @@ export default function RfqView({
                   <div className="overflow-x-auto">
                     <table className="w-full text-left text-xs border-collapse min-w-[700px]">
                       <thead>
-                        <tr className="bg-stone-50 border-b border-stone-200 text-stone-500 font-bold text-[9px] uppercase">
-                          <th className="py-3 px-4">Evaluation Metric</th>
+                        <tr className="bg-stone-50 border-b border-stone-200 text-stone-500 font-bold text-[9px] uppercase font-mono">
+                          <th className="py-3 px-4 text-stone-900">Evaluation Metric</th>
                           {scoredVendors.map(vendor => (
-                            <th key={vendor.vendorId} className="py-3 px-4 text-center">
+                            <th key={vendor.vendorId} className="py-3 px-4 text-center text-stone-900">
                               <div className="space-y-0.5">
                                 <span className="text-[10px] text-stone-900 font-bold block">{vendor.vendorName}</span>
                                 <span className="text-[9px] text-stone-400 font-mono font-normal">Code: {vendor.vendorId}</span>
@@ -1684,7 +906,7 @@ export default function RfqView({
                           ))}
                         </tr>
                       </thead>
-                      <tbody className="divide-y divide-stone-150 text-stone-750 font-sans">
+                      <tbody className="divide-y divide-stone-150 text-stone-755 font-sans">
                         {/* Materials Prices */}
                         {rfq.items.map(item => (
                           <tr key={item.line} className="hover:bg-stone-50/20">
@@ -1700,7 +922,7 @@ export default function RfqView({
                                   <p className={isLowest ? 'text-emerald-700 font-bold' : 'text-stone-850'}>
                                     ₹{bidPrice ? bidPrice.toLocaleString() : 'N/A'}
                                   </p>
-                                  <p className="text-[9px] text-stone-400">Target: ₹{target}</p>
+                                  <p className="text-[9px] text-stone-400 font-normal">Target: ₹{target}</p>
                                 </td>
                               );
                             })}
@@ -1711,34 +933,34 @@ export default function RfqView({
                         <tr className="bg-stone-50/40">
                           <td className="py-2.5 px-4 font-semibold text-stone-700">Estimated Freight (INR)</td>
                           {scoredVendors.map(vendor => (
-                            <td key={vendor.vendorId} className="py-2.5 px-4 text-center font-mono">
+                            <td key={vendor.vendorId} className="py-2.5 px-4 text-center font-mono font-bold text-stone-900">
                               ₹{(vendor.freight || 0).toLocaleString()}
                             </td>
                           ))}
                         </tr>
 
                         <tr>
-                          <td className="py-2.5 px-4 font-semibold text-stone-750">Lead Time (Days) - [PLIFZ]</td>
+                          <td className="py-2.5 px-4 font-semibold text-stone-755">Lead Time (Days)</td>
                           {scoredVendors.map(vendor => (
-                            <td key={vendor.vendorId} className="py-2.5 px-4 text-center font-mono">
+                            <td key={vendor.vendorId} className="py-2.5 px-4 text-center font-mono font-bold text-stone-900">
                               {vendor.deliveryLeadTimeDays} days
                             </td>
                           ))}
                         </tr>
 
                         <tr>
-                          <td className="py-2.5 px-4 font-semibold text-stone-750">Quotation Validity - [BNDDT]</td>
+                          <td className="py-2.5 px-4 font-semibold text-stone-755">Quotation Validity</td>
                           {scoredVendors.map(vendor => (
-                            <td key={vendor.vendorId} className="py-2.5 px-4 text-center font-mono">
+                            <td key={vendor.vendorId} className="py-2.5 px-4 text-center font-mono font-bold text-stone-900">
                               {vendor.validityDate || 'N/A'}
                             </td>
                           ))}
                         </tr>
 
                         <tr>
-                          <td className="py-2.5 px-4 font-semibold text-stone-750 font-sans">Min Order Qty (MOQ)</td>
+                          <td className="py-2.5 px-4 font-semibold text-stone-755 font-sans">Min Order Qty (MOQ)</td>
                           {scoredVendors.map(vendor => (
-                            <td key={vendor.vendorId} className="py-2.5 px-4 text-center font-mono">
+                            <td key={vendor.vendorId} className="py-2.5 px-4 text-center font-mono font-bold text-stone-900">
                               {vendor.moq} EA
                             </td>
                           ))}
@@ -1749,8 +971,7 @@ export default function RfqView({
                           <td className="py-3 px-4 font-bold text-stone-900">Technical Score</td>
                           {scoredVendors.map(vendor => (
                             <td key={vendor.vendorId} className="py-3 px-4 text-center font-bold text-stone-900">
-                              <span className={`px-2 py-0.5 rounded text-[10px] ${vendor.technicalScore === highestTech ? 'bg-indigo-50 text-indigo-700 border border-indigo-200' : 'bg-stone-100 text-stone-600'
-                                }`}>
+                              <span className={`px-2 py-0.5 rounded text-[10px] ${vendor.technicalScore === highestTech ? 'bg-indigo-50 text-indigo-700 border border-indigo-200' : 'bg-stone-100 text-stone-600'}`}>
                                 {vendor.technicalScore} / 100
                               </span>
                             </td>
@@ -1760,24 +981,24 @@ export default function RfqView({
                         <tr className="bg-stone-50/60 font-sans">
                           <td className="py-3 px-4 font-bold text-stone-900">Vendor Master Rating</td>
                           {scoredVendors.map(vendor => (
-                            <td key={vendor.vendorId} className="py-3 px-4 text-center font-mono">
+                            <td key={vendor.vendorId} className="py-3 px-4 text-center font-mono font-bold text-stone-900">
                               {vendor.vendorRating} pts
                             </td>
                           ))}
                         </tr>
 
                         {/* Weighted Score */}
-                        <tr className="bg-stone-900 text-white font-sans border-t-2 border-stone-950">
+                        <tr className="bg-primary text-white font-sans border-t border-primary">
                           <td className="py-3.5 px-4 font-bold text-xs uppercase tracking-wider">Weighted score (calculated)</td>
                           {scoredVendors.map(vendor => {
                             const isWinner = vendor.weightedScore === highestScore;
                             return (
                               <td key={vendor.vendorId} className="py-3.5 px-4 text-center font-bold text-sm">
-                                <span className={isWinner ? 'text-amber-400' : 'text-white'}>
-                                  {vendor.weightedScore} %
+                                <span className={isWinner ? 'text-amber-300 font-extrabold' : 'text-white'}>
+                                  {vendor.weightedScore}%
                                 </span>
                                 {isWinner && (
-                                  <span className="block text-[8px] text-amber-400 font-bold uppercase tracking-wider mt-0.5">
+                                  <span className="block text-[8px] text-amber-300 font-bold uppercase tracking-wider mt-0.5">
                                     ⭐ Recommended Winner
                                   </span>
                                 )}
@@ -1831,11 +1052,11 @@ export default function RfqView({
                                 <Button
                                   onClick={() => triggerPOConversion(rfq.id, vendor.vendorId)}
                                   disabled={isPoConverting}
-                                  variant={vendor.weightedScore === highestScore ? 'default' : 'outline'}
-                                  className={`font-bold text-[11px] h-8.5 rounded-lg px-4 ${vendor.weightedScore === highestScore
-                                    ? 'bg-amber-500 hover:bg-amber-600 text-stone-950 border-transparent shadow-xs'
-                                    : 'border-stone-300 text-stone-750 hover:bg-stone-100'
-                                    }`}
+                                  className={`font-bold text-[10px] h-9 rounded px-4 cursor-pointer transition-all ${
+                                    vendor.weightedScore === highestScore
+                                      ? 'bg-amber-500 hover:bg-amber-600 text-stone-950 font-bold'
+                                      : 'border border-stone-300 text-stone-700 hover:bg-stone-50 bg-white'
+                                  }`}
                                 >
                                   {isPoConverting ? 'Converting...' : 'Award & Convert PO'}
                                 </Button>
@@ -1849,7 +1070,7 @@ export default function RfqView({
 
                   {/* Re-issue or Cancel general RFQ actions */}
                   {rfq.status !== 'Awarded' && rfq.status !== 'Closed' && (
-                    <div className="flex justify-end gap-3.5 pt-4 border-t border-stone-100">
+                    <div className="flex justify-end gap-3 pt-4 border-t border-stone-100">
                       <Button
                         type="button"
                         onClick={() => {
@@ -1860,10 +1081,9 @@ export default function RfqView({
                             alert(`RFQ ${rfq.id} successfully re-issued with new deadline: ${newDead}. Bids have been reset.`);
                           }
                         }}
-                        variant="outline"
-                        className="border-stone-300 text-stone-750 hover:bg-stone-100 font-bold text-xs px-4"
+                        className="border border-stone-300 text-stone-750 hover:bg-stone-50 bg-white font-bold text-xs px-4 h-9 cursor-pointer"
                       >
-                        ✗ Re-issue RFQ (Extend &amp; Reset Bids)
+                        🔄 Re-issue RFQ (Extend &amp; Reset Bids)
                       </Button>
                       <Button
                         type="button"
@@ -1874,9 +1094,9 @@ export default function RfqView({
                             alert(`RFQ ${rfq.id} has been cancelled.`);
                           }
                         }}
-                        className="bg-red-50 hover:bg-red-100 text-red-700 border border-red-200 font-bold text-xs px-5 rounded-lg h-9 animate-fade-in"
+                        className="bg-red-50 hover:bg-red-100 text-red-700 border border-red-200 font-bold text-xs px-5 rounded h-9 cursor-pointer"
                       >
-                        ✗ Cancel RFQ Document
+                        ❌ Cancel RFQ Document
                       </Button>
                     </div>
                   )}
@@ -1884,85 +1104,1015 @@ export default function RfqView({
               </div>
             );
           })() : (
-            <div className="p-8 border border-stone-200 rounded-xl bg-white text-center text-stone-400">
+            <div className="p-8 border border-stone-200 rounded-sm bg-white text-center text-stone-400 shadow-md">
               <Layers className="size-8 mx-auto text-stone-300 mb-3 animate-pulse" />
               <p className="text-xs font-semibold text-stone-700">No RFQ Selected</p>
               <p className="text-[10px] text-stone-500 mt-1">Please select an RFQ with active vendor quotations above to load the evaluation grid.</p>
             </div>
           )}
         </div>
+      ) : activeProcTab === 'me47' ? (
+        /* TAB: ME47 MAINTAIN QUOTATION FORM */
+        <div className="space-y-6">
+          {tabLoading ? (
+            <div className="space-y-6 animate-fade-in bg-white border border-border p-6 rounded-sm shadow-md">
+              <div>
+                <div className="h-4.5 w-48 bg-stone-200 rounded animate-pulse mb-1.5" />
+                <div className="h-3 w-80 bg-stone-150 rounded animate-pulse" />
+              </div>
+              <div className="space-y-3">
+                <div className="h-4.5 w-28 bg-stone-200 rounded animate-pulse" />
+                <div className="flex flex-col border border-stone-200 rounded divide-y divide-stone-200 bg-white overflow-hidden">
+                  {[1, 2, 3].map(i => (
+                    <div key={i} className="py-2.5 px-3 flex items-center gap-3">
+                      <div className="h-3.5 w-40 bg-stone-200 rounded animate-pulse shrink-0" />
+                      <div className="h-8 flex-1 bg-stone-100 rounded animate-pulse" />
+                    </div>
+                  ))}
+                </div>
+              </div>
+            </div>
+          ) : (
+            <form onSubmit={handleQuotationSubmit} className="space-y-6 relative bg-white border border-border p-6 rounded-sm shadow-md">
+              {isLoading && (
+                <div className="absolute inset-0 bg-white/85 backdrop-blur-xs flex flex-col items-center justify-center z-30 min-h-[400px]">
+                  <div className="size-10 border-4 border-primary border-t-transparent rounded-full animate-spin mb-4" />
+                  <p className="text-xs font-bold text-stone-900 uppercase tracking-widest font-mono">BAPI_QUOTATION_CREATE Posting to SAP ERP...</p>
+                  <p className="text-[10px] text-stone-500 mt-1">Updating Info Records &amp; synchronization with SAP database (ME47)...</p>
+                </div>
+              )}
+
+              <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
+                <div>
+                  <h3 className="text-sm font-bold text-stone-900">Maintain Quotation (ME47)</h3>
+                  <p className="text-[11px] text-stone-500 mt-0.5">Submit proposal prices, discount structures and delivery timelines directly to SAP</p>
+                </div>
+              </div>
+
+              {/* RFQ Selection Dropdown and Details */}
+              {(() => {
+                const selectedRfq = state.rfqs.find(r => r.id === quoteForm.rfqId);
+                return (
+                  <div className={`p-4 bg-stone-50 border rounded-sm space-y-4 ${quoteErrors.rfqId ? 'border-red-500 ring-1 ring-red-500/50 bg-red-50/5' : 'border-border'}`}>
+                    <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
+                      <div>
+                        <h4 className="text-[11px] font-bold text-stone-750 uppercase tracking-wider font-mono">Select RFQ Document</h4>
+                        <p className="text-[10px] text-stone-400 mt-0.5 font-semibold">Choose an active RFQ from the SAP ERP system to quote for</p>
+                      </div>
+                      <div>
+                        <select
+                          value={quoteForm.rfqId}
+                          onChange={e => {
+                            const selectedId = e.target.value;
+                            const rfq = state.rfqs.find(r => r.id === selectedId);
+                            setQuoteForm({
+                              ...quoteForm,
+                              rfqId: selectedId,
+                              selectedLine: rfq && rfq.items.length > 0 ? rfq.items[0].line : 10
+                            });
+                            if (quoteErrors.rfqId) setQuoteErrors(prev => ({ ...prev, rfqId: false }));
+                          }}
+                          className={`bg-white border rounded px-3 py-1.5 text-xs outline-none font-semibold text-stone-900 transition-all ${
+                            quoteErrors.rfqId ? 'border-red-500' : 'border-stone-300'
+                          }`}
+                        >
+                          <option value="">-- Choose RFQ Document --</option>
+                          {state.rfqs.map(r => (
+                            <option key={r.id} value={r.id}>
+                              {r.id} - {r.description} ({r.status})
+                            </option>
+                          ))}
+                        </select>
+                      </div>
+                    </div>
+
+                    {selectedRfq && (
+                      <div className="border-t border-stone-200 pt-3 space-y-3">
+                        <div className="flex items-center justify-between">
+                          <h5 className="text-[9px] font-bold text-stone-400 uppercase tracking-wider">RFQ Line Item Details (Selected for Quotation)</h5>
+                          <span className="font-mono text-[9px] text-stone-600 font-bold bg-stone-200/60 px-2 py-0.5 rounded">
+                            Status: {selectedRfq.status}
+                          </span>
+                        </div>
+
+                        {/* Line Item selector if multiple items */}
+                        {selectedRfq.items.length > 1 && (
+                          <div className="flex flex-wrap items-center gap-2 py-1">
+                            <span className="text-[9px] font-bold text-stone-450 uppercase tracking-wider mr-1">Select Line Item:</span>
+                            {selectedRfq.items.map(item => (
+                              <button
+                                key={item.line}
+                                type="button"
+                                onClick={() => setQuoteForm({ ...quoteForm, selectedLine: item.line })}
+                                className={`px-3 py-1 text-xs font-mono font-bold rounded border transition-all cursor-pointer ${
+                                  Number(quoteForm.selectedLine) === item.line
+                                    ? 'bg-primary text-white border-primary'
+                                    : 'bg-white text-stone-700 border-stone-300 hover:bg-stone-50'
+                                }`}
+                              >
+                                Line {item.line}: {item.materialCode}
+                              </button>
+                            ))}
+                          </div>
+                        )}
+
+                        {/* Selected Item Info Card */}
+                        {(() => {
+                          const selectedItem = selectedRfq.items.find(item => item.line === Number(quoteForm.selectedLine)) || selectedRfq.items[0];
+                          if (!selectedItem) return null;
+                          return (
+                            <div className="grid grid-cols-2 md:grid-cols-4 gap-4 pt-1 text-xs font-sans text-stone-750">
+                              <div>
+                                <span className="text-[9px] text-stone-400 block font-bold uppercase">Material Code</span>
+                                <span className="font-bold text-stone-900 font-mono">{selectedItem.materialCode}</span>
+                              </div>
+                              <div>
+                                <span className="text-[9px] text-stone-400 block font-bold uppercase">Description</span>
+                                <span className="font-bold text-stone-900 truncate block max-w-[200px]">{selectedItem.description}</span>
+                              </div>
+                              <div>
+                                <span className="text-[9px] text-stone-400 block font-bold uppercase">Required Quantity</span>
+                                <span className="font-bold text-stone-900 font-mono">{selectedItem.quantity.toLocaleString()} {selectedItem.uom}</span>
+                              </div>
+                              <div>
+                                <span className="text-[9px] text-stone-400 block font-bold uppercase">Target Price Reference</span>
+                                <span className="font-bold text-stone-900 font-mono">₹{selectedItem.targetPrice?.toFixed(2)}</span>
+                              </div>
+                            </div>
+                          );
+                        })()}
+                      </div>
+                    )}
+                  </div>
+                );
+              })()}
+
+              {/* 1. QUOTATION HEADER */}
+              <div className="space-y-4">
+                <SectionHeader title="Quotation Header" icon={FileText} />
+                <div className="flex flex-col border border-stone-200 rounded-lg divide-y divide-stone-200 bg-white overflow-hidden shadow-xs">
+                  <div className="flex flex-col lg:flex-row divide-y lg:divide-y-0 lg:divide-x divide-stone-200 bg-white">
+                    <div className="w-[340px] shrink-0">
+                      <EnterpriseFieldCard
+                        label="Your Quote Reference"
+                        error={quoteErrors.quoteRef}
+                        labelWidth="sm:w-36"
+                      >
+                        <input
+                          type="text"
+                          placeholder="e.g. QT-2026-001"
+                          value={quoteForm.quoteRef}
+                          onChange={e => setQuoteForm({ ...quoteForm, quoteRef: e.target.value })}
+                          className="w-[150px] bg-white border border-stone-300 focus:border-primary focus:ring-1 focus:ring-primary rounded-lg py-1.5 px-3 text-xs outline-none text-stone-900 transition-all font-mono uppercase font-bold h-8"
+                        />
+                      </EnterpriseFieldCard>
+                    </div>
+
+                    <div className="w-[300px] shrink-0">
+                      <EnterpriseFieldCard
+                        label="Quotation Date"
+                        required
+                        error={quoteErrors.quoteDate}
+                        labelWidth="sm:w-24"
+                      >
+                        <div className="relative w-[150px]">
+                          <input
+                            type="date"
+                            required
+                            value={quoteForm.quoteDate}
+                            onChange={e => {
+                              setQuoteForm({ ...quoteForm, quoteDate: e.target.value });
+                              if (quoteErrors.quoteDate) setQuoteErrors(prev => ({ ...prev, quoteDate: false }));
+                            }}
+                            className="w-full bg-white border border-stone-300 focus:border-primary focus:ring-1 focus:ring-primary rounded-lg py-1.5 pl-3 pr-10 text-xs outline-none text-stone-900 transition-all font-mono font-bold h-8"
+                          />
+                          <Calendar className="absolute right-3 top-1/2 -translate-y-1/2 size-4 text-stone-400 pointer-events-none" />
+                        </div>
+                      </EnterpriseFieldCard>
+                    </div>
+
+                    <div className="w-[300px] shrink-0">
+                      <EnterpriseFieldCard
+                        label="Validity Date"
+                        required
+                        error={quoteErrors.validityDate}
+                        labelWidth="sm:w-24"
+                      >
+                        <div className="relative w-[150px]">
+                          <input
+                            type="date"
+                            required
+                            value={quoteForm.validityDate}
+                            onChange={e => {
+                              setQuoteForm({ ...quoteForm, validityDate: e.target.value });
+                              if (quoteErrors.validityDate) setQuoteErrors(prev => ({ ...prev, validityDate: false }));
+                            }}
+                            className="w-full bg-white border border-stone-300 focus:border-primary focus:ring-1 focus:ring-primary rounded-lg py-1.5 pl-3 pr-10 text-xs outline-none text-stone-900 transition-all font-mono font-bold h-8"
+                          />
+                          <Calendar className="absolute right-3 top-1/2 -translate-y-1/2 size-4 text-stone-400 pointer-events-none" />
+                        </div>
+                      </EnterpriseFieldCard>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+
+              {/* 2. LINE ITEM PRICING */}
+              <div className="space-y-4">
+                <SectionHeader title="Line Item Pricing" icon={Percent} />
+                <div className="flex flex-col border border-stone-200 rounded-lg divide-y divide-stone-200 bg-white overflow-hidden shadow-xs">
+                  <div className="flex flex-col lg:flex-row divide-y lg:divide-y-0 lg:divide-x divide-stone-200 bg-white">
+                    <div className="w-[320px] shrink-0">
+                      <EnterpriseFieldCard
+                        label="Unit Price (₹)"
+                        required
+                        error={quoteErrors.unitPrice}
+                        labelWidth="sm:w-28"
+                      >
+                        <input
+                          type="number"
+                          min="0.01"
+                          step="0.01"
+                          required
+                          placeholder="0.00"
+                          value={quoteForm.unitPrice}
+                          onChange={e => {
+                            setQuoteForm({ ...quoteForm, unitPrice: e.target.value });
+                            if (quoteErrors.unitPrice) setQuoteErrors(prev => ({ ...prev, unitPrice: false }));
+                          }}
+                          className="w-[150px] bg-white border border-stone-300 focus:border-primary focus:ring-1 focus:ring-primary rounded-lg py-1.5 px-3 text-xs outline-none text-stone-900 transition-all font-mono font-bold h-8"
+                        />
+                      </EnterpriseFieldCard>
+                    </div>
+
+                    <div className="w-[280px] shrink-0">
+                      <EnterpriseFieldCard
+                        label="GST Rate (%)"
+                        required
+                        error={quoteErrors.gstRate}
+                        labelWidth="sm:w-24"
+                      >
+                        <select
+                          value={quoteForm.gstRate}
+                          onChange={e => {
+                            setQuoteForm({ ...quoteForm, gstRate: e.target.value });
+                            if (quoteErrors.gstRate) setQuoteErrors(prev => ({ ...prev, gstRate: false }));
+                          }}
+                          className="w-[150px] bg-white border border-stone-300 focus:border-primary focus:ring-1 focus:ring-primary rounded-lg py-1.5 px-3 text-xs outline-none text-stone-900 transition-all font-semibold h-8"
+                        >
+                          <option value="18%">18% - G1</option>
+                          <option value="12%">12% - G2</option>
+                          <option value="5%">5% - G3</option>
+                          <option value="28%">28% - G4</option>
+                          <option value="Exempt">Exempt - G0</option>
+                        </select>
+                      </EnterpriseFieldCard>
+                    </div>
+
+                    <div className="w-[260px] shrink-0">
+                      <EnterpriseFieldCard
+                        label="Discount (%)"
+                        labelWidth="sm:w-24"
+                      >
+                        <input
+                          type="number"
+                          min="0"
+                          max="100"
+                          step="0.01"
+                          placeholder="0"
+                          value={quoteForm.discount}
+                          onChange={e => setQuoteForm({ ...quoteForm, discount: e.target.value })}
+                          className="w-[110px] bg-white border border-stone-300 focus:border-primary focus:ring-1 focus:ring-primary rounded-lg py-1.5 px-3 text-xs outline-none text-stone-900 transition-all font-mono font-bold h-8"
+                        />
+                      </EnterpriseFieldCard>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+
+              {/* 3. DELIVERY TERMS */}
+              <div className="space-y-4">
+                <SectionHeader title="Delivery Terms" icon={Clock} />
+                <div className="flex flex-col border border-stone-200 rounded-lg divide-y divide-stone-200 bg-white overflow-hidden shadow-xs">
+                  <div className="flex flex-col lg:flex-row divide-y lg:divide-y-0 lg:divide-x divide-stone-200 bg-white">
+                    <div className="w-[320px] shrink-0">
+                      <EnterpriseFieldCard
+                        label="Delivery Lead Time (Days)"
+                        required
+                        error={quoteErrors.deliveryLeadTime}
+                        labelWidth="sm:w-44"
+                      >
+                        <input
+                          type="number"
+                          min="1"
+                          required
+                          placeholder="7"
+                          value={quoteForm.deliveryLeadTime}
+                          onChange={e => {
+                            setQuoteForm({ ...quoteForm, deliveryLeadTime: e.target.value });
+                            if (quoteErrors.deliveryLeadTime) setQuoteErrors(prev => ({ ...prev, deliveryLeadTime: false }));
+                          }}
+                          className="w-[110px] bg-white border border-stone-300 focus:border-primary focus:ring-1 focus:ring-primary rounded-lg py-1.5 px-3 text-xs outline-none text-stone-900 transition-all font-mono font-bold h-8"
+                        />
+                      </EnterpriseFieldCard>
+                    </div>
+
+                    <div className="w-[280px] shrink-0">
+                      <EnterpriseFieldCard
+                        label="Freight / Packing (₹)"
+                        labelWidth="sm:w-28"
+                      >
+                        <input
+                          type="number"
+                          min="0"
+                          step="0.01"
+                          placeholder="0"
+                          value={quoteForm.freight}
+                          onChange={e => setQuoteForm({ ...quoteForm, freight: e.target.value })}
+                          className="w-[150px] bg-white border border-stone-300 focus:border-primary focus:ring-1 focus:ring-primary rounded-lg py-1.5 px-3 text-xs outline-none text-stone-900 transition-all font-mono font-bold h-8"
+                        />
+                      </EnterpriseFieldCard>
+                    </div>
+
+                    <div className="w-[280px] shrink-0">
+                      <EnterpriseFieldCard
+                        label="Incoterms"
+                        labelWidth="sm:w-24"
+                      >
+                        <select
+                          value={quoteForm.incoterms}
+                          onChange={e => setQuoteForm({ ...quoteForm, incoterms: e.target.value })}
+                          className="w-[150px] bg-white border border-stone-300 focus:border-primary focus:ring-1 focus:ring-primary rounded-lg py-1.5 px-3 text-xs outline-none text-stone-900 transition-all font-semibold h-8"
+                        >
+                          <option value="EXW">EXW - Ex Works</option>
+                          <option value="FOB">FOB - Free on Board</option>
+                          <option value="CIF">CIF - Cost, Insurance &amp; Freight</option>
+                          <option value="FOR">FOR - Free on Rail</option>
+                          <option value="DDP">DDP - Delivered Duty Paid</option>
+                        </select>
+                      </EnterpriseFieldCard>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+
+              {/* STICKY BOTTOM ACTION BAR */}
+              <div className="sticky bottom-0 left-0 right-0 bg-white/95 backdrop-blur-xs border border-stone-250/70 p-4 rounded-xl flex items-center justify-between gap-4 shadow-lg z-10 mt-8 transition-all duration-150 hover:shadow-xl">
+                <div>
+                  <span className="text-[9px] font-bold text-stone-400 uppercase tracking-widest block font-mono">SAP Info Record Session</span>
+                  <p className="text-xs font-semibold text-stone-800">ME47 Maintain Quotation Bids</p>
+                </div>
+
+                <div className="flex gap-3">
+                  <Button
+                    type="button"
+                    onClick={() => {
+                      alert('Quotation Draft saved in local memory.');
+                    }}
+                    variant="outline"
+                    className="border-stone-300 text-stone-700 hover:bg-stone-50 font-bold text-xs cursor-pointer"
+                  >
+                    Save Draft
+                  </Button>
+                  <Button
+                    type="submit"
+                    variant="default"
+                    className="bg-primary hover:bg-primary/95 text-white font-bold text-xs px-8 rounded flex items-center gap-1.5 h-9 cursor-pointer"
+                  >
+                    Submit Quotation
+                  </Button>
+                </div>
+              </div>
+            </form>
+          )}
+        </div>
+      ) : activeProcTab === 'me41' ? (
+        <div className="space-y-6">
+          {tabLoading ? (
+            <div className="space-y-6 animate-fade-in bg-white border border-border p-6 rounded-sm shadow-md">
+              <div>
+                <div className="h-4.5 w-48 bg-stone-200 rounded animate-pulse mb-1.5" />
+                <div className="h-3 w-80 bg-stone-150 rounded animate-pulse" />
+              </div>
+              <div className="space-y-3">
+                <div className="h-4.5 w-28 bg-stone-200 rounded animate-pulse" />
+                <div className="flex flex-col border border-stone-200 rounded divide-y divide-stone-200 bg-white overflow-hidden">
+                  {[1, 2, 3].map(i => (
+                    <div key={i} className="py-2.5 px-3 flex items-center gap-3">
+                      <div className="h-3.5 w-40 bg-stone-200 rounded animate-pulse shrink-0" />
+                      <div className="h-8 flex-1 bg-stone-100 rounded animate-pulse" />
+                    </div>
+                  ))}
+                </div>
+              </div>
+            </div>
+          ) : (
+            <form onSubmit={handlePublishRFQSubmit} className="space-y-5 relative bg-white border border-border p-5 rounded-sm shadow-md">
+          {isLoading && (
+            <div className="absolute inset-0 bg-white/85 backdrop-blur-xs flex flex-col items-center justify-center z-30 min-h-[400px]">
+              <div className="size-10 border-4 border-primary border-t-transparent rounded-full animate-spin mb-4" />
+              <p className="text-xs font-bold text-stone-900 uppercase tracking-widest font-mono">BAPI_RFQ_CREATE Posting to SAP ERP...</p>
+              <p className="text-[10px] text-stone-500 mt-1">Establishing RFC connection &amp; writing database records</p>
+            </div>
+          )}
+
+          <div className="space-y-3">
+            {/* Header Details Card Title & Form Actions */}
+            <div className="flex flex-wrap items-center justify-between gap-4 border-b border-stone-200 pb-2 mb-3">
+              <div className="flex items-center gap-2">
+                <FileText className="size-4 text-stone-700 shrink-0" />
+                <h3 className="text-xs font-extrabold text-stone-900 tracking-wider uppercase select-none">
+                  RFQ Header Details
+                </h3>
+              </div>
+              <div className="flex items-center gap-2 select-none">
+                <Button
+                  type="button"
+                  onClick={() => {
+                    if (confirm("Are you sure you want to cancel?")) {
+                      setActiveProcTab('monitor');
+                    }
+                  }}
+                  variant="outline"
+                  className="border-stone-300 text-stone-700 hover:bg-stone-50 font-bold text-xs h-8 px-4 cursor-pointer"
+                >
+                  Cancel
+                </Button>
+                <Button
+                  type="button"
+                  onClick={() => {
+                    alert('Draft saved in local memory.');
+                  }}
+                  variant="outline"
+                  className="border-stone-300 text-stone-700 hover:bg-stone-50 font-bold text-xs h-8 px-4 cursor-pointer"
+                >
+                  Save Draft
+                </Button>
+                <Button
+                  type="submit"
+                  variant="default"
+                  className="bg-primary hover:bg-primary/95 text-white font-bold text-xs px-4 h-8 rounded flex items-center gap-1 cursor-pointer"
+                >
+                  <span>Create RFQ</span>
+                  <ChevronDown className="size-3.5" />
+                </Button>
+              </div>
+            </div>
+
+            <div className="flex flex-col border border-stone-200 rounded-lg divide-y divide-stone-200 bg-white overflow-hidden shadow-xs">
+              {/* Row 1: RFQ Reference No. | Document Type */}
+              <div className="flex flex-col lg:flex-row divide-y lg:divide-y-0 lg:divide-x divide-stone-200 bg-white">
+                <div className="w-[300px] shrink-0">
+                  <EnterpriseFieldCard
+                    label="RFQ Reference No."
+                    required
+                    dataType="CHAR"
+                    length="LEN 10"
+                    tableField="EKKO-EBELN"
+                    labelWidth="sm:w-28"
+                    error={formErrors.rfqRefNo}
+                  >
+                    <input
+                      type="text"
+                      required
+                      placeholder="e.g. RFQ-10029"
+                      value={rfqForm.rfqRefNo}
+                      onChange={e => {
+                        rfqFormSet({ ...rfqForm, rfqRefNo: e.target.value });
+                        if (formErrors.rfqRefNo) setFormErrors({ ...formErrors, rfqRefNo: false });
+                      }}
+                      className="w-[150px] bg-white border border-stone-300 focus:border-primary focus:ring-1 focus:ring-primary rounded py-1 px-2 text-xs outline-none text-stone-900 font-mono uppercase font-bold"
+                    />
+                  </EnterpriseFieldCard>
+                </div>
+
+                <div className="w-[330px] shrink-0">
+                  <EnterpriseFieldCard
+                    label="Document Type"
+                    required
+                    dataType="CHAR"
+                    length="LEN 4"
+                    tableField="EKKO-BSART"
+                    labelWidth="sm:w-24"
+                    error={formErrors.rfqType}
+                  >
+                    <select
+                      value={rfqForm.rfqType}
+                      onChange={e => {
+                        rfqFormSet({ ...rfqForm, rfqType: e.target.value });
+                        if (formErrors.rfqType) setFormErrors({ ...formErrors, rfqType: false });
+                      }}
+                      className="w-[190px] bg-white border border-stone-300 focus:border-primary focus:ring-1 focus:ring-primary rounded py-1 px-2 text-xs outline-none text-stone-900 font-semibold"
+                    >
+                      <option value="AN">AN - Standard RFQ</option>
+                      <option value="AB">AB - Outline Agreement RFQ</option>
+                    </select>
+                  </EnterpriseFieldCard>
+                </div>
+              </div>
+
+              {/* Row 2: RFQ Description */}
+              <div className="bg-white">
+                <EnterpriseFieldCard
+                  label="RFQ Description"
+                  required
+                  dataType="CHAR"
+                  length="LEN 40"
+                  tableField="EKKO-TXZ01"
+                  labelWidth="sm:w-28"
+                  error={formErrors.description}
+                >
+                  <textarea
+                    rows={2}
+                    required
+                    placeholder="Describe the RFQ purchase target..."
+                    value={rfqForm.description}
+                    onChange={e => {
+                      rfqFormSet({ ...rfqForm, description: e.target.value });
+                      if (formErrors.description) setFormErrors({ ...formErrors, description: false });
+                    }}
+                    className="w-full max-w-2xl bg-white border border-stone-300 focus:border-primary focus:ring-1 focus:ring-primary rounded py-1 px-2.5 text-xs outline-none text-stone-900 resize-none font-bold"
+                  />
+                </EnterpriseFieldCard>
+              </div>
+            </div>
+          </div>
+
+          {/* Schedule & Terms */}
+          <div className="space-y-3">
+            <SectionHeader title="Schedule & Terms" icon={Calendar} />
+            <div className="flex flex-col border border-stone-200 rounded-lg divide-y divide-stone-200 bg-white overflow-hidden shadow-xs">
+              <div className="flex flex-col lg:flex-row lg:flex-wrap divide-y lg:divide-y-0 lg:divide-x divide-stone-200 bg-white">
+                <div className="w-[290px] shrink-0">
+                  <EnterpriseFieldCard
+                    label="Quotation Deadline"
+                    required
+                    dataType="DATE"
+                    length="LEN 8"
+                    tableField="EKKO-ANGDT"
+                    labelWidth="sm:w-24"
+                    error={formErrors.deadlineDate}
+                  >
+                    <input
+                      type="date"
+                      required
+                      value={rfqForm.deadlineDate}
+                      onChange={e => {
+                        rfqFormSet({ ...rfqForm, deadlineDate: e.target.value });
+                        if (formErrors.deadlineDate) setFormErrors({ ...formErrors, deadlineDate: false });
+                      }}
+                      className="w-[150px] bg-white border border-stone-300 focus:border-primary focus:ring-1 focus:ring-primary rounded py-1 px-2 text-xs outline-none text-stone-900 font-mono font-bold"
+                    />
+                  </EnterpriseFieldCard>
+                </div>
+
+                <div className="w-[210px] shrink-0">
+                  <EnterpriseFieldCard
+                    label="Binding Period"
+                    dataType="NUMC"
+                    length="LEN 3"
+                    tableField="EKKO-BNDDT"
+                    labelWidth="sm:w-20"
+                    error={formErrors.bindingPeriod}
+                  >
+                    <input
+                      type="number"
+                      min="1"
+                      value={rfqForm.bindingPeriod}
+                      onChange={e => {
+                        rfqFormSet({ ...rfqForm, bindingPeriod: e.target.value });
+                        if (formErrors.bindingPeriod) setFormErrors({ ...formErrors, bindingPeriod: false });
+                      }}
+                      className="w-[70px] bg-white border border-stone-300 focus:border-primary focus:ring-1 focus:ring-primary rounded py-1 px-2 text-xs outline-none text-stone-900 font-mono font-bold"
+                    />
+                  </EnterpriseFieldCard>
+                </div>
+
+                <div className="w-[270px] shrink-0">
+                  <EnterpriseFieldCard
+                    label="Payment Terms"
+                    dataType="CHAR"
+                    length="LEN 4"
+                    tableField="EKKO-ZTERM"
+                    labelWidth="sm:w-22"
+                  >
+                    <select
+                      value={rfqForm.paymentTerms}
+                      onChange={e => rfqFormSet({ ...rfqForm, paymentTerms: e.target.value })}
+                      className="w-[150px] bg-white border border-stone-300 focus:border-primary focus:ring-1 focus:ring-primary rounded py-1 px-2 text-xs outline-none text-stone-900 font-semibold"
+                    >
+                      <option value="NET 30 Days">NET 30 Days</option>
+                      <option value="NET 45 Days">NET 45 Days</option>
+                      <option value="NET 60 Days">NET 60 Days</option>
+                      <option value="Immediate">Immediate / COD</option>
+                    </select>
+                  </EnterpriseFieldCard>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          {/* Vendor Selection */}
+          <div className="space-y-3">
+            <SectionHeader title="Vendor Selection" icon={User} />
+            <div className="flex flex-col border border-stone-200 rounded-lg divide-y divide-stone-200 bg-white overflow-hidden shadow-xs">
+              <div className="flex flex-col lg:flex-row divide-y lg:divide-y-0 lg:divide-x divide-stone-200 bg-white">
+                <div className="w-[280px] shrink-0">
+                  <EnterpriseFieldCard
+                    label="Purchasing Group"
+                    required
+                    dataType="CHAR"
+                    length="LEN 3"
+                    tableField="EKKO-EKGRP"
+                    labelWidth="sm:w-24"
+                    error={formErrors.purchasingGroup}
+                  >
+                    <select
+                      value={rfqForm.purchasingGroup}
+                      onChange={e => {
+                        rfqFormSet({ ...rfqForm, purchasingGroup: e.target.value });
+                        if (formErrors.purchasingGroup) setFormErrors({ ...formErrors, purchasingGroup: false });
+                      }}
+                      className="w-[130px] bg-white border border-stone-300 focus:border-primary focus:ring-1 focus:ring-primary rounded py-1 px-2.5 text-xs outline-none text-stone-900 font-semibold"
+                    >
+                      <option value="001">001 - Raw Materials</option>
+                      <option value="002">002 - Steel & Piping</option>
+                      <option value="003">003 - Fasteners</option>
+                      <option value="100">100 - General Services</option>
+                    </select>
+                  </EnterpriseFieldCard>
+                </div>
+              </div>
+
+              <div className="bg-white">
+                <EnterpriseFieldCard
+                  label="Vendors to Invite"
+                  required
+                  dataType="CHAR"
+                  length="LEN 10"
+                  tableField="EKKO-LIFNR"
+                  labelWidth="sm:w-32"
+                  error={formErrors.selectedVendors}
+                >
+                  <div className="w-full relative">
+                    <div className="flex flex-wrap gap-1.5 p-1 border border-stone-300 rounded bg-white min-h-[36px] focus-within:border-primary focus-within:ring-1 focus-within:ring-primary transition-all">
+                      {selectedVendors.map(vid => {
+                        const v = vendorMasterList.find(vm => vm.id === vid);
+                        return (
+                          <span key={vid} className="inline-flex items-center gap-1 bg-stone-100 text-stone-850 text-[10px] font-semibold px-2 py-0.5 rounded border border-stone-250">
+                            👤 {v ? v.name : vid} ({vid})
+                            <button
+                              type="button"
+                              onClick={() => {
+                                const filtered = selectedVendors.filter(id => id !== vid);
+                                setSelectedVendors(filtered);
+                                if (filtered.length === 0) setFormErrors({ ...formErrors, selectedVendors: true });
+                              }}
+                              className="text-stone-400 hover:text-red-650 focus:outline-none ml-0.5 cursor-pointer"
+                            >
+                              <X className="size-3" />
+                            </button>
+                          </span>
+                        );
+                      })}
+                      <input
+                        type="search"
+                        placeholder={selectedVendors.length === 0 ? "Search vendors to invite..." : ""}
+                        value={vendorSearch}
+                        onChange={e => {
+                          setVendorSearch(e.target.value);
+                          setVendorDropdownOpen(true);
+                        }}
+                        onFocus={() => setVendorDropdownOpen(true)}
+                        className="flex-1 bg-transparent border-0 outline-none text-xs text-stone-900 p-1 min-w-[120px]"
+                      />
+                      <button
+                        type="button"
+                        onClick={() => setVendorDropdownOpen(!vendorDropdownOpen)}
+                        className="text-stone-400 hover:text-stone-700 focus:outline-none px-1"
+                      >
+                        <ChevronDown className="size-4" />
+                      </button>
+                    </div>
+
+                    {vendorDropdownOpen && (
+                      <>
+                        <div className="fixed inset-0 z-5" onClick={() => setVendorDropdownOpen(false)} />
+                        <div className="absolute z-10 w-full mt-1 bg-white border border-stone-200 rounded shadow-lg max-h-48 overflow-y-auto">
+                          {vendorMasterList
+                            .filter(v => v.name.toLowerCase().includes(vendorSearch.toLowerCase()) || v.id.toLowerCase().includes(vendorSearch.toLowerCase()))
+                            .map(vendor => {
+                              const isSelected = selectedVendors.includes(vendor.id);
+                              return (
+                                <div
+                                  key={vendor.id}
+                                  onClick={() => {
+                                    if (isSelected) {
+                                      const filtered = selectedVendors.filter(id => id !== vendor.id);
+                                      setSelectedVendors(filtered);
+                                      if (filtered.length === 0) setFormErrors({ ...formErrors, selectedVendors: true });
+                                    } else {
+                                      setSelectedVendors([...selectedVendors, vendor.id]);
+                                      if (formErrors.selectedVendors) setFormErrors({ ...formErrors, selectedVendors: false });
+                                    }
+                                    setVendorSearch('');
+                                  }}
+                                  className={`px-3 py-2 text-xs cursor-pointer hover:bg-stone-50 flex items-center justify-between border-b border-stone-100 last:border-0 ${isSelected ? 'bg-stone-100 font-semibold' : ''}`}
+                                >
+                                  <div>
+                                    <span className="font-bold text-stone-850">{vendor.name}</span>
+                                    <span className="font-mono text-stone-400 ml-2">({vendor.id})</span>
+                                  </div>
+                                  {isSelected && <span className="text-primary text-xs">✓</span>}
+                                </div>
+                              );
+                            })}
+                        </div>
+                      </>
+                    )}
+                  </div>
+                </EnterpriseFieldCard>
+              </div>
+            </div>
+          </div>
+
+          <div className="space-y-3">
+            <SectionHeader title="Line Items Entry" icon={ClipboardList} />
+            <div className="flex flex-col border border-stone-200 rounded-lg divide-y divide-stone-200 bg-white overflow-hidden shadow-xs">
+              {/* Row 1: Material Description (full width) */}
+              <div className="bg-white">
+                <EnterpriseFieldCard
+                  label="Material / Item"
+                  dataType="CHAR"
+                  length="LEN 18"
+                  tableField="EKPO-MATNR/TXZ01"
+                  labelWidth="sm:w-24"
+                  error={formErrors.materialDescription}
+                >
+                  <div className="w-full max-w-xl relative">
+                    <div className="relative flex items-center">
+                      <input
+                        type="text"
+                        placeholder="Select material code or type custom description..."
+                        value={rfqForm.materialDescription}
+                        onChange={e => {
+                          rfqFormSet({ ...rfqForm, materialDescription: e.target.value });
+                          setMaterialDropdownOpen(true);
+                          if (formErrors.materialDescription) setFormErrors({ ...formErrors, materialDescription: false });
+                        }}
+                        onFocus={() => setMaterialDropdownOpen(true)}
+                        className="w-full bg-white border border-stone-300 focus:border-primary focus:ring-1 focus:ring-primary rounded py-1 px-2 text-xs outline-none text-stone-900"
+                      />
+                      <button
+                        type="button"
+                        onClick={() => setMaterialDropdownOpen(!materialDropdownOpen)}
+                        className="absolute right-2 top-1/2 -translate-y-1/2 text-stone-400 hover:text-stone-700 focus:outline-none cursor-pointer"
+                      >
+                        <ChevronDown className="size-3.5" />
+                      </button>
+                    </div>
+
+                    {materialDropdownOpen && (
+                      <>
+                        <div className="fixed inset-0 z-5" onClick={() => setMaterialDropdownOpen(false)} />
+                        <div className="absolute z-10 w-full mt-1 bg-white border border-stone-200 rounded shadow-lg max-h-48 overflow-y-auto">
+                          {materialMasterList
+                            .filter(m => m.code.toLowerCase().includes(rfqForm.materialDescription.toLowerCase()) || m.desc.toLowerCase().includes(rfqForm.materialDescription.toLowerCase()))
+                            .map(mat => (
+                              <div
+                                key={mat.code}
+                                onClick={() => {
+                                  rfqFormSet({
+                                    ...rfqForm,
+                                    materialDescription: mat.code,
+                                    unitOfMeasure: mat.uom
+                                  });
+                                  setMaterialDropdownOpen(false);
+                                  if (formErrors.materialDescription) setFormErrors({ ...formErrors, materialDescription: false });
+                                }}
+                                className="px-3 py-2 text-xs cursor-pointer hover:bg-stone-50 border-b border-stone-100 last:border-0"
+                              >
+                                <div className="font-bold text-stone-850">{mat.code}</div>
+                                <div className="text-stone-500 text-[10px] truncate">{mat.desc}</div>
+                              </div>
+                            ))}
+                        </div>
+                      </>
+                    )}
+                  </div>
+                </EnterpriseFieldCard>
+              </div>
+
+              {/* Row 2: Quantity | UoM | Add Button side-by-side */}
+              <div className="flex flex-col lg:flex-row divide-y lg:divide-y-0 lg:divide-x divide-stone-200 bg-white">
+                <div className="w-[250px] shrink-0">
+                  <EnterpriseFieldCard
+                    label="Quantity"
+                    dataType="QUAN"
+                    length="LEN 13"
+                    tableField="EKPO-MENGE"
+                    labelWidth="sm:w-16"
+                    error={formErrors.quantityRequired}
+                  >
+                    <input
+                      type="number"
+                      min="1"
+                      placeholder="e.g. 10000"
+                      value={rfqForm.quantityRequired}
+                      onChange={e => {
+                        rfqFormSet({ ...rfqForm, quantityRequired: e.target.value });
+                        if (formErrors.quantityRequired) setFormErrors({ ...formErrors, quantityRequired: false });
+                      }}
+                      className="w-[120px] bg-white border border-stone-300 focus:border-primary focus:ring-1 focus:ring-primary rounded py-1 px-2 text-xs outline-none text-stone-900 font-mono font-bold"
+                    />
+                  </EnterpriseFieldCard>
+                </div>
+
+                <div className="w-[230px] shrink-0">
+                  <EnterpriseFieldCard
+                    label="Unit of Measure"
+                    dataType="UNIT"
+                    length="LEN 3"
+                    tableField="EKPO-MEINS"
+                    labelWidth="sm:w-22"
+                    error={formErrors.unitOfMeasure}
+                  >
+                    <select
+                      value={rfqForm.unitOfMeasure}
+                      onChange={e => {
+                        rfqFormSet({ ...rfqForm, unitOfMeasure: e.target.value });
+                        if (formErrors.unitOfMeasure) setFormErrors({ ...formErrors, unitOfMeasure: false });
+                      }}
+                      className="w-[100px] bg-white border border-stone-300 focus:border-primary focus:ring-1 focus:ring-primary rounded py-1 px-2 text-xs outline-none text-stone-900 font-semibold"
+                    >
+                      <option value="EA">EA - Each</option>
+                      <option value="PC">PC - Piece</option>
+                      <option value="KG">KG - Kilogram</option>
+                      <option value="MTR">MTR - Meter</option>
+                      <option value="NOS">NOS - Number</option>
+                    </select>
+                  </EnterpriseFieldCard>
+                </div>
+
+                <div className="flex items-center px-3 py-1.5">
+                  <button
+                    type="button"
+                    onClick={handleAddLineItem}
+                    className="bg-primary hover:bg-primary/95 text-white font-bold text-xs py-1.5 px-4 rounded flex items-center gap-1.5 transition-colors cursor-pointer h-7 shadow-sm"
+                  >
+                    <Plus className="size-3.5" /> Add Item
+                  </button>
+                </div>
+              </div>
+
+              {/* Added items list */}
+              <div className="md:col-span-3 space-y-2 pt-2">
+                <label className="text-[10px] font-bold text-stone-500 uppercase tracking-wider block">Currently Added Items ({addedItems.length})</label>
+                {addedItems.length === 0 ? (
+                  <div className="p-6 rounded border border-dashed border-stone-300 bg-stone-50 text-center text-xs text-stone-500 shadow-sm">
+                    No items added to this RFQ yet. Enter details above and click &quot;Add Line Item&quot;.
+                  </div>
+                ) : (
+                  <div className="border border-border rounded-sm overflow-hidden bg-white shadow-xs">
+                    <table className="w-full text-left text-xs border-collapse">
+                      <thead>
+                        <tr className="bg-stone-50 border-b border-border font-bold text-[9px] text-stone-900 uppercase">
+                          <th className="py-2.5 px-4 w-12 text-stone-900">Line</th>
+                          <th className="py-2.5 px-4 text-stone-900">Material / Item Description</th>
+                          <th className="py-2.5 px-4 text-right text-stone-900">Quantity</th>
+                          <th className="py-2.5 px-4 text-center text-stone-900">UoM</th>
+                          <th className="py-2.5 px-4 text-right text-stone-900">Target Price (₹)</th>
+                          <th className="py-2.5 px-4 text-center text-stone-900 font-mono">Actions</th>
+                        </tr>
+                      </thead>
+                      <tbody className="divide-y divide-stone-100 text-[11px] text-stone-750">
+                        {addedItems.map((item, idx) => (
+                          <tr key={idx} className="hover:bg-stone-50/20">
+                            <td className="py-2.5 px-4 font-mono font-bold text-stone-450">{(idx + 1) * 10}</td>
+                            <td className="py-2.5 px-4">
+                              <p className="font-bold text-stone-900">{item.description}</p>
+                              <p className="text-[10px] text-stone-400 font-mono mt-0.5">{item.materialCode}</p>
+                            </td>
+                            <td className="py-2.5 px-4 text-right font-mono font-bold">{item.quantity.toLocaleString()}</td>
+                            <td className="py-2.5 px-4 text-center font-bold">{item.uom}</td>
+                            <td className="py-2.5 px-4 text-right font-mono text-stone-600">₹{item.targetPrice.toFixed(2)}</td>
+                            <td className="py-2.5 px-4 text-center">
+                              <button
+                                type="button"
+                                onClick={() => handleRemoveLineItem(idx)}
+                                className="text-stone-400 hover:text-red-600 p-1 rounded transition-colors cursor-pointer"
+                                title="Remove Item"
+                              >
+                                <Trash2 className="size-4" />
+                              </button>
+                            </td>
+                          </tr>
+                        ))}
+                      </tbody>
+                    </table>
+                  </div>
+                )}
+              </div>
+            </div>
+          </div>
+
+          <div className="flex items-center justify-between border-t border-border pt-4">
+            <div>
+              <span className="text-[9px] font-bold text-stone-400 uppercase tracking-widest block font-mono">SAP Draft Session</span>
+              <p className="text-xs font-semibold text-stone-850">ME41 RFQ Document Creation</p>
+            </div>
+            <div className="flex gap-3">
+              <Button
+                type="button"
+                onClick={() => alert('Draft saved.')}
+                variant="outline"
+                className="border-stone-300 text-stone-700 hover:bg-stone-50 font-bold text-xs h-9 cursor-pointer"
+              >
+                Save Draft
+              </Button>
+              <Button
+                type="submit"
+                variant="default"
+                className="bg-primary hover:bg-primary/95 text-white font-bold text-xs px-8 rounded h-9 cursor-pointer"
+              >
+                Preview &amp; Post RFQ
+              </Button>
+            </div>
+          </div>
+        </form>
       )}
+    </div>
+  ) : null}
 
       {/* 3. PREVIEW DRAFT OVERLAY DIALOG */}
       {isPreviewOpen && (
         <div className="fixed inset-0 z-50 bg-stone-900/60 backdrop-blur-xs flex items-center justify-center p-4 animate-fade-in">
-          <div className="bg-white rounded-2xl border border-stone-200 w-full max-w-2xl shadow-2xl overflow-hidden flex flex-col max-h-[85vh] animate-slide-down">
+          <div className="bg-white rounded border border-border w-full max-w-2xl shadow-2xl overflow-hidden flex flex-col max-h-[85vh] animate-slide-down">
             {/* Modal Header */}
-            <div className="p-5 border-b border-stone-150 bg-stone-50 flex items-center justify-between">
+            <div className="p-4 border-b border-border bg-stone-50 flex items-center justify-between">
               <div>
-                <span className="text-[9px] font-bold text-amber-600 bg-amber-50 border border-amber-200 px-2 py-0.5 rounded uppercase font-mono tracking-wider">
+                <span className="text-[9px] font-bold text-amber-700 bg-amber-50 border border-amber-250 px-2 py-0.5 rounded uppercase font-mono tracking-wider">
                   Draft Document Check
                 </span>
                 <h3 className="font-bold text-sm text-stone-900 mt-1">Review SAP RFQ Proposal</h3>
               </div>
               <button
                 onClick={() => setIsPreviewOpen(false)}
-                className="text-stone-400 hover:text-stone-605 focus:outline-none transition-colors cursor-pointer"
+                className="text-stone-400 hover:text-stone-600 focus:outline-none transition-colors cursor-pointer"
               >
                 <X className="size-5" />
               </button>
             </div>
 
             {/* Modal Body */}
-            <div className="p-6 overflow-y-auto space-y-6 text-xs text-stone-800 custom-scrollbar">
-
-              {/* Header Info */}
-              <div className="grid grid-cols-2 gap-4 bg-stone-50 p-4 rounded-xl border border-stone-200/60 font-sans">
+            <div className="p-5 overflow-y-auto space-y-5 text-xs text-stone-800 custom-scrollbar">
+              <div className="grid grid-cols-2 gap-4 bg-stone-50 p-4 border border-border rounded font-sans">
                 <div>
-                  <span className="text-[10px] text-stone-450 font-bold block uppercase font-mono">RFQ Number (EBELN)</span>
+                  <span className="text-[10px] text-stone-400 font-bold block uppercase font-mono">RFQ Number (EBELN)</span>
                   <span className="text-sm font-bold font-mono text-stone-900 uppercase">{rfqForm.rfqRefNo}</span>
                 </div>
                 <div>
-                  <span className="text-[10px] text-stone-455 font-bold block uppercase font-mono">Document Type (BSART)</span>
+                  <span className="text-[10px] text-stone-400 font-bold block uppercase font-mono">Document Type (BSART)</span>
                   <span className="text-sm font-bold text-stone-900">{rfqForm.rfqType === 'AN' ? 'AN - Standard RFQ' : 'AB - Outline Agreement RFQ'}</span>
                 </div>
-                <div className="col-span-2 pt-2 border-t border-stone-150">
-                  <span className="text-[10px] text-stone-450 font-bold block uppercase font-mono">RFQ Description (TXZ01)</span>
+                <div className="col-span-2 pt-2 border-t border-border">
+                  <span className="text-[10px] text-stone-400 font-bold block uppercase font-mono">RFQ Description (TXZ01)</span>
                   <span className="font-semibold text-stone-900 text-xs">{rfqForm.description}</span>
                 </div>
               </div>
 
-              {/* Schedule & Terms */}
               <div className="space-y-2">
-                <h4 className="font-bold text-stone-900 border-b border-stone-150 pb-1 uppercase font-mono text-[10px] tracking-wider text-stone-450">
+                <h4 className="font-bold text-stone-900 border-b border-border pb-1 uppercase font-mono text-[9px] tracking-wider text-stone-500">
                   Schedule &amp; Terms
                 </h4>
-                <div className="grid grid-cols-3 gap-4 font-sans">
+                <div className="grid grid-cols-3 gap-4">
                   <div>
-                    <span className="text-[9px] text-stone-400 block uppercase font-mono">Deadline (ANGDT)</span>
+                    <span className="text-[9px] text-stone-450 block uppercase font-mono">Deadline (ANGDT)</span>
                     <span className="font-bold font-mono text-stone-900">{rfqForm.deadlineDate}</span>
                   </div>
                   <div>
-                    <span className="text-[9px] text-stone-400 block uppercase font-mono">Binding Period</span>
+                    <span className="text-[9px] text-stone-450 block uppercase font-mono">Binding Period</span>
                     <span className="font-bold font-mono text-stone-900">{rfqForm.bindingPeriod} Days</span>
                   </div>
                   <div>
-                    <span className="text-[9px] text-stone-400 block uppercase font-mono">Payment Terms</span>
+                    <span className="text-[9px] text-stone-455 block uppercase font-mono">Payment Terms</span>
                     <span className="font-semibold text-stone-900">{rfqForm.paymentTerms}</span>
                   </div>
                 </div>
               </div>
 
-              {/* Invited Vendors */}
               <div className="space-y-2">
-                <h4 className="font-bold text-stone-900 border-b border-stone-150 pb-1 uppercase font-mono text-[10px] tracking-wider text-stone-450">
+                <h4 className="font-bold text-stone-900 border-b border-border pb-1 uppercase font-mono text-[9px] tracking-wider text-stone-500">
                   Invited Vendors (LIFNR)
                 </h4>
                 <div className="flex flex-wrap gap-2">
                   {selectedVendors.map(vid => {
                     const v = vendorMasterList.find(vm => vm.id === vid);
                     return (
-                      <span key={vid} className="px-2.5 py-1 bg-stone-150/70 border border-stone-200 text-stone-850 font-bold rounded-lg flex items-center gap-1.5 font-mono text-[10px]">
+                      <span key={vid} className="px-2 py-0.5 bg-stone-100 border border-border text-stone-850 font-bold rounded flex items-center gap-1.5 font-mono text-[10px]">
                         👤 {v ? v.name : vid} ({vid})
                       </span>
                     );
@@ -1970,25 +2120,24 @@ export default function RfqView({
                 </div>
               </div>
 
-              {/* Line Items */}
               <div className="space-y-2">
-                <h4 className="font-bold text-stone-900 border-b border-stone-150 pb-1 uppercase font-mono text-[10px] tracking-wider text-stone-450">
+                <h4 className="font-bold text-stone-900 border-b border-border pb-1 uppercase font-mono text-[9px] tracking-wider text-stone-500">
                   Line Item Details (EKPO)
                 </h4>
-                <div className="border border-stone-200 rounded-lg overflow-hidden bg-stone-50/20">
+                <div className="border border-border rounded overflow-hidden bg-stone-50/20">
                   <table className="w-full text-left text-xs">
                     <thead>
-                      <tr className="bg-stone-50 border-b border-stone-200 text-stone-500 font-bold text-[9px] uppercase font-mono">
-                        <th className="py-2 px-4 w-12">Line</th>
-                        <th className="py-2 px-4">Material / Item Description</th>
-                        <th className="py-2 px-4 text-right">Quantity</th>
-                        <th className="py-2 px-4 text-center">UOM</th>
+                      <tr className="bg-stone-50 border-b border-border text-stone-500 font-bold text-[9px] uppercase font-mono">
+                        <th className="py-2 px-4 w-12 text-stone-900">Line</th>
+                        <th className="py-2 px-4 text-stone-900">Material / Item Description</th>
+                        <th className="py-2 px-4 text-right text-stone-900">Quantity</th>
+                        <th className="py-2 px-4 text-center text-stone-900 font-mono">UOM</th>
                       </tr>
                     </thead>
                     <tbody className="font-sans">
                       {addedItems.map((item, idx) => (
                         <tr key={idx} className="text-stone-700 border-b border-stone-100 last:border-b-0">
-                          <td className="py-2.5 px-4 font-mono text-stone-400 font-bold">{(idx + 1) * 10}</td>
+                          <td className="py-2.5 px-4 font-mono text-stone-500 font-bold">{(idx + 1) * 10}</td>
                           <td className="py-2.5 px-4">
                             <p className="font-bold text-stone-900">{item.materialCode}</p>
                             <p className="text-[9px] text-stone-400 font-mono">{item.description}</p>
@@ -2001,23 +2150,23 @@ export default function RfqView({
                       ))}
                     </tbody>
                   </table>
+                </div>
               </div>
             </div>
-          </div>
 
-          {/* Modal Actions */}
-            <div className="p-4 bg-stone-50 border-t border-stone-150 flex justify-end gap-3">
+            {/* Modal Actions */}
+            <div className="p-4 bg-stone-50 border-t border-border flex justify-end gap-3">
               <Button
                 onClick={() => setIsPreviewOpen(false)}
                 variant="outline"
-                className="border-stone-300 text-stone-700 hover:bg-stone-50 font-bold text-xs"
+                className="border-stone-300 text-stone-750 hover:bg-stone-50 font-bold text-xs h-9 cursor-pointer"
               >
                 Back to Edit
               </Button>
               <Button
                 onClick={confirmAndPublishRFQ}
                 variant="default"
-                className="bg-stone-850 hover:bg-black text-stone-700 hover:text-white font-bold text-xs px-6 rounded-lg flex items-center gap-1.5"
+                className="bg-primary hover:bg-primary/95 text-white font-bold text-xs px-6 rounded flex items-center gap-1.5 h-9 cursor-pointer"
               >
                 Confirm &amp; Post RFQ <ArrowRight className="size-3.5" />
               </Button>

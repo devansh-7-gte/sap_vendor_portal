@@ -305,8 +305,6 @@ export default function OnboardingView({ state, companyForm, setCompanyForm, han
             </div>
           </div>
         </div>
-      )}        </div>
-        </div>
       )}
     </div>
   );
