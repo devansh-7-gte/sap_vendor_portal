@@ -7,18 +7,51 @@ import {
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 
-// Compact inline field cell for SAP-style layout
-function InlineFieldCell({ label, icon: Icon, children }) {
+// --- SHARED LAYOUT COMPONENTS FROM REGISTRATION VIEW ---
+
+function SectionHeader({ title, icon: Icon }) {
   return (
-    <div className="flex items-center gap-2.5 py-2 px-3.5 hover:bg-stone-50/50 transition-colors select-none min-h-[38px] shrink-0">
-      <span className="text-[10.5px] font-semibold text-stone-500 shrink-0 select-none">
+    <div className="col-span-full mb-1 mt-4 first:mt-0 select-none">
+      <h3 className="text-xs font-bold text-stone-900 tracking-wider uppercase border-b-2 border-primary/30 pb-1.5 flex items-center gap-2">
+        {Icon && <Icon className="size-4 text-primary shrink-0" />}
+        <span>{title}</span>
+      </h3>
+    </div>
+  );
+}
+
+function SapReadOnlyField({ label, value, isFile, isMonospace = true }) {
+  return (
+    <div className="flex items-center text-xs select-none min-h-[28px]">
+      <span className="w-40 shrink-0 font-bold text-black text-right text-[11px] uppercase tracking-wide pr-2">
         {label}
       </span>
-      <div className="flex items-center gap-1.5 shrink-0">
-        {Icon && <Icon className="size-3.5 text-stone-400 shrink-0" />}
-        <div className="text-stone-900 font-bold text-[11px] flex items-center">
-          {children}
-        </div>
+      <div 
+        style={{
+          display: 'inline-flex',
+          alignItems: 'center',
+          gap: '6px',
+          backgroundColor: '#F5F5F5',
+          color: '#292524',
+          border: '1px solid #d1d5db',
+          borderRadius: '3px',
+          padding: '2px 8px',
+          fontSize: '11px',
+          height: '24px',
+          fontWeight: '600',
+          fontFamily: isMonospace ? 'monospace' : 'sans-serif',
+          cursor: 'default',
+          boxSizing: 'border-box',
+          width: 'fit-content',
+          maxWidth: '280px',
+          overflow: 'hidden',
+          textOverflow: 'ellipsis',
+          whiteSpace: 'nowrap'
+        }}
+        title={value || ''}
+      >
+        {isFile && <FileText className="size-3 text-emerald-600 shrink-0" />}
+        <span>{value || '—'}</span>
       </div>
     </div>
   );
@@ -72,7 +105,7 @@ export default function PaymentTrackingView({ state }) {
     ? (selectedPayment.tdsDeducted !== undefined ? selectedPayment.tdsDeducted : Math.round(paymentAmount * 0.01))
     : 0;
   const grossAmount = selectedPayment
-    ? (selectedPayment.grossAmount !== undefined ? selectedPayment.grossAmount : paymentAmount - tdsAmount)
+    ? (selectedPayment.grossAmount !== undefined ? selectedPayment.grossAmount : paymentAmount + tdsAmount)
     : 0;
   const deductorTan = state?.profile?.tanNo || 'MUMB12345A';
   const deducteePan = state?.profile?.panNo || 'ABCDE1234F';
@@ -144,76 +177,25 @@ export default function PaymentTrackingView({ state }) {
             <div className="space-y-6 animate-fade-in">
               {/* Section 1: Invoice Summary */}
               <div className="space-y-2">
-                <h4 className="text-[10px] font-extrabold text-stone-500 uppercase tracking-wider">
-                  SAP Invoice Reference Details
-                </h4>
-                <div className="flex flex-col sm:flex-row sm:items-stretch bg-white border border-stone-200 rounded-md divide-y sm:divide-y-0 sm:divide-x divide-stone-200 shadow-sm w-full sm:w-fit overflow-x-auto custom-scrollbar">
-                  <InlineFieldCell label="Invoice Number" icon={FileText}>
-                    <span className="font-mono text-stone-900 font-bold select-all">
-                      {invoice.invoiceNumber}
-                    </span>
-                  </InlineFieldCell>
-
-                  <InlineFieldCell label="SAP Document No." icon={FileText}>
-                    <span className="font-mono text-stone-900 font-bold select-all">
-                      {invoice.sapMiroDoc}
-                    </span>
-                  </InlineFieldCell>
-
-                  <InlineFieldCell label="Payment Status" icon={CheckCircle2}>
-                    <span className="px-2 py-0.5 rounded-sm text-[9px] font-extrabold border bg-green-50 text-green-700 border-green-200 inline-flex items-center gap-1 font-mono uppercase">
-                      Cleared (F110)
-                    </span>
-                  </InlineFieldCell>
+                <SectionHeader title="SAP INVOICE REFERENCE DETAILS" icon={FileText} />
+                <div className="grid grid-cols-2 gap-y-3 bg-white border border-stone-200 rounded-md p-4 shadow-sm w-fit" style={{ columnGap: '12px' }}>
+                  <SapReadOnlyField label="Invoice Number" value={invoice.invoiceNumber} />
+                  <SapReadOnlyField label="SAP Document No." value={invoice.sapMiroDoc} />
+                  <SapReadOnlyField label="Payment Status" value="Cleared (F110)" />
                 </div>
               </div>
 
               {/* Section 2: Payment Details */}
               <div className="space-y-2">
-                <h4 className="text-[10px] font-extrabold text-stone-500 uppercase tracking-wider">
-                  Treasury Clearing &amp; Settlement Parameters
-                </h4>
-                <div className="space-y-2.5">
-                  {/* Row 1: Amounts */}
-                  <div className="flex flex-col sm:flex-row sm:items-stretch bg-white border border-stone-200 rounded-md divide-y sm:divide-y-0 sm:divide-x divide-stone-200 shadow-sm w-full sm:w-fit overflow-x-auto custom-scrollbar">
-                    <InlineFieldCell label="Gross Invoice Amount" icon={Receipt}>
-                      <span className="font-mono text-stone-900 font-bold">
-                        ₹ {grossAmount.toLocaleString('en-IN')}.00
-                      </span>
-                    </InlineFieldCell>
-
-                    <InlineFieldCell label="TDS Deducted (194C)" icon={Receipt}>
-                      <span className="font-mono text-red-600 font-bold">
-                        - ₹ {tdsAmount.toLocaleString('en-IN')}.00
-                      </span>
-                    </InlineFieldCell>
-
-                    <InlineFieldCell label="Net Settlement Disbursed" icon={Receipt}>
-                      <span className="font-mono text-emerald-600 font-extrabold select-all">
-                        ₹ {paymentAmount.toLocaleString('en-IN')}.00
-                      </span>
-                    </InlineFieldCell>
-                  </div>
-
-                  {/* Row 2: Audits & References */}
-                  <div className="flex flex-col sm:flex-row sm:items-stretch bg-white border border-stone-200 rounded-md divide-y sm:divide-y-0 sm:divide-x divide-stone-200 shadow-sm w-full sm:w-fit overflow-x-auto custom-scrollbar">
-                    <InlineFieldCell label="Clearing Date" icon={Calendar}>
-                      <span className="font-mono text-stone-900 font-semibold">
-                        {selectedPayment.paymentDate}
-                      </span>
-                    </InlineFieldCell>
-
-                    <InlineFieldCell label="Payment Method" icon={Landmark}>
-                      <span className="text-stone-900 font-semibold">
-                        {selectedPayment.paymentMethod === 'NEFT' ? 'N - NEFT Transfer' : 'R - RTGS Settlement'}
-                      </span>
-                    </InlineFieldCell>
-
-                    <InlineFieldCell label="UTR / Reference" icon={FileText}>
-                      <span className="font-mono text-stone-900 font-extrabold select-all">
-                        {selectedPayment.utrCode}
-                      </span>
-                    </InlineFieldCell>
+                <SectionHeader title="TREASURY CLEARING & SETTLEMENT PARAMETERS" icon={Landmark} />
+                <div className="grid grid-cols-2 gap-y-3 bg-white border border-stone-200 rounded-md p-4 shadow-sm w-fit" style={{ columnGap: '12px' }}>
+                  <SapReadOnlyField label="Gross Invoice Amount" value={`₹ ${grossAmount.toLocaleString('en-IN')}.00`} />
+                  <SapReadOnlyField label="TDS Deducted (194C)" value={`- ₹ ${tdsAmount.toLocaleString('en-IN')}.00`} />
+                  <SapReadOnlyField label="Net Settlement Disbursed" value={`₹ ${paymentAmount.toLocaleString('en-IN')}.00`} />
+                  <SapReadOnlyField label="Clearing Date" value={selectedPayment.paymentDate} />
+                  <SapReadOnlyField label="Payment Method" value={selectedPayment.paymentMethod === 'NEFT' ? 'N - NEFT Transfer' : 'R - RTGS Settlement'} isMonospace={false} />
+                  <div className="col-span-2">
+                    <SapReadOnlyField label="UTR / Reference" value={selectedPayment.utrCode} />
                   </div>
                 </div>
               </div>
@@ -223,7 +205,7 @@ export default function PaymentTrackingView({ state }) {
                 <Button
                   onClick={() => alert(`Raising inquiry regarding settlement transaction UTR: ${selectedPayment.utrCode}`)}
                   variant="outline"
-                  className="border-stone-300 text-stone-700 hover:bg-stone-50 font-bold text-xs px-5 rounded-md h-9 cursor-pointer"
+                  className="border-stone-300 text-stone-750 hover:bg-stone-50 font-bold text-xs px-5 rounded-md h-9 cursor-pointer"
                 >
                   Raise Query / Dispute
                 </Button>
@@ -242,55 +224,24 @@ export default function PaymentTrackingView({ state }) {
             <div className="space-y-6 animate-fade-in">
               {/* Section 1: Certificate Filter */}
               <div className="space-y-2">
-                <h4 className="text-[10px] font-extrabold text-stone-500 uppercase tracking-wider">
-                  Tax Ledger Selection Filters
-                </h4>
-                <div className="flex flex-col sm:flex-row sm:items-stretch bg-white border border-stone-200 rounded-md divide-y sm:divide-y-0 sm:divide-x divide-stone-200 shadow-sm w-full sm:w-fit overflow-x-auto custom-scrollbar">
-                  <InlineFieldCell label="Fiscal Assessment Year" icon={Calendar}>
-                    <span className="font-mono text-stone-900 font-bold">
-                      2025 - 2026
-                    </span>
-                  </InlineFieldCell>
-
-                  <InlineFieldCell label="Filing Quarter" icon={Filter}>
-                    <span className="font-bold text-stone-900 font-mono">
-                      Q1 (April - June)
-                    </span>
-                  </InlineFieldCell>
-
-                  <InlineFieldCell label="Withholding Tax Section" icon={ShieldCheck}>
-                    <span className="font-bold text-stone-900 font-mono">
-                      SEC 194C (Contractors)
-                    </span>
-                  </InlineFieldCell>
+                <SectionHeader title="TAX LEDGER SELECTION FILTERS" icon={Filter} />
+                <div className="grid grid-cols-2 gap-y-3 bg-white border border-stone-200 rounded-md p-4 shadow-sm w-fit" style={{ columnGap: '12px' }}>
+                  <SapReadOnlyField label="Fiscal Assessment Year" value="2025 - 2026" />
+                  <SapReadOnlyField label="Filing Quarter" value="Q1 (April - June)" />
+                  <SapReadOnlyField label="Withholding Tax Section" value="SEC 194C (Contractors)" />
                 </div>
               </div>
 
               {/* Section 2: Certificate Details */}
               <div className="space-y-2">
-                <h4 className="text-[10px] font-extrabold text-stone-500 uppercase tracking-wider">
-                  PAN / TAN Tax Mapping Ledger
-                </h4>
-                <div className="flex flex-col sm:flex-row sm:items-stretch bg-white border border-stone-200 rounded-md divide-y sm:divide-y-0 sm:divide-x divide-stone-200 shadow-sm w-full sm:w-fit overflow-x-auto custom-scrollbar">
-                  <InlineFieldCell label="PAN of Deductee (Supplier)" icon={Building2}>
-                    <span className="font-mono text-stone-900 font-extrabold select-all uppercase">
-                      {deducteePan}
-                    </span>
-                  </InlineFieldCell>
-
-                  <InlineFieldCell label="TAN of Deductor (Customer)" icon={Building2}>
-                    <span className="font-mono text-stone-900 font-extrabold select-all uppercase">
-                      {deductorTan}
-                    </span>
-                  </InlineFieldCell>
-
-                  <InlineFieldCell label="Total Quarterly TDS Withheld" icon={Receipt}>
-                    <span className="font-mono text-red-600 font-extrabold">
-                      ₹ {tdsAmount.toLocaleString('en-IN')}.00
-                    </span>
-                  </InlineFieldCell>
+                <SectionHeader title="PAN / TAN TAX MAPPING LEDGER" icon={Building2} />
+                <div className="grid grid-cols-2 gap-y-3 bg-white border border-stone-200 rounded-md p-4 shadow-sm w-fit" style={{ columnGap: '12px' }}>
+                  <SapReadOnlyField label="PAN of Deductee (Supplier)" value={deducteePan} />
+                  <SapReadOnlyField label="TAN of Deductor (Customer)" value={deductorTan} />
+                  <SapReadOnlyField label="Total Quarterly TDS Withheld" value={`₹ ${tdsAmount.toLocaleString('en-IN')}.00`} />
                 </div>
               </div>
+
 
               {/* Footer Actions */}
               <div className="flex justify-end bg-white border border-stone-200 rounded-md p-4 shadow-sm w-full">
