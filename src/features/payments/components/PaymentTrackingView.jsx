@@ -12,8 +12,8 @@ import { Button } from '@/components/ui/button';
 function SectionHeader({ title, icon: Icon }) {
   return (
     <div className="col-span-full mb-1 mt-4 first:mt-0 select-none">
-      <h3 className="text-[10px] font-bold text-stone-900 tracking-wider uppercase border-b-2 border-primary/30 pb-1.5 flex items-center gap-2">
-        {Icon && <Icon className="size-3.5 text-primary shrink-0" />}
+      <h3 className="text-[9px] font-bold text-stone-900 tracking-wider uppercase border-b-2 border-primary/30 pb-1.5 flex items-center gap-2">
+        {Icon && <Icon className="size-3 text-primary shrink-0" />}
         <span>{title}</span>
       </h3>
     </div>
