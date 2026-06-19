@@ -178,7 +178,7 @@ export default function PaymentTrackingView({ state }) {
               {/* Section 1: Invoice Summary */}
               <div className="space-y-2">
                 <SectionHeader title="SAP INVOICE REFERENCE DETAILS" icon={FileText} />
-                <div className="grid grid-cols-2 gap-y-3 bg-white border border-stone-200 rounded-md p-4 shadow-sm w-fit" style={{ columnGap: '12px' }}>
+                <div className="grid grid-cols-2 gap-y-3 bg-white border border-stone-200 rounded-md p-4 shadow-sm w-fit mx-auto" style={{ columnGap: '12px' }}>
                   <SapReadOnlyField label="Invoice Number" value={invoice.invoiceNumber} />
                   <SapReadOnlyField label="SAP Document No." value={invoice.sapMiroDoc} />
                   <SapReadOnlyField label="Payment Status" value="Cleared (F110)" />
@@ -188,7 +188,7 @@ export default function PaymentTrackingView({ state }) {
               {/* Section 2: Payment Details */}
               <div className="space-y-2">
                 <SectionHeader title="TREASURY CLEARING & SETTLEMENT PARAMETERS" icon={Landmark} />
-                <div className="grid grid-cols-2 gap-y-3 bg-white border border-stone-200 rounded-md p-4 shadow-sm w-fit" style={{ columnGap: '12px' }}>
+                <div className="grid grid-cols-2 gap-y-3 bg-white border border-stone-200 rounded-md p-4 shadow-sm w-fit mx-auto" style={{ columnGap: '12px' }}>
                   <SapReadOnlyField label="Gross Invoice Amount" value={`₹ ${grossAmount.toLocaleString('en-IN')}.00`} />
                   <SapReadOnlyField label="TDS Deducted (194C)" value={`- ₹ ${tdsAmount.toLocaleString('en-IN')}.00`} />
                   <SapReadOnlyField label="Net Settlement Disbursed" value={`₹ ${paymentAmount.toLocaleString('en-IN')}.00`} />
@@ -225,7 +225,7 @@ export default function PaymentTrackingView({ state }) {
               {/* Section 1: Certificate Filter */}
               <div className="space-y-2">
                 <SectionHeader title="TAX LEDGER SELECTION FILTERS" icon={Filter} />
-                <div className="grid grid-cols-2 gap-y-3 bg-white border border-stone-200 rounded-md p-4 shadow-sm w-fit" style={{ columnGap: '12px' }}>
+                <div className="grid grid-cols-2 gap-y-3 bg-white border border-stone-200 rounded-md p-4 shadow-sm w-fit mx-auto" style={{ columnGap: '12px' }}>
                   <SapReadOnlyField label="Fiscal Assessment Year" value="2025 - 2026" />
                   <SapReadOnlyField label="Filing Quarter" value="Q1 (April - June)" />
                   <SapReadOnlyField label="Withholding Tax Section" value="SEC 194C (Contractors)" />
@@ -235,7 +235,7 @@ export default function PaymentTrackingView({ state }) {
               {/* Section 2: Certificate Details */}
               <div className="space-y-2">
                 <SectionHeader title="PAN / TAN TAX MAPPING LEDGER" icon={Building2} />
-                <div className="grid grid-cols-2 gap-y-3 bg-white border border-stone-200 rounded-md p-4 shadow-sm w-fit" style={{ columnGap: '12px' }}>
+                <div className="grid grid-cols-2 gap-y-3 bg-white border border-stone-200 rounded-md p-4 shadow-sm w-fit mx-auto" style={{ columnGap: '12px' }}>
                   <SapReadOnlyField label="PAN of Deductee (Supplier)" value={deducteePan} />
                   <SapReadOnlyField label="TAN of Deductor (Customer)" value={deductorTan} />
                   <SapReadOnlyField label="Total Quarterly TDS Withheld" value={`₹ ${tdsAmount.toLocaleString('en-IN')}.00`} />
