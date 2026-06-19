@@ -23,7 +23,7 @@ function SectionHeader({ title, icon: Icon }) {
 function SapReadOnlyField({ label, value, isFile, isMonospace = true }) {
   return (
     <div className="flex items-center text-xs select-none min-h-[28px]">
-      <span className="w-40 shrink-0 font-bold text-black text-right text-[11px] uppercase tracking-wide pr-2">
+      <span className="w-40 shrink-0 font-bold text-black text-right text-[9.5px] uppercase tracking-wide pr-2">
         {label}
       </span>
       <div 
