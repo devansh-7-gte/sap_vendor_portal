@@ -72,19 +72,31 @@
   }
 
   /* Support clean input fields inside table cells and forms */
-  input[type="text"], input[type="number"], input[type="date"], select, textarea {
+  input[type="text"], input[type="number"], select, textarea {
     background-color: #ffffff !important;
     border-radius: 2px !important;
-    border: 1px solid #d6d3d1 !important; /* border-stone-300 */
-    padding: 0.25rem 0.5rem !important; /* compact padding */
-    font-size: 0.75rem !important; /* text-xs */
-    height: 2rem !important; /* h-8 */
+    border: 1px solid #d6d3d1 !important;
+    padding: 0.25rem 0.5rem !important;
+    font-size: 0.75rem !important;
+    height: 2rem !important;
     box-shadow: none !important;
     outline: none !important;
-    color: #1c1917 !important; /* text-stone-900 */
+    color: #1c1917 !important;
+  }
+  /* Date inputs: base styles for standalone date inputs (no custom icon wrapper) */
+  input[type="date"] {
+    background-color: #ffffff !important;
+    border-radius: 2px !important;
+    border: 1px solid #d6d3d1 !important;
+    padding: 0.25rem 0.5rem !important;
+    font-size: 0.75rem !important;
+    height: 2rem !important;
+    box-shadow: none !important;
+    outline: none !important;
+    color: #1c1917 !important;
   }
   input[type="text"]:focus, input[type="number"]:focus, input[type="date"]:focus, select:focus, textarea:focus {
-    border-color: #2563eb !important; /* blue-600 focus border */
+    border-color: #2563eb !important;
     box-shadow: 0 0 0 1px #2563eb !important;
   }
   textarea {
@@ -92,25 +104,55 @@
     min-height: 4.5rem !important;
   }
 
-  /* Center absolute search and calendar icons vertically */
+  /* Center absolute search and calendar icons vertically within their relative containers */
   .relative > svg.absolute {
     top: 50% !important;
     transform: translateY(-50%) !important;
   }
 
-  /* Hide native calendar icon in date inputs when a custom Lucide calendar icon is present in the wrapper */
-  .relative:has(> svg) input[type="date"]::-webkit-calendar-picker-indicator {
-    background: transparent;
-    color: transparent;
-    cursor: pointer;
-    opacity: 0;
-    position: absolute;
-    right: 8px;
-    width: 20px;
-    height: 100%;
-    z-index: 10;
+  /* Adjust padding for text/search inputs containing left icons */
+  .relative > svg.absolute[class*="left-"] ~ input {
+    padding-left: 2rem !important;
   }
-}
+
+  /*
+   * DATE-FIELD-BOX: flex container that ACTS as the visible input border.
+   * The real <input type="date"> inside has no border of its own.
+   * The Calendar SVG icon is a plain flex sibling — no absolute positioning needed.
+   */
+  .date-field-box {
+    display: flex !important;
+    align-items: center !important;
+    height: 2rem !important;
+    background: #ffffff !important;
+    border: 1px solid #d6d3d1 !important;
+    border-radius: 2px !important;
+    overflow: hidden !important;
+  }
+  .date-field-box:focus-within {
+    border-color: #2563eb !important;
+    box-shadow: 0 0 0 1px #2563eb !important;
+  }
+  /* Strip the real input of its own border/bg so the wrapper provides it */
+  .date-field-box input[type="date"] {
+    border: none !important;
+    box-shadow: none !important;
+    background: transparent !important;
+    height: 100% !important;
+    flex: 1 1 0% !important;
+    min-width: 0 !important;
+    padding: 0 0.25rem 0 0.625rem !important;
+    font-size: 0.75rem !important;
+    color: #1c1917 !important;
+    outline: none !important;
+  }
+  /* Hide the native calendar picker indicator; clicking the icon area still works */
+  .date-field-box input[type="date"]::-webkit-calendar-picker-indicator {
+    opacity: 0 !important;
+    cursor: pointer !important;
+    width: 1.25rem !important;
+  }
+  }
 
 /* Animations */
 @keyframes fadeIn {
