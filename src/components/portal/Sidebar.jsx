@@ -112,17 +112,17 @@ export default function Sidebar({ activeTab, setActiveTab, state, onReset }) {
       </div>
 
       {/* VENDOR PROFILE BOX */}
-      <div className={`p-2 border-t border-border bg-white flex flex-col gap-1 ${sidebarCollapsed ? 'items-center' : ''}`}>
+      <div className={`p-3 pb-8 border-t border-border bg-card flex flex-col gap-2 ${sidebarCollapsed ? 'items-center' : ''}`}>
         <div className="flex items-center gap-2 w-full justify-center">
-          <div className="size-7 rounded-full bg-blue-50 flex items-center justify-center text-primary border border-blue-100 shrink-0">
+          <div className="size-7 rounded-full bg-muted flex items-center justify-center text-primary border border-border shrink-0">
             <Building2 className="size-3.5" />
           </div>
           {!sidebarCollapsed && (
             <div className="overflow-hidden min-w-0 flex-1">
-              <h4 className="text-[11px] font-bold text-stone-850 truncate" title={(mounted && state.profile.companyName) || 'Guest Vendor'}>
+              <h4 className="text-[10px] font-bold text-foreground truncate" title={(mounted && state.profile.companyName) || 'Guest Vendor'}>
                 {(mounted && state.profile.companyName) || 'Guest Vendor'}
               </h4>
-              <p className="text-[9px] text-stone-500 font-mono truncate">
+              <p className="text-[9px] text-muted-foreground font-mono truncate">
                 {(mounted && state.profile.sapVendorCode) || 'Pending Master'}
               </p>
             </div>
@@ -133,7 +133,7 @@ export default function Sidebar({ activeTab, setActiveTab, state, onReset }) {
         {sidebarCollapsed ? (
           <button
             onClick={onReset}
-            className="text-stone-400 hover:text-red-700 flex items-center justify-center p-1.5 rounded hover:bg-red-50 cursor-pointer mt-0.5"
+            className="text-muted-foreground hover:text-destructive flex items-center justify-center p-1.5 rounded hover:bg-muted cursor-pointer mt-0.5"
             title="Reset ERP Database"
           >
             <Database className="size-4" />
@@ -141,7 +141,7 @@ export default function Sidebar({ activeTab, setActiveTab, state, onReset }) {
         ) : (
           <button
             onClick={onReset}
-            className="text-left text-[10px] font-mono text-red-650 hover:text-red-700 hover:underline flex items-center gap-0.5 mt-0.5 cursor-pointer"
+            className="text-left text-[9px] font-mono text-destructive hover:text-red-700 hover:underline flex items-center gap-0.5 mt-0.5 cursor-pointer"
             title="Reset local state back to defaults"
           >
             <Database className="size-3" />
