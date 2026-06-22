@@ -109,7 +109,6 @@ export default function DashboardView({ state, setActiveTab }) {
       <div className="space-y-2 flex-1">
         <div className="h-2.5 bg-muted rounded w-20"></div>
         <div className="h-5 bg-muted rounded w-12"></div>
-        <div className="h-2.5 bg-muted rounded w-28"></div>
       </div>
       <div className="size-6 rounded-full bg-muted shrink-0"></div>
     </div>
@@ -301,10 +300,6 @@ export default function DashboardView({ state, setActiveTab }) {
               <div className="space-y-0.5">
                 <p className="text-[9px] font-bold text-muted-foreground uppercase tracking-wider">Open POs</p>
                 <p className="text-base font-bold text-foreground font-mono">{openPOCount}</p>
-                <div className="text-[9px] font-semibold text-muted-foreground">
-                  <span className="text-muted-foreground">₹{(openPOTotalValue / 100000).toFixed(1)}L total value</span>
-                  {openPOCount > 0 && <span className="text-foreground font-bold ml-1.5">+3 this week</span>}
-                </div>
               </div>
               <div className="size-6 rounded-full bg-muted flex items-center justify-center text-muted-foreground shrink-0 border border-border">
                 <ShoppingBag className="size-3" />
@@ -316,10 +311,6 @@ export default function DashboardView({ state, setActiveTab }) {
               <div className="space-y-0.5">
                 <p className="text-[9px] font-bold text-muted-foreground uppercase tracking-wider">Pending Invoices</p>
                 <p className="text-base font-bold text-foreground font-mono">{pendingInvoicesCount}</p>
-                <div className="text-[9px] font-semibold text-muted-foreground">
-                  <span className="text-muted-foreground">₹{(pendingInvoicesCount * 3.1).toFixed(1)}L awaiting AP</span>
-                  {pendingInvoicesCount > 0 && <span className="text-foreground font-bold ml-1.5">2 matched</span>}
-                </div>
               </div>
               <div className="size-6 rounded-full bg-muted flex items-center justify-center text-muted-foreground shrink-0 border border-border">
                 <Receipt className="size-3" />
@@ -331,10 +322,6 @@ export default function DashboardView({ state, setActiveTab }) {
               <div className="space-y-0.5">
                 <p className="text-[9px] font-bold text-muted-foreground uppercase tracking-wider">Next Payment</p>
                 <p className="text-base font-bold text-foreground font-mono">₹{(totalSettledPayments ? (totalSettledPayments * 0.15 / 100000).toFixed(1) : 8.4)}L</p>
-                <div className="text-[9px] font-semibold text-muted-foreground">
-                  <span className="text-muted-foreground">Due 15-Jun-2025</span>
-                  <span className="text-foreground font-bold ml-1.5 font-sans">Net 45 &bull; On track</span>
-                </div>
               </div>
               <div className="size-6 rounded-full bg-muted flex items-center justify-center text-muted-foreground shrink-0 border border-border">
                 <CreditCard className="size-3" />
@@ -346,10 +333,6 @@ export default function DashboardView({ state, setActiveTab }) {
               <div className="space-y-0.5">
                 <p className="text-[9px] font-bold text-muted-foreground uppercase tracking-wider">Performance Score</p>
                 <p className="text-base font-bold text-foreground font-mono">{state.performance.deliveryOTIF || 87}<span className="text-[10px] text-muted-foreground font-normal">/100</span></p>
-                <div className="text-[9px] font-semibold text-muted-foreground">
-                  <span className="text-muted-foreground">Q1 2025-26</span>
-                  <span className="text-foreground font-bold ml-1.5">+4 from last Q</span>
-                </div>
               </div>
               <div className="size-6 rounded-full bg-muted flex items-center justify-center text-muted-foreground shrink-0 border border-border">
                 <Activity className="size-3" />
@@ -375,8 +358,7 @@ export default function DashboardView({ state, setActiveTab }) {
         {isLoading ? (
           <div className="p-3 space-y-2 animate-pulse">
             <div className="h-3 bg-muted rounded w-2/3"></div>
-            <div className="h-2.5 bg-muted rounded w-full"></div>
-            <div className="h-2.5 bg-muted rounded w-1/3"></div>
+            <div className="h-2.5 bg-muted rounded w-1/4"></div>
           </div>
         ) : alerts.length === 0 ? (
           renderEmptyState(
@@ -398,7 +380,6 @@ export default function DashboardView({ state, setActiveTab }) {
                     </div>
                     <div className="space-y-0.5">
                       <h5 className="font-bold text-[10px] text-foreground">{alert.title}</h5>
-                      <p className="text-muted-foreground text-[10px] leading-snug">{alert.desc}</p>
                       <button
                         onClick={() => setActiveTab(alert.tab)}
                         className="text-foreground hover:text-accent font-semibold text-[9px] flex items-center gap-0.5 hover:underline pt-0.5 cursor-pointer uppercase tracking-wider"
@@ -420,7 +401,6 @@ export default function DashboardView({ state, setActiveTab }) {
                     </div>
                     <div className="space-y-0.5">
                       <h5 className="font-bold text-[10px] text-foreground">{alert.title}</h5>
-                      <p className="text-muted-foreground text-[10px] leading-snug">{alert.desc}</p>
                       <button
                         onClick={() => setActiveTab(alert.tab)}
                         className="text-foreground hover:text-accent font-semibold text-[9px] flex items-center gap-0.5 hover:underline pt-0.5 cursor-pointer uppercase tracking-wider"
