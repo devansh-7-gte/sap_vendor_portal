@@ -1,0 +1,126 @@
+{
+  "schemaVersion": 2,
+  "generatedAt": "2026-06-22T11:58:00Z",
+  "title": "Design System: VendorConnect Portal",
+  "extensions": {
+    "colorMeta": {
+      "primary": {
+        "role": "primary",
+        "displayName": "Classic SAP Steel Blue",
+        "canonical": "oklch(33% 0.12 250)",
+        "tonalRamp": ["#001833", "#002855", "#003c78", "#004080", "#1a5e9e", "#3a7fbe", "#65a5de", "#9bc8fa"]
+      },
+      "secondary": {
+        "role": "secondary",
+        "displayName": "Light Fiori Blue",
+        "canonical": "oklch(93% 0.02 245)",
+        "tonalRamp": ["#2c3f50", "#4f6880", "#7894b0", "#a9c5e3", "#cce0f5", "#e1ebf4", "#f0f5fa", "#f8fbfe"]
+      },
+      "neutral-bg": {
+        "role": "neutral",
+        "displayName": "Soft Slate-Blue Background",
+        "canonical": "oklch(96% 0.01 240)",
+        "tonalRamp": ["#0f1214", "#1e2226", "#3d444d", "#7a8594", "#a9b4c4", "#cbd5e1", "#f0f4f8", "#f8fafc"]
+      },
+      "neutral-fg": {
+        "role": "neutral",
+        "displayName": "High-Contrast Gray",
+        "canonical": "oklch(15% 0.01 240)",
+        "tonalRamp": ["#1c1c1c", "#2d2d2d", "#4a4a4a", "#6b6b6b", "#8e8e8e", "#b5b5b5", "#dcdcdc", "#f5f5f5"]
+      },
+      "border": {
+        "role": "neutral",
+        "displayName": "Grid Border Slate",
+        "canonical": "oklch(85% 0.01 240)",
+        "tonalRamp": ["#4a4e52", "#6c7278", "#939ba3", "#bdc5cc", "#d2d5d8", "#e2e5e8", "#f0f2f4", "#fcfdfe"]
+      }
+    },
+    "typographyMeta": {
+      "display": {
+        "displayName": "Display Title",
+        "purpose": "High-level module landing page headers only."
+      },
+      "body": {
+        "displayName": "Body/Grid Text",
+        "purpose": "Dashboard cells, labels, forms, and general content."
+      }
+    },
+    "shadows": [
+      {
+        "name": "console-elevation",
+        "value": "0 10px 30px -5px rgba(0, 0, 0, 0.16)",
+        "purpose": "Only used for transient UI elements like the absolute BAPI Console drawer."
+      }
+    ],
+    "motion": [
+      {
+        "name": "fade-standard",
+        "value": "cubic-bezier(0.16, 1, 0.3, 1)",
+        "purpose": "Used for page loading transitions and modal animations."
+      }
+    ]
+  },
+  "components": [
+    {
+      "name": "Primary Button",
+      "kind": "button",
+      "refersTo": "button-primary",
+      "description": "Standard call-to-action button with crisp corners and classic steel blue color.",
+      "html": "<button class=\"ds-btn-primary\">SUBMIT REGISTRATION</button>",
+      "css": ".ds-btn-primary { background: #004080; color: #ffffff; padding: 8px 16px; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; font-size: 0.875rem; font-weight: 600; border: none; border-radius: 4px; cursor: pointer; transition: background 0.2s ease, transform 0.1s ease; } .ds-btn-primary:hover { background: #0a6ed1; } .ds-btn-primary:active { transform: scale(0.98); }"
+    },
+    {
+      "name": "Input Field",
+      "kind": "input",
+      "refersTo": "input-field",
+      "description": "Standard text input field with high contrast borders and sharp corners.",
+      "html": "<input type=\"text\" class=\"ds-input-field\" placeholder=\"Enter GSTIN...\" />",
+      "css": ".ds-input-field { background: #ffffff; color: #1c1c1c; border: 1px solid #d2d5d8; border-radius: 2px; padding: 4px 8px; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; font-size: 0.75rem; height: 2rem; outline: none; width: 100%; box-sizing: border-box; transition: border-color 0.2s, box-shadow 0.2s; } .ds-input-field:focus { border-color: #2563eb; box-shadow: 0 0 0 1px #2563eb; }"
+    },
+    {
+      "name": "Card Container",
+      "kind": "card",
+      "refersTo": "card",
+      "description": "Flat card container with clear borders separating content panels.",
+      "html": "<div class=\"ds-card\"><h3 class=\"ds-card-title\">Purchase Order PO-2026-0001</h3><p class=\"ds-card-body\">Status: Acknowledged. Expected delivery in 3 days.</p></div>",
+      "css": ".ds-card { background: #ffffff; border: 1px solid #d2d5d8; border-radius: 4px; padding: 16px; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; } .ds-card-title { font-size: 1rem; font-weight: 600; color: #1c1c1c; margin: 0 0 8px 0; } .ds-card-body { font-size: 0.875rem; color: #555555; margin: 0; }"
+    }
+  ],
+  "narrative": {
+    "northStar": "The Steel Scaffold",
+    "overview": "VendorConnect is an industrial-strength self-service portal for Indian manufacturing procurement. Its visual system reflects structural reliability, operational transparency, and high efficiency. Rejecting the overly rounded, low-contrast, soft-shadow conventions of standard SaaS tools, VendorConnect utilizes crisp grid lines, high-contrast typography, and a compact layout density inspired by classic enterprise SAP Fiori screens but reimagined for a modern React environment.",
+    "keyCharacteristics": [
+      "Crisp borders and sharp corners (4px standard radius) instead of heavy pill rounded elements.",
+      "Clean grid lines and high contrast (≥4.5:1 text contrast) for readability.",
+      "Clear BAPI/RFC payload representation to enforce transparency.",
+      "A restrained, steel-blue color foundation offset by purposeful status highlights."
+    ],
+    "rules": [
+      {
+        "name": "The Steel Border Rule",
+        "body": "Grid lines and division borders are explicit and visible (1px, #d2d5d8). Never use shadows to suggest boundary divisions; use concrete lines to structure layout cells.",
+        "section": "colors"
+      },
+      {
+        "name": "The Amber Highlight Rule",
+        "body": "Mapped black hover interactions and borders must transition cleanly to Amber-500 (#f59e0b) to provide high-visibility state signals.",
+        "section": "colors"
+      },
+      {
+        "name": "The Flat Canvas Rule",
+        "body": "Surfaces must remain flat and flush against the background (#f0f4f8) at rest. Drop shadows must only be utilized for transient UI layers (e.g. active dropdown menus, absolute payload consoles) to indicate modal layering.",
+        "section": "elevation"
+      }
+    ],
+    "dos": [
+      "Do use explicit 1px borders (#d2d5d8) to separate table cells, headers, and dashboard blocks.",
+      "Do ensure all input fields maintain standard 2rem heights and sharp corners for fast keyboard navigation.",
+      "Do label BAPI log capsules with distinct semantic color badges (Emerald for Success, Red for Failure)."
+    ],
+    "donts": [
+      "Don't use decorative purple/violet gradients or neon accents.",
+      "Don't use card shadows at rest; keep layouts flat to align with Fiori density principles.",
+      "Don't use fuzzy low-contrast light gray typography; keep text colors at High-Contrast Gray (#1c1c1c) or higher."
+    ]
+  }
+}
