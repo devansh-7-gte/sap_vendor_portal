@@ -8,6 +8,9 @@ import {
   Building, Building2, TrendingUp, Percent, ShieldCheck, RefreshCw, FileCheck, HelpCircle, Receipt
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
+import FileUploadZone from '@/components/shared/FileUploadZone';
+import SkeletonLoader from '@/components/shared/SkeletonLoader';
+import ErrorBoundary from '@/components/ErrorBoundary';
 
 function EnterpriseFieldCard({ label, required, error, children, icon: Icon }) {
   return (
@@ -32,6 +35,16 @@ function EnterpriseFieldCard({ label, required, error, children, icon: Icon }) {
 
 const generateInvoiceNumber = () => `INV-2026-${Math.floor(100000 + Math.random() * 900000)}`;
 
+const formatDate = (dateStr) => {
+  if (!dateStr) return '';
+  const d = new Date(dateStr);
+  if (isNaN(d.getTime())) return dateStr;
+  const day = String(d.getDate()).padStart(2, '0');
+  const month = String(d.getMonth() + 1).padStart(2, '0');
+  const year = d.getFullYear();
+  return `${day}.${month}.${year}`;
+};
+
 export default function PurchaseOrdersView({
   state,
   selectedPoId,
@@ -44,11 +57,19 @@ export default function PurchaseOrdersView({
   setActiveTab,
   submitInvoice
 }) {
+  const [isLoading, setIsLoading] = useState(true);
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      setIsLoading(false);
+    }, 800);
+    return () => clearTimeout(timer);
+  }, []);
+
   // -----------------------------------------------------------------
   // DATA PIPELINE SANITISATION
   // -----------------------------------------------------------------
   // Filter out any null elements or corrupt POs/GRNs/ASNs from localStorage
-  const cleanPOs = (state?.pos || [])
+  const cleanPOs = (Array.isArray(state?.pos) ? state.pos : [])
     .filter(Boolean)
     .map(po => ({
       plant: 'Plant 1000 (Mumbai)',
@@ -68,7 +89,7 @@ export default function PurchaseOrdersView({
       }))
     }));
 
-  const cleanGrns = (state?.grns || [])
+  const cleanGrns = (Array.isArray(state?.grns) ? state.grns : [])
     .filter(Boolean)
     .map(grn => ({
       postingDate: new Date().toISOString().split('T')[0],
@@ -82,15 +103,18 @@ export default function PurchaseOrdersView({
       }))
     }));
 
-  const cleanAsns = (state?.asns || []).filter(Boolean);
+  const cleanAsns = (Array.isArray(state?.asns) ? state.asns : []).filter(Boolean);
 
   // Navigation states:
   // poSubTab tracks the main top menu: 'list' (Orders Monitor), 'grn' (Goods Receipts), 'invoice' (Invoice Ready)
   const [poSubTab, setPoSubTab] = useState('list');
   // currentView tracks detail sub-states: 'list' | 'detail' | 'asn' | 'asn_success' | 'grn_detail' | 'invoice_detail'
   const [currentView, setCurrentView] = useState('list');
-  const [activePo, setActivePo] = useState(null);
-  const [activeGrn, setActiveGrn] = useState(null);
+  const [activePoState, setActivePo] = useState(null);
+  const [activeGrnState, setActiveGrn] = useState(null);
+  const activePo = activePoState ? (cleanPOs.find(p => p.id === activePoState.id) || activePoState) : null;
+  const activeGrn = activeGrnState ? (cleanGrns.find(g => g.id === activeGrnState.id) || activeGrnState) : null;
+  const [localSubmissionTimes, setLocalSubmissionTimes] = useState({});
   const [isSapView, setIsSapView] = useState(false);
   const [activeLineIdx, setActiveLineIdx] = useState(0);
 
@@ -148,21 +172,24 @@ export default function PurchaseOrdersView({
     const timer = setInterval(() => {
       const now = Date.now();
       cleanPOs.forEach(po => {
-        if (po.status === 'Dispatched' && po.acknowledgedAt) {
+        if (po.status === 'Dispatched') {
           // Calculate elapsed time since dispatch submission.
           // Since submitASN creates the ASN and triggers GRN in 10 seconds,
           // we can simulate a countdown from 10 seconds.
           const asn = cleanAsns.find(a => a.poId === po.id);
-          if (asn && asn.submittedAt) {
-            const elapsed = Math.floor((now - new Date(asn.submittedAt).getTime()) / 1000);
+          const submittedDate = asn?.submittedAt || asn?.createdAt || localSubmissionTimes[po.id];
+          if (submittedDate) {
+            const elapsed = Math.floor((now - new Date(submittedDate).getTime()) / 1000);
             const remaining = Math.max(0, 10 - elapsed);
             setCountdown(prev => ({ ...prev, [po.id]: remaining }));
+          } else {
+            setCountdown(prev => ({ ...prev, [po.id]: 10 }));
           }
         }
       });
     }, 1000);
     return () => clearInterval(timer);
-  }, [cleanPOs, cleanAsns]);
+  }, [cleanPOs, cleanAsns, localSubmissionTimes]);
 
   // Pre-load default chat messages for POs
   useEffect(() => {
@@ -183,6 +210,35 @@ export default function PurchaseOrdersView({
       }
     });
   }, [cleanPOs]);
+
+  // Auto-initialize ASN form when user enters tab 2 via tab navigation
+  useEffect(() => {
+    if (detailTab === 'create_asn' && activePo && activePo.status !== 'Open') {
+      const lines = (activePo.items || []).map(item => item.line);
+      const isInitialized = lines.length > 0 && lines.every(line => dispatchQuantities[line] !== undefined);
+      if (!isInitialized) {
+        const initialQtys = {};
+        const initialErrors = {};
+        (activePo.items || []).forEach(item => {
+          const remaining = item.quantity - (item.grnQuantity || 0);
+          initialQtys[item.line] = remaining;
+          initialErrors[item.line] = '';
+        });
+        setDispatchQuantities(initialQtys);
+        setValidationErrors(initialErrors);
+        setEwayBillNo(prev => prev || `E-WAY-${Math.floor(100000000000 + Math.random() * 900000000000)}`);
+        setAsnForm(prev => ({
+          carrierName: prev.carrierName || 'DHL Global Logistics',
+          trackingNumber: prev.trackingNumber || `DHL-${Math.floor(1000000 + Math.random() * 9000000)}`,
+          vehicleNumber: prev.vehicleNumber || 'MH-12-XY-4321',
+          invoiceReference: prev.invoiceReference || `TAX-2026-${Math.floor(100 + Math.random() * 900)}`,
+          shipDate: prev.shipDate || new Date().toISOString().split('T')[0],
+          estimatedDeliveryDate: prev.estimatedDeliveryDate || new Date(Date.now() + 3 * 24 * 60 * 60 * 1000).toISOString().split('T')[0],
+          items: initialQtys
+        }));
+      }
+    }
+  }, [detailTab, activePo?.id]);
 
   // Handle PO Row selection
   const handleOpenPoDetails = (po) => {
@@ -329,6 +385,7 @@ export default function PurchaseOrdersView({
     setDispatchQuantities(initialQtys);
     setValidationErrors(initialErrors);
     setEwayBillNo(`E-WAY-${Math.floor(100000000000 + Math.random() * 900000000000)}`);
+    setAsnDocs({ packingList: null, invoiceCopy: null, transportDoc: null });
     setAsnForm({
       carrierName: 'DHL Global Logistics',
       trackingNumber: `DHL-${Math.floor(1000000 + Math.random() * 9000000)}`,
@@ -336,14 +393,14 @@ export default function PurchaseOrdersView({
       invoiceReference: `TAX-2026-${Math.floor(100 + Math.random() * 900)}`,
       shipDate: new Date().toISOString().split('T')[0],
       estimatedDeliveryDate: new Date(Date.now() + 3 * 24 * 60 * 60 * 1000).toISOString().split('T')[0],
-      items: {}
+      items: initialQtys
     });
     setDetailTab('create_asn');
     setCurrentView('detail');
   };
 
   // Validate and submit ASN
-  const handleAsnSubmitClick = () => {
+  const handleAsnSubmitClick = async () => {
     let hasErrors = false;
     const newErrors = {};
 
@@ -366,31 +423,42 @@ export default function PurchaseOrdersView({
 
     if (hasErrors) return;
 
-    // Call store dispatch
-    handleAsnSubmit({
-      ...activePo,
-      items: activePo?.items || []
-    });
+    try {
+      // Record local submission timestamp to start countdown immediately
+      if (activePo) {
+        setLocalSubmissionTimes(prev => ({ ...prev, [activePo.id]: new Date().toISOString() }));
+      }
 
-    // Configure the success info
-    const generatedAsnId = `ASN-${Date.now().toString().slice(-6)}`;
-    const sapInboundDelivery = `1800${Math.floor(10000 + Math.random() * 90000)}`;
+      // Call store dispatch
+      const res = await handleAsnSubmit({
+        ...activePo,
+        items: activePo?.items || [],
+        ewayBillNo,
+        documentIds: Object.values(asnDocs).filter(Boolean).map(d => d.documentId)
+      });
 
-    setAsnSuccessInfo({
-      asnId: generatedAsnId,
-      sapInbound: sapInboundDelivery,
-      poId: activePo?.id || 'PO',
-      carrierName: asnForm.carrierName || 'DHL Global Logistics',
-      trackingNumber: asnForm.trackingNumber || `TRK-${Math.floor(100000 + Math.random() * 900000)}`,
-      eta: asnForm.estimatedDeliveryDate,
-      items: (activePo?.items || []).map(item => ({
-        ...item,
-        shippedQty: Number(dispatchQuantities[item.line])
-      }))
-    });
+      if (res && res.asn) {
+        // Configure the success info using the actual backend-generated IDs
+        setAsnSuccessInfo({
+          asnId: res.asn.id,
+          sapInbound: res.asn.sapInboundDelivery,
+          poId: activePo?.id || 'PO',
+          carrierName: asnForm.carrierName || 'DHL Global Logistics',
+          trackingNumber: asnForm.trackingNumber || `TRK-${Math.floor(100000 + Math.random() * 900000)}`,
+          eta: asnForm.estimatedDeliveryDate,
+          items: (activePo?.items || []).map(item => ({
+            ...item,
+            shippedQty: Number(dispatchQuantities[item.line])
+          }))
+        });
+      }
 
-    setDetailTab('grn_status');
-    setCurrentView('detail');
+      setDetailTab('grn_status');
+      setCurrentView('detail');
+    } catch (e) {
+      console.error(e);
+      alert('Failed to submit ASN: ' + (e.message || e));
+    }
   };
 
   // Submit MIRO Invoice Posting
@@ -483,8 +551,19 @@ export default function PurchaseOrdersView({
     }
   };
 
+  if (isLoading) {
+    return (
+      <ErrorBoundary>
+        <div className="p-4 space-y-4">
+          <SkeletonLoader type="table" rows={6} cols={5} />
+        </div>
+      </ErrorBoundary>
+    );
+  }
+
   return (
-    <div className="space-y-6 max-w-full mx-auto animate-fade-in pb-16 relative">
+    <ErrorBoundary>
+      <div className="space-y-6 max-w-full mx-auto animate-fade-in pb-16 relative">
       
       {/* ==================== SUB-TABS NAVIGATION BAR ==================== */}
       {currentView === 'list' && (
@@ -725,14 +804,14 @@ export default function PurchaseOrdersView({
                           onDoubleClick={() => handleOpenPoDetails(po)}
                           className="hover:bg-stone-50/40 transition-colors group cursor-pointer"
                         >
-                          <td className="py-3.5 px-4 font-mono font-bold text-stone-900 group-hover:underline">
+                          <td className="py-3.5 px-4 font-mono font-bold text-stone-900 group-hover:underline whitespace-nowrap">
                             {po.id}
                           </td>
-                          <td className="py-3.5 px-4 font-mono text-stone-500">{po.createdDate}</td>
+                          <td className="py-3.5 px-4 font-mono text-stone-500 whitespace-nowrap">{formatDate(po.createdDate)}</td>
                           <td className="py-3.5 px-4 font-semibold text-stone-700">{buyerName}</td>
                           <td className="py-3.5 px-4 text-stone-600 font-medium">{plantName}</td>
                           <td className="py-3.5 px-4 text-center font-mono font-bold">{(po.items || []).length}</td>
-                          <td className="py-3.5 px-4 text-right font-mono font-bold text-stone-900">
+                          <td className="py-3.5 px-4 text-right font-mono font-bold text-stone-900 whitespace-nowrap">
                             ₹ {totalValue.toLocaleString()}.00
                           </td>
                           <td className="py-3.5 px-4">
@@ -750,7 +829,7 @@ export default function PurchaseOrdersView({
                               {po.status === 'Acknowledged' && (
                                 <button
                                   onClick={() => handleOpenAsnForm(po)}
-                                  className="px-2 py-1 bg-stone-850 hover:bg-stone-950 text-stone-700 rounded-md text-[10px] font-bold transition-colors"
+                                  className="px-2 py-1 bg-white border border-stone-300 text-stone-800 hover:bg-orange-500 hover:text-white hover:border-orange-500 rounded-md text-[10px] font-bold transition-colors"
                                 >
                                   Create ASN
                                 </button>
@@ -1011,7 +1090,7 @@ export default function PurchaseOrdersView({
               {activePo.status === 'Open' && (
                 <Button
                   onClick={() => acknowledgePO(activePo.id)}
-                  className="bg-stone-850 hover:bg-black text-stone-700 hover:text-white font-bold text-xs rounded-lg px-4"
+                  className="bg-white border border-stone-300 text-stone-800 hover:bg-orange-500 hover:text-white hover:border-orange-500 font-bold text-xs rounded-lg px-4 transition-all duration-150"
                 >
                   Acknowledge Purchase Order
                 </Button>
@@ -1054,7 +1133,7 @@ export default function PurchaseOrdersView({
 
                   <EnterpriseFieldCard label="PO Date" icon={Calendar} accentColor="bg-blue-600">
                     <span className="font-mono text-stone-850 font-bold text-sm">
-                      {activePo.createdDate}
+                      {formatDate(activePo.createdDate)}
                     </span>
                   </EnterpriseFieldCard>
 
@@ -1100,12 +1179,12 @@ export default function PurchaseOrdersView({
                           <ChevronLeft className="size-4" />
                         </button>
                         <span className="text-xs font-semibold text-stone-600 font-mono select-none">
-                          Page {activeLineIdx + 1} of {Math.max(1, Math.ceil(activePo.items.length / 2))}
+                          Page {activeLineIdx + 1} of {Math.max(1, Math.ceil(activePo.items.length / 5))}
                         </span>
                         <button
                           type="button"
-                          disabled={activeLineIdx >= Math.ceil(activePo.items.length / 2) - 1}
-                          onClick={() => setActiveLineIdx(prev => Math.min(Math.ceil(activePo.items.length / 2) - 1, prev + 1))}
+                          disabled={activeLineIdx >= Math.ceil(activePo.items.length / 5) - 1}
+                          onClick={() => setActiveLineIdx(prev => Math.min(Math.ceil(activePo.items.length / 5) - 1, prev + 1))}
                           className="p-1.5 border border-stone-200 rounded-lg hover:bg-stone-50 disabled:opacity-40 disabled:hover:bg-white text-stone-700 cursor-pointer transition-colors"
                         >
                           <ChevronRight className="size-4" />
@@ -1115,54 +1194,49 @@ export default function PurchaseOrdersView({
                   </div>
 
                   {activePo.items && activePo.items.length > 0 && (
-                    <div className="max-w-5xl mx-auto w-full space-y-4">
-                      {/* Grid Container for 2 cards per page */}
-                      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                        {activePo.items.slice(activeLineIdx * 2, activeLineIdx * 2 + 2).map((item, idx) => (
-                          <div key={idx} className="p-5 border border-stone-250 bg-white rounded-xl space-y-4 shadow-sm hover:shadow-md hover:border-stone-350 transition-all duration-200 animate-fade-in">
-                            <div className="border-b border-stone-150 pb-3">
-                              <p className="text-sm font-semibold text-stone-900 leading-tight">{item.description}</p>
-                              <span className="text-xs text-stone-450 font-mono block mt-1">
-                                Material Code: {item.materialCode} &bull; Line {item.line}
-                              </span>
-                            </div>
-
-                            <div className="grid grid-cols-2 gap-x-4 gap-y-4 text-xs">
-                              <div>
-                                <span className="text-[9px] text-stone-700 font-bold uppercase block tracking-wider">Ordered Qty</span>
-                                <span className="font-bold text-stone-850 font-mono mt-0.5 block">{item.quantity} {item.uom}</span>
-                              </div>
-                              <div>
-                                <span className="text-[9px] text-stone-700 font-bold uppercase block tracking-wider">Net Price</span>
-                                <span className="font-bold text-stone-850 font-mono mt-0.5 block">₹ {item.unitPrice.toLocaleString()}.00</span>
-                              </div>
-                              <div>
-                                <span className="text-[9px] text-stone-700 font-bold uppercase block tracking-wider">GST Tax Code</span>
-                                <span className="font-bold text-stone-850 font-mono mt-0.5 block">G1 (18%)</span>
-                              </div>
-                              <div>
-                                <span className="text-[9px] text-stone-700 font-bold uppercase block tracking-wider">Delivery Date</span>
-                                <span className="font-bold text-stone-850 font-mono mt-0.5 block">{item.deliveryDate || activePo.createdDate}</span>
-                              </div>
-                              <div className="col-span-2 border-t border-stone-100 pt-3 flex items-baseline justify-between">
-                                <div>
-                                  <span className="text-[9px] text-stone-700 font-bold uppercase block tracking-wider">Payment Terms</span>
-                                  <span className="font-bold text-stone-850 font-mono mt-0.5 block">{activePo.paymentTerms}</span>
-                                </div>
-                                <div className="text-right">
-                                  <span className="text-[9px] text-stone-700 font-bold block tracking-wider">Line Net Value</span>
-                                  <span className="font-bold text-stone-955 font-mono text-sm mt-0.5 block">₹ {item.netValue.toLocaleString()}.00</span>
-                                </div>
-                              </div>
-                            </div>
-                          </div>
-                        ))}
+                    <div className="w-full space-y-4">
+                      {/* Responsive Table Container */}
+                      <div className="w-full overflow-x-auto border border-stone-200 rounded-lg bg-white shadow-xs">
+                        <table className="w-full text-xs text-left border-collapse min-w-[900px]">
+                          <thead>
+                            <tr className="bg-stone-50/75 border-b border-stone-200 text-stone-700 font-bold uppercase text-[10px] tracking-wider font-sans">
+                              <th className="py-2 px-3 border-r border-stone-200 w-16">Line</th>
+                              <th className="py-2 px-3 border-r border-stone-200 w-36">Material Code</th>
+                              <th className="py-2 px-3 border-r border-stone-200 min-w-[200px]">Description</th>
+                              <th className="py-2 px-3 border-r border-stone-200 w-28 text-right">Ordered Qty</th>
+                              <th className="py-2 px-3 border-r border-stone-200 w-20">UoM</th>
+                              <th className="py-2 px-3 border-r border-stone-200 w-32 text-right">Net Price</th>
+                              <th className="py-2 px-3 border-r border-stone-200 w-28">GST Tax Code</th>
+                              <th className="py-2 px-3 border-r border-stone-200 w-36">Delivery Date</th>
+                              <th className="py-2 px-3 text-right w-36">Line Net Value</th>
+                            </tr>
+                          </thead>
+                          <tbody className="divide-y divide-stone-200">
+                            {activePo.items.slice(activeLineIdx * 5, activeLineIdx * 5 + 5).map((item, idx) => {
+                              return (
+                                <tr key={item.line || idx} className="hover:bg-stone-50/50 transition-colors">
+                                  <td className="py-2 px-3 border-r border-stone-200 text-stone-600 font-semibold font-mono">{item.line}</td>
+                                  <td className="py-2 px-3 border-r border-stone-200">
+                                    <span className="text-blue-600 font-bold hover:underline cursor-pointer">{item.materialCode}</span>
+                                  </td>
+                                  <td className="py-2 px-3 border-r border-stone-200 text-stone-800 font-sans font-medium">{item.description}</td>
+                                  <td className="py-2 px-3 border-r border-stone-200 font-bold text-stone-900 text-right font-mono">{item.quantity}</td>
+                                  <td className="py-2 px-3 border-r border-stone-200 text-stone-600 font-medium">{item.uom || 'EA'}</td>
+                                  <td className="py-2 px-3 border-r border-stone-200 font-bold text-stone-900 text-right font-mono">₹ {item.unitPrice.toLocaleString()}.00</td>
+                                  <td className="py-2 px-3 border-r border-stone-200 text-stone-600 font-medium">G1 (18%)</td>
+                                  <td className="py-2 px-3 border-r border-stone-200 font-medium font-mono text-stone-700">{formatDate(item.deliveryDate || activePo.createdDate)}</td>
+                                  <td className="py-2 px-3 font-bold text-stone-900 text-right font-mono">₹ {item.netValue.toLocaleString()}.00</td>
+                                </tr>
+                              );
+                            })}
+                          </tbody>
+                        </table>
                       </div>
                       
                       {/* Bullet page indicators */}
-                      {Math.ceil(activePo.items.length / 2) > 1 && (
+                      {Math.ceil(activePo.items.length / 5) > 1 && (
                         <div className="flex justify-center items-center gap-1.5 mt-3 select-none">
-                          {Array.from({ length: Math.ceil(activePo.items.length / 2) }).map((_, dotIdx) => (
+                          {Array.from({ length: Math.ceil(activePo.items.length / 5) }).map((_, dotIdx) => (
                             <button
                               key={dotIdx}
                               type="button"
@@ -1195,7 +1269,7 @@ export default function PurchaseOrdersView({
                     </p>
                     <Button
                       onClick={() => acknowledgePO(activePo.id)}
-                      className="mt-4 bg-stone-850 hover:bg-black text-stone-700 hover:text-white font-bold text-xs rounded-lg px-6"
+                      className="mt-4 bg-white border border-stone-300 text-stone-800 hover:bg-orange-500 hover:text-white hover:border-orange-500 font-bold text-xs rounded-lg px-6 transition-all duration-150"
                     >
                       Acknowledge PO
                     </Button>
@@ -1277,6 +1351,39 @@ export default function PurchaseOrdersView({
                       </EnterpriseFieldCard>
                     </div>
 
+                    {/* ASN Document Attachments */}
+                    <div className="space-y-3 mt-6">
+                      <h4 className="text-xs font-bold text-stone-850 uppercase tracking-wider border-b border-stone-200 pb-1.5 flex items-center justify-between">
+                        <span>Shipment Document Attachments</span>
+                      </h4>
+                      <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                        <FileUploadZone
+                          label="Packing List (Optional)"
+                          value={asnDocs.packingList}
+                          onUploadComplete={result => setAsnDocs(prev => ({ ...prev, packingList: result }))}
+                          onFileRemoved={() => setAsnDocs(prev => ({ ...prev, packingList: null }))}
+                          linkedTo="ASN"
+                          accept=".pdf,.png,.jpg,.jpeg,.doc,.docx"
+                        />
+                        <FileUploadZone
+                          label="Invoice Copy (Optional)"
+                          value={asnDocs.invoiceCopy}
+                          onUploadComplete={result => setAsnDocs(prev => ({ ...prev, invoiceCopy: result }))}
+                          onFileRemoved={() => setAsnDocs(prev => ({ ...prev, invoiceCopy: null }))}
+                          linkedTo="ASN"
+                          accept=".pdf,.png,.jpg,.jpeg,.doc,.docx"
+                        />
+                        <FileUploadZone
+                          label="Transport Bill / LR (Optional)"
+                          value={asnDocs.transportDoc}
+                          onUploadComplete={result => setAsnDocs(prev => ({ ...prev, transportDoc: result }))}
+                          onFileRemoved={() => setAsnDocs(prev => ({ ...prev, transportDoc: null }))}
+                          linkedTo="ASN"
+                          accept=".pdf,.png,.jpg,.jpeg,.doc,.docx"
+                        />
+                      </div>
+                    </div>
+
                     {/* Dispatch quantities allocation */}
                     <div className="space-y-3.5 mt-6">
                       <h4 className="text-xs font-bold text-stone-850 uppercase tracking-wider border-b border-stone-200 pb-1.5 flex items-center justify-between">
@@ -1311,10 +1418,18 @@ export default function PurchaseOrdersView({
                                     type="number"
                                     value={dispatchQuantities[item.line] || ''}
                                     onChange={e => {
-                                      setDispatchQuantities({
-                                        ...dispatchQuantities,
-                                        [item.line]: e.target.value
-                                      });
+                                      const val = e.target.value;
+                                      setDispatchQuantities(prev => ({
+                                        ...prev,
+                                        [item.line]: val
+                                      }));
+                                      setAsnForm(prev => ({
+                                        ...prev,
+                                        items: {
+                                          ...prev.items,
+                                          [item.line]: val
+                                        }
+                                      }));
                                     }}
                                     className="w-full bg-white border border-stone-300 focus:border-stone-500 rounded-lg px-2.5 py-1 text-xs text-right font-mono font-normal outline-none h-8"
                                   />
@@ -1351,20 +1466,58 @@ export default function PurchaseOrdersView({
               <div className="space-y-6 animate-fade-in">
                 {(() => {
                   const grn = cleanGrns.find(g => g.poId === activePo.id);
+                  const activeAsn = cleanAsns.find(a => a.poId === activePo.id) || (asnSuccessInfo?.poId === activePo.id ? asnSuccessInfo : null);
                   if (!grn) {
                     if (activePo.status === 'Dispatched') {
                       return (
-                        <div className="p-6 border border-amber-200 bg-amber-50/50 rounded-xl text-center space-y-4">
-                          <Truck className="size-10 text-amber-500 animate-bounce mx-auto" />
-                          <h4 className="text-xs font-bold text-amber-800">Shipment In Transit</h4>
-                          <p className="text-xs text-stone-600 max-w-sm mx-auto leading-relaxed">
-                            Logistics dispatch details synced to SAP. The physical container is moving. ERP stores QC compliance check is running.
-                          </p>
-                          <div className="max-w-xs mx-auto p-3 bg-white border border-amber-200 rounded-lg text-xs font-mono font-bold text-stone-700 shadow-sm flex items-center justify-between">
-                            <span>MIGO GRN Receipt check sync:</span>
-                            <span className="text-amber-600 animate-pulse">
-                              {countdown[activePo.id] !== undefined ? `${countdown[activePo.id]}s` : '10s'}
-                            </span>
+                        <div className="p-6 border border-amber-200 bg-amber-50/50 rounded-xl space-y-4 max-w-xl mx-auto shadow-sm animate-fade-in text-stone-700">
+                          <div className="text-center space-y-2">
+                            <div className="size-12 bg-green-50 border border-green-200 text-green-600 rounded-full flex items-center justify-center mx-auto shadow-xs">
+                              <Check className="size-6 animate-pulse" />
+                            </div>
+                            <h4 className="text-sm font-bold text-amber-850">ASN Dispatch Submitted Successfully</h4>
+                            <p className="text-xs text-stone-500 max-w-md mx-auto leading-normal">
+                              Logistics dispatch details successfully transmitted via SAP BAPI (`BAPI_DELIVERY_CREATE_DN`).
+                            </p>
+                          </div>
+
+                          <div className="p-4 bg-white border border-amber-250/60 rounded-xl text-xs space-y-3.5 shadow-sm">
+                            <div className="grid grid-cols-2 gap-x-4 gap-y-2 text-left font-mono">
+                              <div>
+                                <span className="text-[9px] text-stone-400 font-bold uppercase block font-sans">ASN Reference ID</span>
+                                <span className="font-bold text-stone-900 text-xs select-all">
+                                  {activeAsn?.id || activeAsn?.asnId || 'N/A'}
+                                </span>
+                              </div>
+                              <div>
+                                <span className="text-[9px] text-stone-400 font-bold uppercase block font-sans">SAP Delivery Note ID</span>
+                                <span className="font-bold text-stone-900 text-xs select-all">
+                                  {activeAsn?.sapInboundDelivery || activeAsn?.sapInbound || 'N/A'}
+                                </span>
+                              </div>
+                              <div>
+                                <span className="text-[9px] text-stone-400 font-bold uppercase block font-sans">Carrier / Transporter</span>
+                                <span className="font-bold text-stone-700 text-xs font-sans">
+                                  {activeAsn?.carrierName || 'N/A'}
+                                </span>
+                              </div>
+                              <div>
+                                <span className="text-[9px] text-stone-400 font-bold uppercase block font-sans">Tracking / Vehicle No</span>
+                                <span className="font-bold text-stone-700 text-xs">
+                                  {activeAsn?.trackingNumber || activeAsn?.vehicleNumber || 'N/A'}
+                                </span>
+                              </div>
+                            </div>
+
+                            <div className="border-t border-stone-100 pt-3 flex items-center justify-between bg-stone-50/50 p-2.5 rounded-lg">
+                              <div className="flex items-center gap-2">
+                                <Truck className="size-4.5 text-amber-500 animate-bounce" />
+                                <span className="font-semibold text-stone-600 font-sans">Warehouse MIGO receipt simulation:</span>
+                              </div>
+                              <span className="text-amber-600 animate-pulse font-bold font-mono text-sm">
+                                {countdown[activePo.id] !== undefined ? `${countdown[activePo.id]}s` : '10s'}
+                              </span>
+                            </div>
                           </div>
                         </div>
                       );
@@ -1391,7 +1544,7 @@ export default function PurchaseOrdersView({
                         {!grn.invoiceSubmitted ? (
                           <Button
                             onClick={() => handleOpenInvoiceDetail(grn)}
-                            className="bg-stone-850 hover:bg-black text-stone-700 hover:text-white font-bold text-xs rounded-lg px-5 shadow-sm flex items-center gap-1.5"
+                            className="bg-white border border-stone-300 text-stone-800 hover:bg-orange-500 hover:text-white hover:border-orange-500 font-bold text-xs rounded-lg px-5 shadow-sm flex items-center gap-1.5 transition-all duration-150"
                           >
                             <span>Proceed with Invoice</span>
                             <ChevronRight className="size-3.5" />
@@ -1689,7 +1842,7 @@ export default function PurchaseOrdersView({
                           <Button
                             disabled={isPostingInvoice}
                             onClick={handleMiroInvoicePost}
-                            className="w-full bg-stone-900 hover:bg-black text-stone-700 hover:text-white font-bold text-xs py-2 rounded-lg flex items-center justify-center gap-1.5 shadow-md border border-black"
+                            className="w-full bg-white border border-stone-300 text-stone-800 hover:bg-orange-500 hover:text-white hover:border-orange-500 font-bold text-xs py-2 rounded-lg flex items-center justify-center gap-1.5 shadow-md transition-all duration-150"
                           >
                             {isPostingInvoice ? (
                               <>
@@ -1797,6 +1950,7 @@ export default function PurchaseOrdersView({
         </div>
       )}
 
-    </div>
+      </div>
+    </ErrorBoundary>
   );
 }

@@ -1,23 +1,11 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { INITIAL_CHATS, INITIAL_PERFORMANCE } from '../constants';
 import { dashboardService } from '../services/dashboardService';
 
 export function useDashboard(profile, clearAllLogs) {
-  const [chats, setChats] = useState(() => {
-    if (typeof window !== 'undefined') {
-      try {
-        const savedChats = localStorage.getItem('sap_vendor_portal_chats');
-        if (savedChats) {
-          return JSON.parse(savedChats);
-        }
-      } catch (e) {
-        console.error('Failed to load dashboard state chats', e);
-      }
-    }
-    return INITIAL_CHATS;
-  });
+  const [chats, setChats] = useState([]);
 
   const [performance, setPerformance] = useState(() => {
     if (typeof window !== 'undefined') {
@@ -60,31 +48,38 @@ export function useDashboard(profile, clearAllLogs) {
     } catch (e) {}
   };
 
-  const sendChatMessage = (text) => {
-    const newMsg = {
+  const refreshChats = useCallback(async () => {
+    try {
+      const data = await dashboardService.getChats();
+      if (data) {
+        setChats(data);
+        persistChats(data);
+      }
+    } catch (e) {
+      console.error('Failed to load chats from API', e);
+    }
+  }, []);
+
+  useEffect(() => {
+    refreshChats();
+  }, [refreshChats]);
+
+  const sendChatMessage = async (text) => {
+    const tempMsg = {
       id: `MSG-${Date.now()}`,
       sender: 'Vendor',
       message: text,
       timestamp: new Date().toISOString()
     };
-    const updated = [...chats, newMsg];
-    setChats(updated);
-    persistChats(updated);
+    setChats(prev => [...prev, tempMsg]);
 
-    // Simulate system response
-    setTimeout(() => {
-      const systemMsg = {
-        id: `MSG-SYS-${Date.now()}`,
-        sender: 'Buyer Officer',
-        message: `Acknowledge message regarding: "${text.slice(0, 30)}...". We are checking the transaction queue.`,
-        timestamp: new Date().toISOString()
-      };
-      setChats(prev => {
-        const final = [...prev, systemMsg];
-        persistChats(final);
-        return final;
-      });
-    }, 1500);
+    try {
+      await dashboardService.sendChatMessage({ message: text });
+      refreshChats();
+    } catch (e) {
+      console.error(e);
+      refreshChats();
+    }
   };
 
   const addSystemMessage = (messageText) => {
@@ -125,6 +120,7 @@ export function useDashboard(profile, clearAllLogs) {
     performance,
     sendChatMessage,
     addSystemMessage,
-    clearAllState
+    clearAllState,
+    refreshChats
   };
 }

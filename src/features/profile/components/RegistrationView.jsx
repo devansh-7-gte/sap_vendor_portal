@@ -20,6 +20,7 @@ import {
   RefreshCw
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
+import FileUploadZone from '@/components/shared/FileUploadZone';
 
 // --- INDIAN STATES CONSTANT ---
 const INDIAN_STATES = [
@@ -112,8 +113,8 @@ function SearchableSelect({ value, onChange, options, placeholder, error }) {
         setIsOpen(false);
       }
     }
-    document.addEventListener('mousedown', handleClickOutside);
-    return () => document.removeEventListener('mousedown', handleClickOutside);
+    document.addEventListener('click', handleClickOutside);
+    return () => document.removeEventListener('click', handleClickOutside);
   }, []);
 
   const filteredOptions = options.filter(opt =>
@@ -148,6 +149,11 @@ function SearchableSelect({ value, onChange, options, placeholder, error }) {
               type="search"
               value={search}
               onChange={e => setSearch(e.target.value)}
+              onKeyDown={e => {
+                if (e.key === 'Enter') {
+                  e.preventDefault();
+                }
+              }}
               placeholder="Search..."
               className="w-full text-xs outline-none text-stone-800 bg-transparent py-0.5"
               autoFocus
@@ -321,129 +327,21 @@ function CustomDatePicker({ value, onChange, placeholder }) {
 
 // 7. Drag and Drop Document Upload Zone Component
 function DocumentUploadZone({ fieldName, value, onChange, label, error }) {
-  const [dragOver, setDragOver] = useState(false);
-  const [uploadProgress, setUploadProgress] = useState(null);
-  const fileInputRef = useRef(null);
-
-  const startSimulatedUpload = (fileName, fileSize) => {
-    setUploadProgress(0);
-    const totalDuration = 1000; // 1s upload
-    const intervalTime = 100;
-    const step = 100 / (totalDuration / intervalTime);
-
-    const interval = setInterval(() => {
-      setUploadProgress(prev => {
-        if (prev >= 100) {
-          clearInterval(interval);
-          onChange(fileName);
-          setTimeout(() => setUploadProgress(null), 300);
-          return 100;
-        }
-        return prev + step;
-      });
-    }, intervalTime);
-  };
-
-  const handleDragOver = (e) => {
-    e.preventDefault();
-    setDragOver(true);
-  };
-
-  const handleDragLeave = () => {
-    setDragOver(false);
-  };
-
-  const handleDrop = (e) => {
-    e.preventDefault();
-    setDragOver(false);
-    const files = e.dataTransfer.files;
-    if (files && files.length > 0) {
-      const file = files[0];
-      startSimulatedUpload(file.name, file.size);
-    }
-  };
-
-  const handleFileChange = (e) => {
-    const files = e.target.files;
-    if (files && files.length > 0) {
-      const file = files[0];
-      startSimulatedUpload(file.name, file.size);
-    }
-  };
-
-  const handleRemove = (e) => {
-    e.stopPropagation();
-    onChange(null);
-    if (fileInputRef.current) fileInputRef.current.value = '';
-  };
+  const fileValue = value
+    ? (typeof value === 'object' && value.documentId
+        ? value
+        : { documentId: value, originalName: typeof value === 'object' ? value.originalName || 'file.pdf' : value, url: typeof value === 'object' ? value.url || '#' : '#' })
+    : null;
 
   return (
-    <div
-      onDragOver={handleDragOver}
-      onDragLeave={handleDragLeave}
-      onDrop={handleDrop}
-      className={`relative w-full border border-dashed rounded-lg p-3 text-center transition-all h-16 flex items-center justify-center cursor-pointer group ${dragOver
-        ? 'border-stone-850 bg-stone-50'
-        : error
-          ? 'border-red-300 hover:border-red-400 bg-red-50/5'
-          : 'border-stone-300 hover:border-stone-400 hover:bg-stone-50/50 bg-stone-50/20'
-        }`}
-      onClick={() => fileInputRef.current?.click()}
-    >
-      <input
-        type="file"
-        ref={fileInputRef}
-        onChange={handleFileChange}
-        accept=".pdf,.png,.jpg,.jpeg"
-        className="hidden"
-      />
-
-      {uploadProgress !== null ? (
-        <div className="w-full px-4 text-left space-y-1">
-          <div className="flex justify-between text-[10px] font-bold text-stone-500 font-mono">
-            <span>UPLOADING FILE...</span>
-            <span>{Math.round(uploadProgress)}%</span>
-          </div>
-          <div className="w-full bg-stone-200 h-1 rounded-full overflow-hidden">
-            <div className="bg-stone-850 h-full transition-all duration-100" style={{ width: `${uploadProgress}%` }}></div>
-          </div>
-        </div>
-      ) : value ? (
-        <div className="flex items-center justify-between w-full gap-2 px-1">
-          <div className="flex items-center gap-2 min-w-0">
-            <FileText className="size-5 text-emerald-600 shrink-0" />
-            <div className="text-left overflow-hidden">
-              <p className="text-[11px] font-semibold text-stone-900 truncate" title={value}>
-                {value}
-              </p>
-              <p className="text-[9px] text-emerald-600 font-mono flex items-center gap-0.5 select-none">
-                <Check className="size-3 text-emerald-600" /> UPLOADED
-              </p>
-            </div>
-          </div>
-          <div className="flex items-center gap-1 shrink-0">
-            <button
-              type="button"
-              onClick={handleRemove}
-              className="p-1 hover:bg-stone-100 rounded-md text-stone-500 hover:text-red-600 transition-colors"
-              title="Delete File"
-            >
-              <Trash2 className="size-3.5" />
-            </button>
-          </div>
-        </div>
-      ) : (
-        <div className="flex items-center justify-center gap-2 text-stone-500 select-none">
-          <Upload className="size-4 group-hover:text-stone-850 transition-colors shrink-0" />
-          <div className="text-left leading-tight">
-            <span className="text-[11px] font-semibold text-stone-700 group-hover:text-stone-850 block">
-              Drag & Drop file or <span className="underline">Browse</span>
-            </span>
-            <span className="text-[9px] text-stone-400 font-mono block">PDF, JPG, PNG up to 10MB</span>
-          </div>
-        </div>
-      )}
-    </div>
+    <FileUploadZone
+      label={label}
+      value={fileValue}
+      onUploadComplete={(result) => onChange(result)}
+      onFileRemoved={() => onChange(null)}
+      linkedTo="Profile"
+      accept=".pdf,.png,.jpg,.jpeg"
+    />
   );
 }
 
@@ -826,7 +724,7 @@ export default function RegistrationView({
 
           {/* STEP 1: COMPANY INFORMATION */}
           {currentStep === 1 && (
-            <div className="animate-fade-in space-y-3">
+            <div className="space-y-3">
               <SectionHeader title="COMPANY IDENTITY" icon={Building2} />
               <div className="flex flex-col border border-stone-200 rounded-lg divide-y divide-stone-200 bg-white overflow-hidden shadow-xs">
                 <div className="bg-white">
@@ -854,16 +752,19 @@ export default function RegistrationView({
                 </div>
                 <div className="bg-white">
                   <EnterpriseFieldCard label="Incorporation Date" labelWidth="sm:w-28" error={validationErrors[1]?.incorporationDate}>
-                    <div className="w-[150px]">
-                      <CustomDatePicker value={companyForm.incorporationDate} onChange={val => handleFieldChange('incorporationDate', val)} placeholder="Select Date" />
-                    </div>
+                    <input
+                      type="date"
+                      value={companyForm.incorporationDate || ''}
+                      onChange={e => handleFieldChange('incorporationDate', e.target.value)}
+                      className="w-[150px] bg-white border border-stone-400 hover:border-stone-600 focus:border-stone-955 focus:ring-1 focus:ring-stone-955 rounded-lg py-1.5 px-3 text-xs outline-none text-stone-955 font-normal h-9 shadow-sm transition-all"
+                    />
                   </EnterpriseFieldCard>
                 </div>
               </div>
 
               <SectionHeader title="REGISTERED ADDRESS" icon={Truck} />
-              <div className="flex flex-col border border-stone-200 rounded-lg divide-y divide-stone-200 bg-white overflow-hidden shadow-xs">
-                <div className="bg-white">
+              <div className="flex flex-col border border-stone-200 rounded-lg divide-y divide-stone-200 bg-white shadow-xs">
+                <div className="bg-white rounded-t-lg overflow-hidden">
                   <EnterpriseFieldCard label="Street / Area" required labelWidth="sm:w-20" error={validationErrors[1]?.address}>
                     <input type="text" value={companyForm.address} onChange={e => handleFieldChange('address', e.target.value)} placeholder="e.g. 102, Mittal Chambers, Nariman Point" className="w-full max-w-lg bg-white border border-stone-400 hover:border-stone-600 focus:border-stone-955 focus:ring-1 focus:ring-stone-955 rounded-lg py-1.5 px-3 text-xs outline-none text-stone-955 font-normal h-9 shadow-sm transition-all" />
                   </EnterpriseFieldCard>
@@ -880,7 +781,7 @@ export default function RegistrationView({
                     </EnterpriseFieldCard>
                   </div>
                 </div>
-                <div className="flex flex-col lg:flex-row divide-y lg:divide-y-0 lg:divide-x divide-stone-200 bg-white">
+                <div className="flex flex-col lg:flex-row divide-y lg:divide-y-0 lg:divide-x divide-stone-200 bg-white rounded-b-lg overflow-hidden">
                   <div className="w-[210px] shrink-0">
                     <EnterpriseFieldCard label="PIN Code" required labelWidth="sm:w-16" error={validationErrors[1]?.postalCode}>
                       <input type="text" maxLength={6} value={companyForm.postalCode} onChange={e => handleFieldChange('postalCode', e.target.value.replace(/\D/g, ''))} placeholder="e.g. 400021" className="w-[100px] bg-white border border-stone-400 hover:border-stone-600 focus:border-stone-955 focus:ring-1 focus:ring-stone-955 rounded-lg py-1.5 px-3 text-xs outline-none text-stone-955 font-normal font-mono h-9 shadow-sm transition-all" />
@@ -903,7 +804,7 @@ export default function RegistrationView({
 
           {/* STEP 2: TAX & REGULATORY */}
           {currentStep === 2 && (
-            <div className="animate-fade-in space-y-1">
+            <div className="space-y-1">
               <SectionHeader title="INDIAN TAX IDS" icon={Building2} />
               <div className="flex flex-col border border-stone-200 rounded-lg divide-y divide-stone-200 bg-white overflow-hidden shadow-xs">
                 <div className="flex flex-col lg:flex-row divide-y lg:divide-y-0 lg:divide-x divide-stone-200 bg-white">
@@ -1039,7 +940,7 @@ export default function RegistrationView({
 
           {/* STEP 3: BANK DETAILS */}
           {currentStep === 3 && (
-            <div className="animate-fade-in space-y-3">
+            <div className="space-y-3">
               <SectionHeader title="BANK ACCOUNT" icon={CreditCard} />
               <div className="flex flex-col border border-stone-200 rounded-lg divide-y divide-stone-200 bg-white overflow-hidden shadow-xs">
                 <div className="bg-white">
@@ -1173,7 +1074,7 @@ export default function RegistrationView({
 
           {/* STEP 4: DOCUMENT UPLOADS */}
           {currentStep === 4 && (
-            <div className="animate-fade-in space-y-3">
+            <div className="space-y-3">
               <SectionHeader title="MANDATORY DOCUMENTS" icon={FileText} />
               <div className="flex flex-col border border-stone-200 rounded-lg divide-y divide-stone-200 bg-white overflow-hidden shadow-xs">
                 <EnterpriseFieldCard

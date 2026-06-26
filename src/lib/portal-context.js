@@ -9,6 +9,8 @@ import { useInvoices } from '@/features/billing/hooks/useInvoices';
 import { usePayments } from '@/features/payments/hooks/usePayments';
 import { useDashboard } from '@/features/dashboard/hooks/useDashboard';
 import { usePathname, useRouter } from 'next/navigation';
+import { initSocket, closeSocket } from '@/lib/socket';
+import ToastNotification from '@/components/portal/ToastNotification';
 
 const PortalContext = createContext(undefined);
 
@@ -20,6 +22,56 @@ export function PortalProvider({ children }) {
   const invoiceHook = useInvoices(profileHook.profile, poHook.setInvoiceSubmittedForGrn, paymentHook.addPayment);
   const rfqHook = useRFQs(profileHook.profile);
   const dashboardHook = useDashboard(profileHook.profile, shell.clearSapLogs);
+
+  const [toasts, setToasts] = useState([]);
+  const addToast = (type, message) => {
+    setToasts(prev => [...prev, { id: `toast-${Date.now()}-${Math.random()}`, type, message }]);
+  };
+  const removeToast = (id) => {
+    setToasts(prev => prev.filter(t => t.id !== id));
+  };
+
+  useEffect(() => {
+    const clerkId = profileHook.profile?.clerkId || (typeof window !== 'undefined' ? localStorage.getItem('clerk_user_id') : null) || 'mock_vendor_id';
+    
+    console.log('[PortalContext] Initializing WebSockets connection for vendor:', clerkId);
+    const socket = initSocket(null, clerkId);
+
+    socket.on('po:new', (po) => {
+      poHook.refreshPOs();
+      addToast('info', `New Purchase Order received! ID: ${po.id}`);
+      shell.addSapLog('ODATA', 'ZPD_PO_SRV/PurchaseOrderSet', 'INBOUND', po, 'SUCCESS');
+    });
+
+    socket.on('grn:received', (grn) => {
+      poHook.refreshGRNs();
+      poHook.refreshPOs();
+      poHook.refreshASNs();
+      addToast('success', `Goods Receipt Note (GRN) received for PO: ${grn.poId}. Stores accepted your goods.`);
+      shell.addSapLog('IDoc', 'MBGMCR03_GRN_IDoc', 'INBOUND', grn, 'SUCCESS');
+    });
+
+    socket.on('payment:cleared', (pmt) => {
+      paymentHook.refreshPayments();
+      invoiceHook.refreshInvoices();
+      addToast('success', `Payment cleared! UTR: ${pmt.utrCode} · Net Amount: ₹${pmt.netAmount.toLocaleString('en-IN')}`);
+      shell.addSapLog('IDoc', 'PAYEXT_F110_PAYMENT', 'INBOUND', pmt, 'SUCCESS');
+    });
+
+    socket.on('chat:message', (msg) => {
+      if (dashboardHook?.refreshChats) {
+        dashboardHook.refreshChats();
+      }
+    });
+
+    socket.on('log:new', (log) => {
+      shell.addSapLog(log.type, log.name, 'INBOUND', log.payload || 'Sync', 'SUCCESS');
+    });
+
+    return () => {
+      closeSocket();
+    };
+  }, [profileHook.profile?.clerkId]);
 
   const pathname = usePathname();
   const router = useRouter();
@@ -152,13 +204,13 @@ export function PortalProvider({ children }) {
     setSelectedRfqId(null);
   };
 
-  const handleAsnSubmit = (po) => {
+  const handleAsnSubmit = async (po) => {
     const items = po.items.map(item => ({
       line: item.line,
       shippedQuantity: Number(asnForm.items[item.line] || item.quantity)
     }));
 
-    poHook.submitASN({
+    const res = await poHook.submitASN({
       poId: po.id,
       shipDate: asnForm.shipDate || new Date().toISOString().split('T')[0],
       estimatedDeliveryDate: asnForm.estimatedDeliveryDate || new Date(Date.now() + 2 * 24 * 60 * 60 * 1000).toISOString().split('T')[0],
@@ -166,6 +218,8 @@ export function PortalProvider({ children }) {
       trackingNumber: asnForm.trackingNumber || `BD-${Math.floor(100000 + Math.random() * 900000)}`,
       vehicleNumber: asnForm.vehicleNumber || `DL-01-CA-${Math.floor(1000 + Math.random() * 9000)}`,
       invoiceReference: asnForm.invoiceReference || `INV-${Math.floor(100000 + Math.random() * 900000)}`,
+      ewayBillNo: po.ewayBillNo || '',
+      documentIds: po.documentIds || [],
       items
     });
 
@@ -175,6 +229,16 @@ export function PortalProvider({ children }) {
       invoiceReference: '', shipDate: '', estimatedDeliveryDate: '',
       items: {}
     });
+
+    // Fallback timer to refresh POs, ASNs and GRNs after 11 seconds (backend simulation takes 10s)
+    setTimeout(() => {
+      console.log('[PortalContext] Fallback refresh for GRN/MIGO simulation...');
+      poHook.refreshPOs();
+      poHook.refreshASNs();
+      poHook.refreshGRNs();
+    }, 11000);
+
+    return res;
   };
 
   const handleInvoiceSubmit = (grn) => {
@@ -218,6 +282,14 @@ export function PortalProvider({ children }) {
       setSelectedGrnId(null);
       setInvoiceForm({ invoiceNumber: '', invoiceDate: '' });
       setActiveTab('invoices');
+
+      // Fallback timer to refresh payments, invoices and POs after 13 seconds (backend simulation takes 12s)
+      setTimeout(() => {
+        console.log('[PortalContext] Fallback refresh for Payment simulation...');
+        paymentHook.refreshPayments();
+        invoiceHook.refreshInvoices();
+        poHook.refreshPOs();
+      }, 13000);
     }, 1500);
   };
 
@@ -234,10 +306,11 @@ export function PortalProvider({ children }) {
     }
   };
 
-  const awardVendorBidWrapper = (rfqId, vendorId) => {
-    const newPO = rfqHook.awardVendorBid(rfqId, vendorId);
+  const awardVendorBidWrapper = async (rfqId, vendorId) => {
+    const newPO = await rfqHook.awardVendorBid(rfqId, vendorId);
     if (newPO) {
       poHook.addPO(newPO);
+      poHook.refreshPOs();
       dashboardHook.addSystemMessage(`Purchase Order ${newPO.id} has been created and dispatched to the awarded vendor.`);
     }
   };
@@ -288,10 +361,12 @@ export function PortalProvider({ children }) {
         handleInvoiceSubmit,
         handleSendMessage,
         handleResetDatabase,
-        awardVendorBidWrapper
+        awardVendorBidWrapper,
+        addToast
       }}
     >
       {children}
+      <ToastNotification toasts={toasts} removeToast={removeToast} />
     </PortalContext.Provider>
   );
 }

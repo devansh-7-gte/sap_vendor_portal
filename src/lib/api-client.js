@@ -9,16 +9,34 @@ export const apiClient = {
     
     // Add default vendor ID header for development/compatibility
     if (typeof window !== 'undefined') {
-      const savedState = localStorage.getItem('sap_vendor_portal_state');
-      if (savedState) {
-        try {
-          const state = JSON.parse(savedState);
-          if (state?.profile?.clerkId) {
-            headers['x-vendor-id'] = state.profile.clerkId;
+      let clerkId = localStorage.getItem('clerk_user_id');
+      
+      if (!clerkId) {
+        const profileData = localStorage.getItem('sap_vendor_profile_data');
+        if (profileData) {
+          try {
+            const parsed = JSON.parse(profileData);
+            clerkId = parsed.clerkId;
+          } catch (e) {
+            // Ignore
           }
-        } catch (e) {
-          // Ignore
         }
+      }
+      
+      if (!clerkId) {
+        const savedState = localStorage.getItem('sap_vendor_portal_state');
+        if (savedState) {
+          try {
+            const state = JSON.parse(savedState);
+            clerkId = state?.profile?.clerkId;
+          } catch (e) {
+            // Ignore
+          }
+        }
+      }
+
+      if (clerkId) {
+        headers['x-vendor-id'] = clerkId;
       }
     }
 

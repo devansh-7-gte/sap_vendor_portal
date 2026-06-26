@@ -41,35 +41,18 @@ function EnterpriseFieldCard({ label, required, error, labelWidth, children }) {
 
 function SapReadOnlyField({ label, value, isFile, isMonospace = true }) {
   return (
-    <div className="flex items-center text-xs select-none min-h-[28px]">
-      <span className="w-40 shrink-0 font-bold text-black text-right text-[9.5px] uppercase tracking-wide pr-2">
+    <div className="flex items-center text-xs select-none min-h-[28px] focus-within:outline-none">
+      <span className="w-40 shrink-0 font-bold text-stone-800 text-right text-[11px] uppercase tracking-wide pr-2 select-none">
         {label}
       </span>
       <div 
-        style={{
-          display: 'inline-flex',
-          alignItems: 'center',
-          gap: '6px',
-          backgroundColor: '#F5F5F5',
-          color: '#292524',
-          border: '1px solid #d1d5db',
-          borderRadius: '3px',
-          padding: '2px 8px',
-          fontSize: '11px',
-          height: '24px',
-          fontWeight: '600',
-          fontFamily: isMonospace ? 'monospace' : 'sans-serif',
-          cursor: 'default',
-          boxSizing: 'border-box',
-          width: 'fit-content',
-          maxWidth: '280px',
-          overflow: 'hidden',
-          textOverflow: 'ellipsis',
-          whiteSpace: 'nowrap'
-        }}
+        className={`inline-flex items-center gap-1.5 bg-stone-100 text-stone-900 border border-stone-300 rounded-[3px] px-2.5 text-xs h-6 font-semibold cursor-default box-border w-fit max-w-[280px] overflow-hidden text-ellipsis whitespace-nowrap focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-primary focus-visible:ring-offset-1 ${
+          isMonospace ? 'font-mono' : 'font-sans'
+        }`}
         title={value || ''}
+        tabIndex={0}
       >
-        {isFile && <FileText className="size-3 text-emerald-600 shrink-0" />}
+        {isFile && <FileText className="size-3.5 text-stone-500 shrink-0" />}
         <span>{value || '—'}</span>
       </div>
     </div>
@@ -96,31 +79,34 @@ export default function ReportsAnalyticsView({ state }) {
       <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 border-b border-stone-200 pb-4 select-none">
         <div className="space-y-1">
           <h2 className="text-xl font-bold tracking-tight text-stone-900 flex items-center gap-2">
-            <FileSpreadsheet className="size-5.5 text-primary shrink-0" /> Reports &amp; Analytics
+            <FileSpreadsheet className="size-5 text-primary shrink-0" /> Reports &amp; Analytics
           </h2>
           <p className="text-stone-500 text-xs font-semibold">
             Operational spend analytics, treasury payables ledger aging, and self-service report scheduling
           </p>
         </div>
         <div className="flex flex-wrap items-center gap-2.5">
-          <div className="flex items-center gap-2 bg-white border border-stone-300 hover:border-stone-400 rounded-md py-1.5 px-3 text-xs outline-none text-stone-700 font-semibold h-9 shadow-sm transition-all cursor-pointer">
-            <Calendar className="size-3.5 text-stone-400" />
+          <div 
+            tabIndex={0}
+            className="flex items-center gap-2 bg-white border border-stone-300 hover:border-stone-400 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2 rounded-md py-1.5 px-3 text-xs text-stone-700 font-semibold h-9 shadow-sm transition-all cursor-pointer"
+          >
+            <Calendar className="size-4 text-stone-400 shrink-0" />
             <span>01 Jan 2026 - 31 Dec 2026</span>
           </div>
           <button 
             type="button"
-            className="flex items-center gap-2 bg-white border border-stone-300 hover:border-stone-400 hover:bg-stone-50 text-stone-700 font-semibold px-3 h-9 rounded-md transition-colors text-xs cursor-pointer shadow-sm"
+            className="flex items-center gap-2 bg-white border border-stone-300 hover:border-stone-400 hover:bg-stone-50 text-stone-700 font-semibold px-3 h-9 rounded-md transition-all text-xs cursor-pointer shadow-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2"
             onClick={() => alert('Opening Filters pane')}
           >
-            <Filter className="size-3.5 text-stone-400" />
+            <Filter className="size-4 text-stone-400 shrink-0" />
             <span>Filters</span>
           </button>
           <button 
             type="button"
-            className="flex items-center gap-2 bg-white border border-stone-300 hover:border-stone-400 hover:bg-stone-50 text-stone-700 font-semibold px-3 h-9 rounded-md transition-colors text-xs cursor-pointer shadow-sm"
+            className="flex items-center gap-2 bg-white border border-stone-300 hover:border-stone-400 hover:bg-stone-50 text-stone-700 font-semibold px-3 h-9 rounded-md transition-all text-xs cursor-pointer shadow-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2"
             onClick={() => alert('Exporting analytics report')}
           >
-            <Download className="size-3.5 text-stone-400" />
+            <Download className="size-4 text-stone-400 shrink-0" />
             <span>Export</span>
           </button>
         </div>
@@ -139,10 +125,10 @@ export default function ReportsAnalyticsView({ state }) {
             <button
               key={t.id}
               onClick={() => setDetailTab(t.id)}
-              className={`pb-2 px-5 text-xs font-bold border-b-2 transition-all cursor-pointer ${
+              className={`pb-2 px-5 text-xs font-bold border-b-2 transition-all cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2 rounded-t-[3px] ${
                 detailTab === t.id
                   ? 'border-primary text-primary font-extrabold'
-                  : 'border-transparent text-stone-400 hover:text-stone-750'
+                  : 'border-transparent text-stone-400 hover:text-stone-700 hover:border-stone-200'
               }`}
             >
               {t.label}

@@ -2,6 +2,8 @@
 
 import React, { createContext, useContext, useState, useEffect } from 'react';
 
+import { apiClient } from './api-client';
+
 const ShellContext = createContext(undefined);
 
 export function ShellProvider({ children }) {
@@ -30,6 +32,22 @@ export function ShellProvider({ children }) {
       }
     ];
   });
+
+  const refreshSapLogs = async () => {
+    try {
+      const logs = await apiClient.get('/logs');
+      if (logs) {
+        setSapPayloadLogs(logs);
+      }
+    } catch (e) {
+      console.error('Failed to fetch SAP logs from API', e);
+    }
+  };
+
+  // Fetch SAP logs from backend on mount
+  useEffect(() => {
+    refreshSapLogs();
+  }, []);
 
   // Sync shell logs to localStorage on changes
   useEffect(() => {
@@ -71,7 +89,8 @@ export function ShellProvider({ children }) {
         setActiveTab,
         sapPayloadLogs,
         addSapLog,
-        clearSapLogs
+        clearSapLogs,
+        refreshSapLogs
       }}
     >
       {children}

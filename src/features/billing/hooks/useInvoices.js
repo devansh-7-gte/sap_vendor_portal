@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from 'react';
 import { useShell } from '../../../lib/shell-context';
+import { invoiceService } from '../services/invoiceService';
 
 // Pure helper functions outside the hook to prevent React purity linter checks
 const generateSapMiroDoc = () => `510560${Math.floor(1000 + Math.random() * 9000)}`;
@@ -12,21 +13,7 @@ const generateSapPaymentDoc = () => `20005${Math.floor(10000 + Math.random() * 9
 
 export function useInvoices(profile, setInvoiceSubmittedForGrn, addPayment) {
   const { addSapLog } = useShell();
-
-  // Lazy state initializer to avoid cascading renders
-  const [invoices, setInvoices] = useState(() => {
-    if (typeof window !== 'undefined') {
-      try {
-        const saved = localStorage.getItem('sap_vendor_portal_invoices');
-        if (saved) {
-          return JSON.parse(saved);
-        }
-      } catch (e) {
-        console.error('Failed to load invoices state', e);
-      }
-    }
-    return [];
-  });
+  const [invoices, setInvoices] = useState([]);
 
   const persistLocally = (updated) => {
     try {
@@ -34,156 +21,37 @@ export function useInvoices(profile, setInvoiceSubmittedForGrn, addPayment) {
     } catch (e) {}
   };
 
-  const submitInvoice = (invoiceData) => {
-    const sapMiroDoc = generateSapMiroDoc();
-    const newInvoice = {
-      id: generateInvoiceId(),
-      ...invoiceData,
-      status: 'Submitted',
-      sapMiroDoc,
-      createdAt: new Date().toISOString()
-    };
-
-    addSapLog(
-      'BAPI',
-      'BAPI_INCOMINGINVOICE_CREATE',
-      'OUTBOUND',
-      JSON.stringify({
-        I_INVOICE_NO: newInvoice.invoiceNumber,
-        I_PO_NUMBER: newInvoice.poId,
-        I_GRN_NUMBER: newInvoice.grnId,
-        I_SUB_TOTAL: newInvoice.subTotal,
-        I_TAX_AMOUNT: newInvoice.taxAmount,
-        I_TOTAL_AMOUNT: newInvoice.totalAmount,
-        I_TAX_CODE: newInvoice.taxCode,
-        ITEMS: newInvoice.items.map(item => ({
-          LINE: item.line,
-          MATNR: item.materialCode,
-          QTY: item.quantity,
-          PRICE: item.unitPrice,
-          AMOUNT: item.amount
-        }))
-      }),
-      'PENDING'
-    );
-
-    const updated = [newInvoice, ...invoices];
-    setInvoices(updated);
-    persistLocally(updated);
-
-    // Mark GRN as invoiced
-    if (setInvoiceSubmittedForGrn) {
-      setInvoiceSubmittedForGrn(invoiceData.grnId);
+  const refreshInvoices = async () => {
+    try {
+      const data = await invoiceService.getInvoices();
+      if (data && data.invoices) {
+        setInvoices(data.invoices);
+        persistLocally(data.invoices);
+      }
+    } catch (e) {
+      console.error(e);
     }
-
-    // Simulate invoice approval and posting in SAP in 4 seconds
-    setTimeout(() => {
-      simulateSapPosting(newInvoice, addPayment);
-    }, 4000);
   };
 
-  const simulateSapPosting = (invoice, addPayment) => {
-    setInvoices(prev => {
-      const updated = prev.map(inv => {
-        if (inv.id === invoice.id) {
-          // Success log
-          addSapLog(
-            'BAPI',
-            'BAPI_INCOMINGINVOICE_CREATE',
-            'OUTBOUND',
-            JSON.stringify({
-              MIRO_DOC: inv.sapMiroDoc,
-              STATUS: 'POSTED_IN_SAP',
-              SAP_MSG: 'Invoice verified and posted successfully'
-            }),
-            'SUCCESS'
-          );
+  useEffect(() => {
+    refreshInvoices();
+  }, [profile]);
 
-          // Update status to Posted in SAP
-          return {
-            ...inv,
-            status: 'Posted in SAP',
-            postedAt: new Date().toISOString()
-          };
-        }
-        return inv;
-      });
-      persistLocally(updated);
-      return updated;
-    });
-
-    // Simulate payment run (F110 Automatic Payment) in 6 seconds
-    setTimeout(() => {
-      simulatePaymentRun(invoice, addPayment);
-    }, 6000);
-  };
-
-  const simulatePaymentRun = (invoice, addPayment) => {
-    setInvoices(prev => {
-      const updated = prev.map(inv => {
-        if (inv.id === invoice.id) {
-          return {
-            ...inv,
-            status: 'Cleared',
-            clearedAt: new Date().toISOString()
-          };
-        }
-        return inv;
-      });
-      persistLocally(updated);
-      return updated;
-    });
-
-    const paymentId = generatePaymentId();
-    const utrCode = generateUtrCode();
-
-    const newPayment = {
-      id: paymentId,
-      invoiceId: invoice.id,
-      poId: invoice.poId,
-      vendorId: profile?.sapVendorCode || 'VND-CURRENT',
-      invoiceNumber: invoice.invoiceNumber,
-      sapMiroDoc: invoice.sapMiroDoc,
-      grossAmount: invoice.totalAmount,
-      tdsDeducted: Math.round(invoice.totalAmount * 0.01),
-      netAmount: Math.round(invoice.totalAmount * 0.99),
-      paymentDate: new Date().toISOString().split('T')[0],
-      utrCode,
-      paymentMethod: 'NEFT',
-      sapPaymentDoc: generateSapPaymentDoc(),
-      bankName: 'HDFC Bank Ltd',
-      runId: `F110-${new Date().toISOString().split('T')[0].replace(/-/g, '')}`,
-      
-      // TDS certifications
-      fiscalYear: new Date().getFullYear(),
-      quarter: `Q${Math.floor(new Date().getMonth() / 3) + 1}`,
-      tdsSection: profile?.tdsSection || '194C',
-      deducteePan: profile?.pan || 'ABCDE1234F',
-      deductorTan: 'MUMB12345A',
-      totalTds: Math.round(invoice.totalAmount * 0.01)
-    };
-
-    addSapLog(
-      'IDoc',
-      'PAYEXT.PEXR2002',
-      'INBOUND',
-      JSON.stringify({
-        DOC_NUM: newPayment.sapPaymentDoc,
-        UTR: utrCode,
-        LIFNR: newPayment.vendorId,
-        WRBTR: newPayment.netAmount,
-        AUGDT: newPayment.paymentDate
-      }),
-      'SUCCESS'
-    );
-
-    if (addPayment) {
-      addPayment(newPayment);
+  const submitInvoice = async (invoiceData) => {
+    try {
+      await invoiceService.createInvoice(invoiceData);
+      refreshInvoices();
+      if (setInvoiceSubmittedForGrn) {
+        setInvoiceSubmittedForGrn(invoiceData.grnId);
+      }
+    } catch (e) {
+      console.error(e);
     }
   };
 
   return {
     invoices,
-    submitInvoice
+    submitInvoice,
+    refreshInvoices
   };
 }

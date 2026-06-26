@@ -1,6 +1,7 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { AlertTriangle, Clock, CheckCircle2 } from 'lucide-react';
+import FileUploadZone from '@/components/shared/FileUploadZone';
 
 export default function RFQsView({
   state,
@@ -14,6 +15,12 @@ export default function RFQsView({
   setBidRemarks,
   handleBidSubmit
 }) {
+  const [gstRate, setGstRate] = useState('18');
+  const [validityDate, setValidityDate] = useState('');
+  const [freight, setFreight] = useState(0);
+  const [moq, setMoq] = useState(1);
+  const [bidDoc, setBidDoc] = useState(null);
+
   return (
     <div className="space-y-6 max-w-6xl animate-fade-in">
       <div>
@@ -164,12 +171,52 @@ export default function RFQsView({
                     </div>
                   ))}
 
-                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 pt-2">
+                  <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 pt-2">
                     <div className="space-y-1">
                       <label className="text-[9px] font-bold text-gray-500 uppercase tracking-wider block">Lead time (days)</label>
                       <input
                         type="number" value={bidLeadTime}
                         onChange={e => setBidLeadTime(Number(e.target.value))}
+                        className="w-full bg-white border border-gray-300 focus:border-emerald-500 rounded-lg px-3 py-1.5 text-xs outline-none text-gray-900 font-mono"
+                      />
+                    </div>
+                    <div className="space-y-1">
+                      <label className="text-[9px] font-bold text-gray-500 uppercase tracking-wider block">GST Rate (%)</label>
+                      <select
+                        value={gstRate}
+                        onChange={e => setGstRate(e.target.value)}
+                        className="w-full bg-white border border-gray-300 focus:border-emerald-500 rounded-lg px-3 py-1.5 text-xs outline-none text-gray-900 font-mono"
+                      >
+                        <option value="18">18% (Regular Services/Goods)</option>
+                        <option value="12">12%</option>
+                        <option value="5">5%</option>
+                        <option value="28">28%</option>
+                      </select>
+                    </div>
+                    <div className="space-y-1">
+                      <label className="text-[9px] font-bold text-gray-500 uppercase tracking-wider block">Validity Date</label>
+                      <input
+                        type="date" value={validityDate}
+                        onChange={e => setValidityDate(e.target.value)}
+                        className="w-full bg-white border border-gray-300 focus:border-emerald-500 rounded-lg px-3 py-1.5 text-xs outline-none text-gray-900 font-mono"
+                      />
+                    </div>
+                  </div>
+
+                  <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 pt-2">
+                    <div className="space-y-1">
+                      <label className="text-[9px] font-bold text-gray-500 uppercase tracking-wider block">Freight Charge (INR)</label>
+                      <input
+                        type="number" value={freight}
+                        onChange={e => setFreight(Number(e.target.value))}
+                        className="w-full bg-white border border-gray-300 focus:border-emerald-500 rounded-lg px-3 py-1.5 text-xs outline-none text-gray-900 font-mono"
+                      />
+                    </div>
+                    <div className="space-y-1">
+                      <label className="text-[9px] font-bold text-gray-500 uppercase tracking-wider block">MOQ (Min Order Qty)</label>
+                      <input
+                        type="number" value={moq}
+                        onChange={e => setMoq(Number(e.target.value))}
                         className="w-full bg-white border border-gray-300 focus:border-emerald-500 rounded-lg px-3 py-1.5 text-xs outline-none text-gray-900 font-mono"
                       />
                     </div>
@@ -184,11 +231,37 @@ export default function RFQsView({
                     </div>
                   </div>
 
+                  <div className="pt-2">
+                    <FileUploadZone
+                      label="Quotation Attachment / Bid Details"
+                      value={bidDoc}
+                      onUploadComplete={result => setBidDoc(result)}
+                      onFileRemoved={() => setBidDoc(null)}
+                      linkedTo="RFQ"
+                      accept=".pdf,.png,.jpg,.jpeg,.doc,.docx"
+                    />
+                  </div>
+ 
                   <div className="flex justify-end gap-3 pt-2">
                     <Button onClick={() => setSelectedRfqId(null)} variant="ghost" size="sm" className="text-gray-550 text-xs">
                       Cancel
                     </Button>
-                    <Button onClick={() => handleBidSubmit(rfq.id)} variant="default" size="sm" className="bg-[#22c55e] hover:bg-[#1ebd53] text-stone-700 font-bold text-xs px-6">
+                    <Button 
+                      onClick={() => handleBidSubmit(
+                        rfq.id, 
+                        bidPrices[rfq.id], 
+                        bidLeadTime, 
+                        bidRemarks, 
+                        gstRate, 
+                        validityDate, 
+                        freight, 
+                        moq, 
+                        bidDoc ? [bidDoc] : []
+                      )} 
+                      variant="default" 
+                      size="sm" 
+                      className="bg-[#22c55e] hover:bg-[#1ebd53] text-stone-700 font-bold text-xs px-6"
+                    >
                       Submit Bidding Proposal
                     </Button>
                   </div>

@@ -201,4 +201,31 @@ Quarter: Q2, Fiscal Year: 2026, TAN: TAN-SAP1000
 
 🎉 E2E Procure-to-Pay Backend Verification Completed Successfully with 0 errors!
 ```
+---
 
+## 📁 Phase 3 & Frontend Integration (June 2026) — Key File Changes & Real-Time flow
+
+We have fully connected the frontend dashboard features to call backend REST endpoints and synchronized state using real-time Socket.io events.
+
+### 1. Hook & Context Wiring
+- **[usePOs.js](file:///a:/sap_vendor_portal/src/features/purchase-order/hooks/usePOs.js)**:
+  * Modified the `refreshGRNs()` hook method to correctly extract arrays from `{ grns, pagination }` structures.
+  * Configured ASN and Acknowledgement handlers to talk to backend services and handle validation errors.
+- **[portal-context.js](file:///a:/sap_vendor_portal/src/lib/portal-context.js)**:
+  * Established the main Socket.io connection (`initSocket`) and listeners for `grn:received`, `payment:cleared`, and `po:new`.
+  * Connected hooks to automatically refresh REST states upon socket event notification.
+
+### 2. Real-Time Status & UI Sync
+- **Purchase Orders View**:
+  * Derives selected PO and GRN state records dynamically from live `cleanPOs` and `cleanGrns` lists, making sure socket-based updates propagate instantly to the detail views.
+  * Shows actual database-generated keys (`ASN ID` and `SAP Delivery Note ID`) rather than client-side mockup placeholders.
+  * Kicks off a 10s countdown timer on ASN submission, triggering the simulated BAPI Goods Receipt (MIGO) on the backend, which emits `grn:received` to update status to `Delivered` in real-time.
+- **Button Styling**:
+  * Styled active P2P workflow buttons (Create ASN, Acknowledge PO, Post Invoice) to render with white backgrounds and transition to brand orange (`bg-orange-500`) on hover.
+
+### 3. RFQ Monitor and Bidding Visibility Fixes
+- **[rfq.controller.js](file:///a:/sap_vendor_portal/backend/controllers/rfq.controller.js)**:
+  * Enabled bypassing the vendor ID filter if `all=true` is requested in `getRFQs` so procurement buyers can evaluate all bids.
+  * Updated `submitBid` to dynamically invite uninvited bidding vendors rather than throwing a `403 Forbidden` error.
+- **[rfqService.js](file:///a:/sap_vendor_portal/src/features/rfq/services/rfqService.js)**:
+  * Updated `getRFQs()` to call `/rfqs?all=true` to populate all Fiori RFQ Monitor tabs.

@@ -1,15 +1,36 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
-import { Receipt, RefreshCw } from 'lucide-react';
+import { Receipt, RefreshCw, Download } from 'lucide-react';
+import SkeletonLoader from '@/components/shared/SkeletonLoader';
+import ErrorBoundary from '@/components/ErrorBoundary';
 
 export default function InvoicesView({
   state, selectedGrnId, setSelectedGrnId, invoiceForm, setInvoiceForm, handleInvoiceSubmit, isSubmitting
 }) {
-  const uninvoicedGRNs = state.grns.filter(g => !g.invoiceSubmitted);
-  const submittedInvoices = state.invoices;
+  const [isLoading, setIsLoading] = useState(true);
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      setIsLoading(false);
+    }, 800);
+    return () => clearTimeout(timer);
+  }, []);
+
+  const uninvoicedGRNs = (state?.grns || []).filter(g => !g.invoiceSubmitted);
+  const submittedInvoices = state?.invoices || [];
+
+  if (isLoading) {
+    return (
+      <ErrorBoundary>
+        <div className="p-4 space-y-4">
+          <SkeletonLoader type="table" rows={6} cols={5} />
+        </div>
+      </ErrorBoundary>
+    );
+  }
 
   return (
-    <div className="space-y-8 max-w-6xl animate-fade-in">
+    <ErrorBoundary>
+      <div className="space-y-8 max-w-6xl animate-fade-in">
       <div>
         <h2 className="text-xl font-bold tracking-tight text-gray-900">Invoice Submission</h2>
         <p className="text-gray-500 text-xs mt-0.5">Post logistics billing invoices against cleared warehouse GRNs (SAP MIRO LIV).</p>
@@ -155,6 +176,7 @@ export default function InvoicesView({
                   <th className="py-3 px-6">PO Contract ID</th>
                   <th className="py-3 px-6 text-right">GST Total (18%)</th>
                   <th className="py-3 px-6 text-center">Settlement Status</th>
+                  <th className="py-3 px-6 text-center">Actions</th>
                 </tr>
               </thead>
               <tbody className="divide-y divide-gray-100">
@@ -178,6 +200,15 @@ export default function InvoicesView({
                         {inv.status === 'Paid' ? 'Paid (F110 Cleared)' : 'Posted (Open)'}
                       </span>
                     </td>
+                    <td className="py-3.5 px-6 text-center">
+                      <button
+                        onClick={() => window.open(`${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000/api'}/reports/invoice/${inv.id}`, '_blank')}
+                        className="p-1.5 text-indigo-650 hover:text-indigo-900 hover:bg-stone-50 transition-all rounded cursor-pointer"
+                        title="Download Invoice PDF"
+                      >
+                        <Download className="size-3.5" />
+                      </button>
+                    </td>
                   </tr>
                 ))}
               </tbody>
@@ -185,6 +216,7 @@ export default function InvoicesView({
           </div>
         )}
       </div>
-    </div>
+      </div>
+    </ErrorBoundary>
   );
 }

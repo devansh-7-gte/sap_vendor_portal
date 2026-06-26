@@ -23,6 +23,22 @@ import {
   ArrowRight
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
+import SkeletonLoader from '@/components/shared/SkeletonLoader';
+import ErrorBoundary from '@/components/ErrorBoundary';
+
+const formatDate = (dateStr) => {
+  if (!dateStr) return '';
+  // If it's a full ISO string or contains T, split by T
+  if (typeof dateStr === 'string' && dateStr.includes('T')) {
+    dateStr = dateStr.split('T')[0];
+  }
+  const d = new Date(dateStr);
+  if (isNaN(d.getTime())) return dateStr;
+  const day = String(d.getDate()).padStart(2, '0');
+  const month = String(d.getMonth() + 1).padStart(2, '0');
+  const year = d.getFullYear();
+  return `${day}.${month}.${year}`;
+};
 
 // --- Redesigned SAP Fiori Components ---
 const SectionHeader = ({ title, icon: Icon }) => (
@@ -121,6 +137,14 @@ export default function RfqView({
   reissueRFQ,
   cancelRFQ
 }) {
+  const [isPageLoading, setIsPageLoading] = useState(true);
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      setIsPageLoading(false);
+    }, 800);
+    return () => clearTimeout(timer);
+  }, []);
+
   const isApproved = state.profile.status === 'Approved';
   const currentVendorCode = state.profile.sapVendorCode || 'VND-CURRENT';
 
@@ -523,8 +547,19 @@ export default function RfqView({
     }
   };
 
+  if (isPageLoading) {
+    return (
+      <ErrorBoundary>
+        <div className="p-4 space-y-4">
+          <SkeletonLoader type="table" rows={6} cols={5} />
+        </div>
+      </ErrorBoundary>
+    );
+  }
+
   return (
-    <div className="space-y-4 max-w-full animate-fade-in pb-16">
+    <ErrorBoundary>
+      <div className="space-y-4 max-w-full animate-fade-in pb-16">
 
       {/* PROCUREMENT SUB NAVIGATION */}
       <div className="flex border-b border-border select-none bg-white p-1 rounded-sm shadow-xs">
@@ -611,7 +646,7 @@ export default function RfqView({
                       <p className="text-xs font-bold text-stone-800 truncate" title={rfq.description}>{rfq.description}</p>
                       <div className="flex items-center justify-between mt-2 text-[10px] text-stone-400 font-mono">
                         <span>Org: {rfq.purchasingOrg}</span>
-                        <span>Date: {rfq.createdDate}</span>
+                        <span className="whitespace-nowrap">Date: {formatDate(rfq.createdDate)}</span>
                       </div>
                     </button>
                   );
@@ -643,8 +678,8 @@ export default function RfqView({
                       <h3 className="text-xs font-bold text-stone-900 uppercase">
                         (RFQ-{activeRfq.id}) / (Cat.-{activeRfq.description}) / (Typ-{activeRfq.rfqType})
                       </h3>
-                      <p className="text-[10px] text-stone-550 font-mono mt-0.5">
-                        Vendor: {currentVendorCode} &bull; Created: {activeRfq.createdDate} &bull; Org: {activeRfq.purchasingOrg}
+                      <p className="text-[10px] text-stone-550 font-mono mt-0.5 whitespace-nowrap">
+                        Vendor: {currentVendorCode} &bull; Created: {formatDate(activeRfq.createdDate)} &bull; Org: {activeRfq.purchasingOrg}
                       </p>
                     </div>
                     <span className={`px-2.5 py-0.5 rounded text-[10px] font-bold border ${getRfqStatusBadge(activeRfq.status)}`}>
@@ -662,24 +697,24 @@ export default function RfqView({
                           <thead>
                             <tr className="bg-stone-50 border-b border-border font-bold text-[9px] text-stone-900 uppercase">
                               <th className="py-2.5 px-4 w-12 text-stone-900">Line</th>
-                              <th className="py-2.5 px-4 text-stone-900">Material Code</th>
+                              <th className="py-2.5 px-4 text-stone-900 whitespace-nowrap">Material Code</th>
                               <th className="py-2.5 px-4 text-stone-900">Description</th>
                               <th className="py-2.5 px-4 text-right text-stone-900">Qty Required</th>
                               <th className="py-2.5 px-4 text-center text-stone-900">UoM</th>
-                              <th className="py-2.5 px-4 text-right text-stone-900">Target Ref Price</th>
-                              <th className="py-2.5 px-4 text-stone-900 font-mono">Delivery Date</th>
+                              <th className="py-2.5 px-4 text-right text-stone-900 whitespace-nowrap">Target Ref Price</th>
+                              <th className="py-2.5 px-4 text-stone-900 font-mono whitespace-nowrap">Delivery Date</th>
                             </tr>
                           </thead>
                           <tbody className="divide-y divide-stone-150 text-stone-700">
                             {activeRfq.items.map((item, idx) => (
                               <tr key={idx} className="hover:bg-stone-50/20">
                                 <td className="py-2.5 px-4 font-mono font-bold text-stone-500">{(idx + 1) * 10}</td>
-                                <td className="py-2.5 px-4 font-mono font-bold text-stone-900">{item.materialCode}</td>
+                                <td className="py-2.5 px-4 font-mono font-bold text-stone-900 whitespace-nowrap">{item.materialCode}</td>
                                 <td className="py-2.5 px-4 font-semibold">{item.description}</td>
                                 <td className="py-2.5 px-4 text-right font-mono font-bold">{item.quantity.toLocaleString()}</td>
                                 <td className="py-2.5 px-4 text-center font-bold">{item.uom}</td>
-                                <td className="py-2.5 px-4 text-right font-mono text-stone-600">₹{item.targetPrice.toFixed(2)}</td>
-                                <td className="py-2.5 px-4 font-mono text-stone-500">{item.deliveryDate}</td>
+                                <td className="py-2.5 px-4 text-right font-mono text-stone-600 whitespace-nowrap">₹{item.targetPrice.toFixed(2)}</td>
+                                <td className="py-2.5 px-4 font-mono text-stone-500 whitespace-nowrap">{formatDate(item.deliveryDate)}</td>
                               </tr>
                             ))}
                           </tbody>
@@ -691,17 +726,31 @@ export default function RfqView({
                     <div>
                       <SectionHeader title="Invited Vendors (Other Details)" icon={User} />
                       <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
-                        {activeRfq.invitedVendors?.map(v => (
-                          <div key={v.id} className="p-3 bg-stone-50/50 border border-border rounded-sm flex items-center justify-between text-xs">
-                            <div>
-                              <p className="font-bold text-stone-900">{v.name}</p>
-                              <p className="text-[10px] text-stone-500 font-mono mt-0.5">Code: {v.id}</p>
-                            </div>
-                            <span className="px-2 py-0.5 rounded text-[9px] font-bold bg-stone-100 text-stone-700 border border-stone-250">
-                              Rating: {v.rating}
-                            </span>
-                          </div>
-                        ))}
+                        {activeRfq.invitedVendors?.map(v => {
+                           const ratingVal = Number(v.rating || 0);
+                           let ratingColorClass = "bg-stone-100 text-stone-700 border-stone-250";
+                           if (ratingVal >= 90) {
+                             ratingColorClass = "bg-emerald-50 text-emerald-700 border-emerald-200";
+                           } else if (ratingVal >= 80) {
+                             ratingColorClass = "bg-amber-50 text-amber-700 border-amber-200";
+                           } else if (ratingVal > 0) {
+                             ratingColorClass = "bg-rose-50 text-rose-700 border-rose-200";
+                           }
+
+                           return (
+                             <div key={v.id} className="p-4 bg-stone-50/50 border border-border rounded-xl flex flex-col justify-between gap-3 text-xs shadow-xs hover:shadow-sm transition-all duration-200 relative min-h-[90px]">
+                               <div className="flex justify-between items-start gap-4 w-full">
+                                 <p className="font-bold text-stone-900 text-[11px] leading-tight break-words flex-1 pr-6">{v.name}</p>
+                                 <span className={`px-2 py-0.5 rounded-full text-[10px] font-extrabold border ${ratingColorClass} absolute top-4.5 right-4.5`} title={`Vendor Rating: ${v.rating}`}>
+                                   {v.rating}
+                                 </span>
+                               </div>
+                               <div>
+                                 <p className="text-[10px] text-stone-550 font-mono break-all">Code: {v.id}</p>
+                               </div>
+                             </div>
+                           );
+                         })}
                       </div>
                     </div>
 
@@ -714,9 +763,9 @@ export default function RfqView({
                           <span className="font-bold text-stone-900 flex items-center gap-1.5 mt-1.5">
                             <CheckCircle2 className="size-3.5 text-green-600" /> Published
                           </span>
-                          <span className="text-[9px] font-mono text-stone-500 block mt-1">{activeRfq.createdDate}</span>
+                          <span className="text-[9px] font-mono text-stone-500 block mt-1 whitespace-nowrap">{formatDate(activeRfq.createdDate)}</span>
                         </div>
-
+ 
                         <div className="p-3 border border-border rounded-sm bg-stone-50/30">
                           <span className="text-[9px] text-stone-500 uppercase block font-bold">ME47 Quotation</span>
                           <span className={`font-bold mt-1.5 flex items-center gap-1.5 ${activeRfq.bids?.length > 0 ? 'text-stone-900' : 'text-stone-400'}`}>
@@ -730,7 +779,7 @@ export default function RfqView({
                               </>
                             )}
                           </span>
-                          <span className="text-[9px] font-mono text-stone-500 block mt-1">Deadline: {activeRfq.deadlineDate}</span>
+                          <span className="text-[9px] font-mono text-stone-500 block mt-1 whitespace-nowrap">Deadline: {formatDate(activeRfq.deadlineDate)}</span>
                         </div>
 
                         <div className="p-3 border border-border rounded-sm bg-stone-50/30">
@@ -1144,7 +1193,7 @@ export default function RfqView({
 
               <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
                 <div>
-                  <h3 className="text-sm font-bold text-stone-900">Maintain Quotation (ME47)</h3>
+                  <h3 className="text-sm font-bold text-stone-900">Submit Quotation (ME47)</h3>
                   <p className="text-[11px] text-stone-500 mt-0.5">Submit proposal prices, discount structures and delivery timelines directly to SAP</p>
                 </div>
               </div>
@@ -2074,15 +2123,15 @@ export default function RfqView({
             <div className="p-5 overflow-y-auto space-y-5 text-xs text-stone-800 custom-scrollbar">
               <div className="grid grid-cols-2 gap-4 bg-stone-50 p-4 border border-border rounded font-sans">
                 <div>
-                  <span className="text-[10px] text-stone-400 font-bold block uppercase font-mono">RFQ Number (EBELN)</span>
+                  <span className="text-[10px] text-stone-900 font-bold block uppercase font-mono">RFQ Number </span>
                   <span className="text-sm font-bold font-mono text-stone-900 uppercase">{rfqForm.rfqRefNo}</span>
                 </div>
                 <div>
-                  <span className="text-[10px] text-stone-400 font-bold block uppercase font-mono">Document Type (BSART)</span>
+                  <span className="text-[10px] text-stone-900 font-bold block uppercase font-mono">Document Type </span>
                   <span className="text-sm font-bold text-stone-900">{rfqForm.rfqType === 'AN' ? 'AN - Standard RFQ' : 'AB - Outline Agreement RFQ'}</span>
                 </div>
                 <div className="col-span-2 pt-2 border-t border-border">
-                  <span className="text-[10px] text-stone-400 font-bold block uppercase font-mono">RFQ Description (TXZ01)</span>
+                  <span className="text-[10px] text-stone-900 font-bold block uppercase font-mono">RFQ Description</span>
                   <span className="font-semibold text-stone-900 text-xs">{rfqForm.description}</span>
                 </div>
               </div>
@@ -2093,15 +2142,15 @@ export default function RfqView({
                 </h4>
                 <div className="grid grid-cols-3 gap-4">
                   <div>
-                    <span className="text-[9px] text-stone-450 block uppercase font-mono">Deadline (ANGDT)</span>
+                    <span className="text-[9px] text-stone-700 block font-bold uppercase font-mono">Deadline </span>
                     <span className="font-bold font-mono text-stone-900">{rfqForm.deadlineDate}</span>
                   </div>
                   <div>
-                    <span className="text-[9px] text-stone-450 block uppercase font-mono">Binding Period</span>
+                    <span className="text-[9px] text-stone-700 font-bold block uppercase font-mono">Binding Period</span>
                     <span className="font-bold font-mono text-stone-900">{rfqForm.bindingPeriod} Days</span>
                   </div>
                   <div>
-                    <span className="text-[9px] text-stone-455 block uppercase font-mono">Payment Terms</span>
+                    <span className="text-[9px] text-stone-700 block font-bold uppercase font-mono">Payment Terms</span>
                     <span className="font-semibold text-stone-900">{rfqForm.paymentTerms}</span>
                   </div>
                 </div>
@@ -2109,7 +2158,7 @@ export default function RfqView({
 
               <div className="space-y-2">
                 <h4 className="font-bold text-stone-900 border-b border-border pb-1 uppercase font-mono text-[9px] tracking-wider text-stone-500">
-                  Invited Vendors (LIFNR)
+                  Invited Vendors
                 </h4>
                 <div className="flex flex-wrap gap-2">
                   {selectedVendors.map(vid => {
@@ -2125,7 +2174,7 @@ export default function RfqView({
 
               <div className="space-y-2">
                 <h4 className="font-bold text-stone-900 border-b border-border pb-1 uppercase font-mono text-[9px] tracking-wider text-stone-500">
-                  Line Item Details (EKPO)
+                  Line Item Details 
                 </h4>
                 <div className="border border-border rounded overflow-hidden bg-stone-50/20">
                   <table className="w-full text-left text-xs">
@@ -2179,6 +2228,7 @@ export default function RfqView({
         </div>
       )}
 
-    </div>
+      </div>
+    </ErrorBoundary>
   );
 }

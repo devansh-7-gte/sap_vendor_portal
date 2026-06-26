@@ -1,5 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { usePortal } from '@/lib/portal-context';
+import SkeletonLoader from '@/components/shared/SkeletonLoader';
+import ErrorBoundary from '@/components/ErrorBoundary';
 import {
   FileText,
   ShoppingBag,
@@ -162,7 +164,8 @@ export default function DashboardView({ state, setActiveTab }) {
   }
 
   return (
-    <div className="space-y-3 max-w-full animate-fade-in pb-12">
+    <ErrorBoundary>
+      <div className="space-y-3 max-w-full animate-fade-in pb-12">
 
       {/* ERROR STATUS RECOVERY BANNER */}
       {apiError && (
@@ -287,12 +290,9 @@ export default function DashboardView({ state, setActiveTab }) {
       {/* 3. 4 STAT CARDS KPI ROW */}
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-2.5">
         {isLoading ? (
-          <>
-            {renderCardSkeleton()}
-            {renderCardSkeleton()}
-            {renderCardSkeleton()}
-            {renderCardSkeleton()}
-          </>
+          <div className="col-span-full">
+            <SkeletonLoader type="card" count={4} />
+          </div>
         ) : (
           <>
             {/* Stat Card 1: Open POs */}
@@ -680,7 +680,7 @@ export default function DashboardView({ state, setActiveTab }) {
           {/* ACTION BUTTON CLEARING BARS */}
           <div className="p-2.5 bg-muted/50 border-t border-border grid grid-cols-1 sm:grid-cols-2 gap-2">
             <button
-              onClick={() => setActiveTab('payments')}
+              onClick={() => window.open(`${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000/api'}/reports/statement`, '_blank')}
               className="flex items-center justify-center gap-1 px-3 py-1 bg-card border border-border text-foreground rounded text-[10px] font-bold hover:bg-muted transition-colors shadow-xs cursor-pointer h-7.5"
             >
               <Download className="size-3 text-muted-foreground" />
@@ -698,6 +698,7 @@ export default function DashboardView({ state, setActiveTab }) {
 
       </div>
 
-    </div>
+      </div>
+    </ErrorBoundary>
   );
 }

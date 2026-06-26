@@ -2,23 +2,23 @@ import { apiClient } from '../../../lib/api-client';
 
 export const poService = {
   async getPOs() {
-    return apiClient.get('/purchase-orders').catch(() => null);
+    return apiClient.get('/pos').catch(() => null);
   },
 
   async getPOById(poId) {
-    return apiClient.get(`/purchase-orders/${poId}`).catch(() => null);
+    return apiClient.get(`/pos/${poId}`).catch(() => null);
   },
 
   async createPO(poData) {
-    return apiClient.post('/purchase-orders', poData).catch(() => null);
+    return apiClient.post('/pos/simulate', poData);
   },
 
   async acknowledgePO(poId) {
-    return apiClient.put(`/purchase-orders/${poId}/acknowledge`, {}).catch(() => null);
+    return apiClient.put(`/pos/${poId}/acknowledge`, {});
   },
 
   async submitASN(poId, asnData) {
-    return apiClient.post(`/purchase-orders/${poId}/asn`, asnData).catch(() => null);
+    return apiClient.post(`/pos/${poId}/asn`, asnData);
   },
 
   async getASNs() {

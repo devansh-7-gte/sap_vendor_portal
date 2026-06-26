@@ -38,11 +38,23 @@
 - [x] W2D4 — ASN + auto-GRN
 - [x] W2D5 — Invoice + auto-payment
 
-## Phase 3 — Clerk Auth (Week 3)
-- [ ] W3D1–W3D5 (all Clerk tasks)
+## Phase 3 — Real-Time with Socket.io (Week 3)
+- [x] W3D1–W3D5 (Socket.io event loops, rooms, chat feed loggers completed)
 
-## Phases 4–8
-- [ ] (tracked per day above)
+## Phase 4 — Frontend Migration (Week 4)
+- [x] W4D1–W4D5 (Completed ahead of schedule: domain-driven custom hooks refactoring)
+
+## Phase 5 — Security Hardening (Week 5)
+- [ ] W5D1–W5D5 (Zod schema checking, request rate limiting, Helmet, Winston log rotation)
+
+## Phase 6 — SAP RFC Integration (Week 6)
+- [ ] W6D1–W6D5 (SAP node-rfc client connection, BAPI data translation models, IDoc payload receivers)
+
+## Phase 7 — Clerk Authentication (Week 7)
+- [ ] W7D1–W7D5 (Clerk auth context provider setup, middleware route locks, webhook synchronization)
+
+## Phase 8 — Testing, CI/CD & Deployment (Week 8)
+- [ ] W8D1–W8D5 (End-to-end Jest tests, Vercel/Railway deployments, production pipeline checks)
 
 ## Frontend Enhancements (June 2026)
 - [x] Redesign Vendor Registration module to a 4-step wizard

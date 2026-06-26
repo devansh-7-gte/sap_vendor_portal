@@ -11,7 +11,7 @@
 |---|---|
 | **What Clerk replaces** | All custom JWT code: `bcryptjs`, `jsonwebtoken`, `generateToken.js`, `auth.controller.js`, `auth.routes.js`, `/login` page, `/register` page |
 | **What Clerk provides** | Hosted login/register UI · Session management · Social OAuth · MFA · Webhook user sync · `@clerk/express` backend middleware |
-| **Why Phase 3, not Phase 1** | Build and test the entire API layer first (open routes), then lock it down with Clerk in a single focused sprint. This avoids constant auth debugging while building business logic. |
+| **Why Phase 7, not Phase 1** | Build and test the entire API layer first (open routes), then lock it down with Clerk in a single focused sprint. This avoids constant auth debugging while building business logic. |
 | **Backend protection** | `@clerk/express` → `clerkMiddleware()` + `requireAuth()` replace all custom `protect` middleware |
 | **User→MongoDB sync** | Clerk Webhooks (via Svix) → `user.created` event → create Vendor document in Atlas |
 | **MongoDB schema** | `clerkId: String` (unique) replaces `password: String` on the Vendor model. No passwords stored anywhere. |
@@ -38,7 +38,7 @@
 
 ## Phase 1 — Backend Foundation (Week 1)
 > **Goal**: Production-quality modular Express backend with all Mongoose models and scaffold.  
-> **Auth**: None yet. All routes are open. We add Clerk in Phase 3.
+> **Auth**: None yet. All routes are open. We add Clerk in Phase 7.
 
 ---
 
@@ -428,7 +428,7 @@ MongoDB Atlas: all 8 collections appear after first document save
 
 #### `controllers/vendor.controller.js`
 ```javascript
-// All controllers receive req.clerkUserId (set by Clerk middleware in Phase 3)
+// All controllers receive req.clerkUserId (set by Clerk middleware in Phase 7)
 // For now, use req.headers['x-vendor-id'] as temporary stand-in during development
 
 // getProfile(req, res):
@@ -541,7 +541,7 @@ SapLog entries appearing correctly in Atlas saplogs collection
 
 ## Phase 2 — RFQ & PO API Layer (Week 2)
 > **Goal**: Full REST API for RFQ lifecycle, Purchase Orders, ASN, GRN, Invoice, and Payment.  
-> **Auth**: Still open routes. Clerk protection is added in Phase 3 in one pass.
+> **Auth**: Still open routes. Clerk protection is added in Phase 7 in one pass.
 
 ---
 
@@ -784,465 +784,334 @@ Full P2P flow: RFQ → Bid → Award → PO → Acknowledge → ASN → GRN → 
 
 ---
 
-## Phase 3 — Clerk Authentication (Week 3)
-> **Goal**: Install Clerk on frontend AND backend. Wire webhooks to sync users to MongoDB.  
-> Lock down all API routes with Clerk middleware. Remove all temporary dev headers.
+## Phase 3 — Real-Time with Socket.io (Week 3)
+> **Goal**: Live push events — GRN received, payment cleared, new PO, chat messages. Zero polling.
 
 ---
 
-### Week 3 · Day 1 — Clerk Setup (Frontend)
+### Week 3 · Day 1 — Socket.io Server (Rooms configured with developer fallback headers; secured in Week 7)
 
-**Objective**: Install and configure Clerk in the Next.js frontend.
-
-#### Step 1: Create Clerk Application
-```
-1. Go to dashboard.clerk.com
-2. Create new application: "VendorConnect Portal"
-3. Enable sign-in methods: Email + Password
-4. (Optional) Enable Google OAuth for quicker dev testing
-5. Copy: NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY, CLERK_SECRET_KEY
-```
-
-#### Step 2: Install Clerk for Next.js
-```bash
-cd a:\sap_vendor_portal
-npm install @clerk/nextjs
-```
-
-#### Step 3: ✏️ `.env.local`
-```env
-NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY=pk_test_xxxxxxxxxxxx
-CLERK_SECRET_KEY=sk_test_xxxxxxxxxxxx
-NEXT_PUBLIC_CLERK_SIGN_IN_URL=/sign-in
-NEXT_PUBLIC_CLERK_SIGN_UP_URL=/sign-up
-NEXT_PUBLIC_CLERK_AFTER_SIGN_IN_URL=/
-NEXT_PUBLIC_CLERK_AFTER_SIGN_UP_URL=/
-NEXT_PUBLIC_API_URL=http://localhost:5000
-```
-
-#### Step 4: ✏️ `src/app/layout.js`
+#### ✏️ `backend/server.js`
 ```javascript
-import { ClerkProvider } from '@clerk/nextjs';
+const http   = require('http');
+const { Server } = require('socket.io');
+const { createClerkClient } = require('@clerk/express');
 
-export default function RootLayout({ children }) {
-  return (
-    <ClerkProvider>
-      <html lang="en">
-        <body>
-          <StoreProvider>
-            {children}
-          </StoreProvider>
-        </body>
-      </html>
-    </ClerkProvider>
-  );
-}
-```
-
-#### Step 5: 📁 `src/middleware.js` (Next.js route protection)
-```javascript
-import { clerkMiddleware, createRouteMatcher } from '@clerk/nextjs/server';
-
-// Public routes: only sign-in and sign-up pages
-const isPublicRoute = createRouteMatcher(['/sign-in(.*)', '/sign-up(.*)']);
-
-export default clerkMiddleware((auth, request) => {
-  if (!isPublicRoute(request)) {
-    auth().protect(); // Redirect to /sign-in if no session
-  }
+const server = http.createServer(app);
+const io = new Server(server, {
+  cors: { origin: process.env.FRONTEND_URL, credentials: true }
 });
 
-export const config = {
-  matcher: ['/((?!.*\\..*|_next).*)', '/', '/(api|trpc)(.*)'],
-};
-```
+const clerkClient = createClerkClient({ secretKey: process.env.CLERK_SECRET_KEY });
 
-#### Step 6: Clerk's hosted sign-in/sign-up pages
-```
-📁 src/app/sign-in/[[...sign-in]]/page.js
-  → <SignIn />  (Clerk's pre-built component — zero custom UI needed)
-
-📁 src/app/sign-up/[[...sign-up]]/page.js
-  → <SignUp />  (Clerk's pre-built component)
-```
-
-#### ❌ Do NOT build: custom login page, register page, password hashing, JWT generation
-
-#### 🧪 End of Day Test
-```
-Navigate to localhost:3000 → redirected to /sign-in (Clerk's hosted UI)
-Sign up with email → redirected back to portal
-useUser() in any component → returns { user: { id, primaryEmailAddress, ... } }
-```
-
----
-
-### Week 3 · Day 2 — Clerk Setup (Backend) + Vendor Auto-Creation
-
-**Objective**: Install `@clerk/express` on backend. Protect all routes. Auto-create Vendor on first sign-in.
-
-#### Step 1: Install Clerk for Express
-```bash
-cd a:\sap_vendor_portal\backend
-npm install @clerk/express
-```
-
-#### Step 2: ✏️ `backend/.env`
-```env
-CLERK_SECRET_KEY=sk_test_xxxxxxxxxxxx
-CLERK_PUBLISHABLE_KEY=pk_test_xxxxxxxxxxxx
-CLERK_WEBHOOK_SIGNING_SECRET=whsec_xxxxxxxxxxxx   ← from Clerk dashboard (Day 3)
-```
-
-#### Step 3: ✏️ `backend/server.js` — add Clerk middleware
-```javascript
-const { clerkMiddleware, getAuth } = require('@clerk/express');
-
-// Add BEFORE your routes — Clerk attaches auth info to every request
-app.use(clerkMiddleware());
-
-// Now every request has req.auth = { userId, sessionId, ... }
-// userId is the Clerk user ID (e.g., 'user_2abc123xyz')
-```
-
-#### Step 4: 📁 `middleware/requireAuth.js`
-```javascript
-const { requireAuth, getAuth } = require('@clerk/express');
-const Vendor = require('../models/Vendor');
-
-// Combined middleware: Clerk token check + MongoDB vendor lookup
-const protect = [
-  requireAuth(),   // ← Clerk handles token verification — throws 401 if invalid
-  async (req, res, next) => {
-    const { userId } = getAuth(req);
-    
-    // Find or create vendor in MongoDB linked to this Clerk user
-    let vendor = await Vendor.findOne({ clerkId: userId });
-    
-    if (!vendor) {
-      // First-time sign-in: create a minimal vendor profile
-      // Full profile details come from Clerk webhook (Day 3) or profile form
-      vendor = await Vendor.create({
-        clerkId: userId,
-        email: req.auth.sessionClaims?.email || '',
-        companyName: 'New Vendor',
-        gstin: 'PENDING',
-        pan: 'PENDING',
-        status: 'Pending'
-      });
-    }
-    
-    req.vendor = vendor;       // MongoDB vendor document
-    req.clerkUserId = userId;  // Clerk user ID string
-    next();
-  }
-];
-
-module.exports = { protect };
-```
-
-#### Step 5: ✏️ Lock down all routes in `routes/index.js`
-```javascript
-const { protect } = require('../middleware/requireAuth');
-
-// Apply protect to every route that needs auth:
-router.use('/vendors', protect, require('./vendor.routes'));
-router.use('/rfqs', protect, require('./rfq.routes'));
-router.use('/pos', protect, require('./po.routes'));
-router.use('/grns', protect, require('./grn.routes'));
-router.use('/invoices', protect, require('./invoice.routes'));
-router.use('/payments', protect, require('./payment.routes'));
-
-// Public (no auth required):
-router.get('/health', healthCheck);
-router.post('/webhooks', require('./webhook.routes'));  // Clerk webhooks — own auth
-```
-
-#### Step 6: Update all controllers — replace `req.headers['x-vendor-id']` with `req.vendor` + `req.clerkUserId`
-
-#### 🧪 End of Day Test
-```
-GET /api/vendors/profile WITHOUT token → 401 Unauthorized (Clerk)
-GET /api/vendors/profile WITH Clerk Bearer token → vendor profile returned
-Token issued from: const { getToken } = useAuth(); const t = await getToken();
-```
-
----
-
-### Week 3 · Day 3 — Clerk Webhook: User → MongoDB Vendor Sync
-
-**Objective**: When a user signs up in Clerk, automatically create a full Vendor document in MongoDB.
-
-#### Step 1: Expose backend locally for Clerk webhooks
-```bash
-# Install ngrok (or use Clerk's webhook dev tool)
-npx ngrok http 5000
-# Copy the https URL: https://abc123.ngrok.io
-```
-
-#### Step 2: Configure webhook in Clerk Dashboard
-```
-Clerk Dashboard → Webhooks → Add Endpoint
-URL: https://abc123.ngrok.io/api/webhooks
-Events to subscribe:
-  ✅ user.created
-  ✅ user.updated
-  ✅ user.deleted
-Copy: Signing Secret → CLERK_WEBHOOK_SIGNING_SECRET in .env
-```
-
-#### Step 3: Install Svix
-```bash
-cd backend && npm install svix
-```
-
-#### Step 4: 📁 `controllers/webhook.controller.js`
-```javascript
-const { Webhook } = require('svix');
-const Vendor = require('../models/Vendor');
-
-const handleClerkWebhook = async (req, res) => {
-  const WEBHOOK_SECRET = process.env.CLERK_WEBHOOK_SIGNING_SECRET;
-  
-  // ⚠️ Svix requires RAW body — must use bodyParser.raw on this route
-  const wh = new Webhook(WEBHOOK_SECRET);
-  let evt;
+io.use(async (socket, next) => {
+  // For Week 3 (pre-auth), socket connections use x-vendor-id fallback (locked down in Week 7)
+  const token = socket.handshake.auth.token;
+  if (!token) return next(new Error('No token'));
   
   try {
-    evt = wh.verify(req.body, {
-      'svix-id':        req.headers['svix-id'],
-      'svix-timestamp': req.headers['svix-timestamp'],
-      'svix-signature': req.headers['svix-signature'],
-    });
+    const { sub: clerkUserId } = await clerkClient.verifyToken(token);
+    socket.clerkUserId = clerkUserId;
+    next();
   } catch (err) {
-    return res.status(400).json({ error: 'Invalid webhook signature' });
+    next(new Error('Invalid token'));
   }
+});
+
+io.on('connection', (socket) => {
+  // Vendor joins their own private room (clerkUserId as room name)
+  socket.join(socket.clerkUserId);
   
-  const { type, data } = evt;
-  
-  if (type === 'user.created') {
-    const email = data.email_addresses?.[0]?.email_address || '';
-    
-    // Upsert: idempotent — safe to receive same event multiple times
-    await Vendor.findOneAndUpdate(
-      { clerkId: data.id },
-      {
-        $setOnInsert: {
-          clerkId:     data.id,
-          email:       email,
-          companyName: data.first_name ? `${data.first_name} ${data.last_name || ''}`.trim() : 'New Vendor',
-          gstin:       'PENDING',
-          pan:         'PENDING',
-          status:      'Pending'
-        }
-      },
-      { upsert: true, new: true }
-    );
-  }
-  
-  if (type === 'user.updated') {
-    // Sync email updates
-    const email = data.email_addresses?.[0]?.email_address || '';
-    await Vendor.findOneAndUpdate({ clerkId: data.id }, { email });
-  }
-  
-  if (type === 'user.deleted') {
-    // Mark as inactive — do NOT delete (preserve transaction history)
-    await Vendor.findOneAndUpdate({ clerkId: data.id }, { status: 'Rejected', rejectionReason: 'Account deleted' });
-  }
-  
-  res.status(200).json({ success: true });
-};
+  socket.on('join_procurement_room', () => socket.join('procurement'));
+  socket.on('disconnect', () => { /* cleanup */ });
+});
+
+// Export io for use in controllers
+app.set('io', io);
+
+// Change server.listen (not app.listen)
+server.listen(PORT);
 ```
 
-#### Step 5: 📁 `routes/webhook.routes.js`
+#### 📁 `utils/socketEmitter.js`
 ```javascript
-const express = require('express');
-const router = express.Router();
-const bodyParser = require('body-parser');
-const { handleClerkWebhook } = require('../controllers/webhook.controller');
+const EVENTS = {
+  PO_NEW:           'po:new',
+  GRN_RECEIVED:     'grn:received',
+  PAYMENT_CLEARED:  'payment:cleared',
+  RFQ_AWARDED:      'rfq:awarded',
+  BID_RECEIVED:     'rfq:bid_received',
+  CHAT_MESSAGE:     'chat:message',
+  VENDOR_APPROVED:  'vendor:approved',
+  LOG_NEW:          'log:new',
+};
 
-// ⚠️ CRITICAL: Use bodyParser.raw here — not express.json()
-// Svix verifies the raw body bytes, not the parsed JSON
-router.post('/', bodyParser.raw({ type: 'application/json' }), handleClerkWebhook);
+// Emit to a specific vendor's room
+const emitToVendor = (io, clerkUserId, event, data) =>
+  io.to(clerkUserId).emit(event, data);
 
-module.exports = router;
+// Emit to all procurement staff
+const emitToProcurement = (io, event, data) =>
+  io.to('procurement').emit(event, data);
+
+module.exports = { EVENTS, emitToVendor, emitToProcurement };
+```
+
+#### Add Socket.io emits to existing controllers
+```javascript
+// In autoCreateGRN (po.controller.js):
+const io = req.app.get('io');
+emitToVendor(io, vendorClerkId, EVENTS.GRN_RECEIVED, { grnId, poId, acceptedQuantity });
+
+// In autoPaymentRun (invoice.controller.js):
+emitToVendor(io, vendorClerkId, EVENTS.PAYMENT_CLEARED, { utrCode, netAmount, invoiceId });
+
+// In simulatePO (po.controller.js):
+emitToVendor(io, vendorClerkId, EVENTS.PO_NEW, { poId, totalValue });
 ```
 
 #### 🧪 End of Day Test
 ```
-Sign up new user in Clerk UI → check Atlas vendors collection → vendor auto-created
-Update email in Clerk → vendor email updated in Atlas
-Webhook endpoint shows 200 in Clerk dashboard webhook log
-Test idempotency: replay same webhook twice → only one vendor document
+Open portal → check Network tab → WebSocket connection established
+Submit ASN → 10s later → GRN event received in browser WebSocket frame
 ```
 
 ---
 
-### Week 3 · Day 4 — Frontend API Client Layer
+### Week 3 · Day 2 — Socket.io Client (Frontend)
 
-**Objective**: Create the API client that all frontend views will use. Token injected from Clerk.
-
-#### 📁 `src/lib/api.js`
+#### 📁 `src/lib/socket.js`
 ```javascript
-const API_BASE = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000';
+import { io } from 'socket.io-client';
+// Install: npm install socket.io-client
 
-// Core fetcher — used by all API methods
-// getToken() comes from Clerk's useAuth() hook (passed in as param)
-const apiFetch = async (endpoint, options = {}, getToken) => {
-  const token = getToken ? await getToken() : null;
+let socket = null;
+
+export const initSocket = (clerkToken) => {
+  if (socket?.connected) return socket;
   
-  const response = await fetch(`${API_BASE}${endpoint}`, {
-    ...options,
-    headers: {
-      'Content-Type': 'application/json',
-      ...(token && { Authorization: `Bearer ${token}` }),
-      ...options.headers,
-    },
+  socket = io(process.env.NEXT_PUBLIC_API_URL, {
+    auth: { token: clerkToken },  // Clerk token for socket auth
+    transports: ['websocket'],
+    reconnectionAttempts: 5,
   });
   
-  if (!response.ok) {
-    const error = await response.json().catch(() => ({ error: 'Network error' }));
-    throw new Error(error.error || `HTTP ${response.status}`);
-  }
+  return socket;
+};
+
+export const getSocket   = () => socket;
+export const closeSocket = () => { socket?.disconnect(); socket = null; };
+```
+
+#### ✏️ `src/lib/store-context.js` — socket event handlers
+```javascript
+// After sign-in and data load:
+useEffect(() => {
+  if (!isSignedIn || !dataLoaded) return;
   
-  return response.json();
-};
+  let cleanupFn;
+  
+  const setup = async () => {
+    const token = await getToken();
+    const socket = initSocket(token);
+    
+    socket.on('grn:received', async (data) => {
+      const [grns, pos] = await Promise.all([grnApi.list(getToken), poApi.list({}, getToken)]);
+      setState(prev => ({ ...prev, grns, pos }));
+      showToast(`GRN received for ${data.poId}. Stores accepted your goods.`, 'success');
+    });
+    
+    socket.on('payment:cleared', async (data) => {
+      const [payments, invoices] = await Promise.all([paymentApi.list(getToken), invoiceApi.list(getToken)]);
+      setState(prev => ({ ...prev, payments, invoices }));
+      showToast(`Payment cleared! UTR: ${data.utrCode} · Net: ₹${data.netAmount.toLocaleString()}`, 'success');
+    });
+    
+    socket.on('po:new', async () => {
+      const pos = await poApi.list({}, getToken);
+      setState(prev => ({ ...prev, pos }));
+      showToast('New Purchase Order received from SAP!', 'info');
+    });
+    
+    socket.on('vendor:approved', async () => {
+      const profile = await vendorApi.getProfile(getToken);
+      setState(prev => ({ ...prev, profile }));
+      showToast('Your vendor registration has been approved!', 'success');
+    });
+    
+    socket.on('log:new', async () => {
+      const logs = await sapLogApi.list(getToken);
+      setState(prev => ({ ...prev, logs }));
+    });
+    
+    cleanupFn = () => socket.off();
+  };
+  
+  setup();
+  return () => cleanupFn?.();
+}, [isSignedIn, dataLoaded]);
+```
 
-// API namespaces (all take getToken as last arg):
-export const vendorApi = {
-  getProfile:          (getToken) => apiFetch('/api/vendors/profile', {}, getToken),
-  updateProfile:       (data, getToken) => apiFetch('/api/vendors/profile', { method: 'PUT', body: JSON.stringify(data) }, getToken),
-  submitRegistration:  (getToken) => apiFetch('/api/vendors/profile/submit', { method: 'POST' }, getToken),
-  getPerformance:      (getToken) => apiFetch('/api/vendors/performance', {}, getToken),
-};
-
-export const rfqApi = {
-  list:     (params, getToken) => apiFetch(`/api/rfqs?${new URLSearchParams(params)}`, {}, getToken),
-  getById:  (id, getToken) => apiFetch(`/api/rfqs/${id}`, {}, getToken),
-  create:   (data, getToken) => apiFetch('/api/rfqs', { method: 'POST', body: JSON.stringify(data) }, getToken),
-  submitBid:(id, data, getToken) => apiFetch(`/api/rfqs/${id}/bid`, { method: 'POST', body: JSON.stringify(data) }, getToken),
-  award:    (id, data, getToken) => apiFetch(`/api/rfqs/${id}/award`, { method: 'POST', body: JSON.stringify(data) }, getToken),
-  evaluate: (id, getToken) => apiFetch(`/api/rfqs/${id}/evaluate`, {}, getToken),
-  cancel:   (id, getToken) => apiFetch(`/api/rfqs/${id}/cancel`, { method: 'PUT' }, getToken),
-  reissue:  (id, data, getToken) => apiFetch(`/api/rfqs/${id}/reissue`, { method: 'PUT', body: JSON.stringify(data) }, getToken),
-};
-
-export const poApi = {
-  list:        (params, getToken) => apiFetch(`/api/pos?${new URLSearchParams(params)}`, {}, getToken),
-  getById:     (id, getToken) => apiFetch(`/api/pos/${id}`, {}, getToken),
-  acknowledge: (id, getToken) => apiFetch(`/api/pos/${id}/acknowledge`, { method: 'PUT' }, getToken),
-  submitASN:   (id, data, getToken) => apiFetch(`/api/pos/${id}/asn`, { method: 'POST', body: JSON.stringify(data) }, getToken),
-  simulate:    (getToken) => apiFetch('/api/pos/simulate', { method: 'POST' }, getToken),
-};
-
-export const grnApi    = { list: (getToken) => apiFetch('/api/grns', {}, getToken) };
-export const invoiceApi= { list: (getToken) => apiFetch('/api/invoices', {}, getToken), submit: (data, getToken) => apiFetch('/api/invoices', { method: 'POST', body: JSON.stringify(data) }, getToken) };
-export const paymentApi= { list: (getToken) => apiFetch('/api/payments', {}, getToken) };
-export const sapLogApi = { list: (getToken) => apiFetch('/api/logs', {}, getToken) };
+#### 📁 `src/components/portal/ToastNotification.js`
+```javascript
+// Fixed position: bottom-right
+// Types: success(green), info(blue), warning(amber), error(red)
+// Auto-dismiss: 5 seconds
+// Max 3 visible (queue the rest)
+// Slide-in animation from right
+// Stone color system matches existing design
 ```
 
 #### 🧪 End of Day Test
 ```
-In browser console (after Clerk sign-in):
-  const { getToken } = useAuth();
-  import('/src/lib/api.js').then(m => m.vendorApi.getProfile(getToken))
-  → returns vendor profile from API
+Submit ASN → wait 10 seconds → toast: "GRN received!" WITHOUT page refresh
+Post invoice → wait 12 seconds → toast: "Payment cleared! UTR: UTR..." WITHOUT refresh
+All SapLog entries appear in BapiConsole in real-time
 ```
 
 ---
 
-### Week 3 · Day 5 — Migrate store-context.js: Profile + RFQ + Auth Wiring
+### Week 3 · Day 3 — Real-Time Chat via Socket.io
 
-**Objective**: Connect the StoreProvider to Clerk. Load real data on sign-in.
-
-#### ✏️ `src/lib/store-context.js`
-
+#### ✏️ `controllers/chat.controller.js` — add socket emit
 ```javascript
-'use client';
-import { useAuth, useUser } from '@clerk/nextjs';
-
-export function StoreProvider({ children }) {
-  const { getToken, isSignedIn, isLoaded: clerkLoaded } = useAuth();
-  const { user } = useUser();
-
-  const [state, setState] = useState(getUiDefaults()); // only UI prefs
-  const [dataLoaded, setDataLoaded] = useState(false);
-
-  // Load all data from API once Clerk confirms sign-in
-  useEffect(() => {
-    if (!clerkLoaded || !isSignedIn) return;
-    loadAllData();
-  }, [clerkLoaded, isSignedIn]);
-
-  const loadAllData = async () => {
-    try {
-      const [profile, rfqs, pos, grns, invoices, payments] = await Promise.all([
-        vendorApi.getProfile(getToken),
-        rfqApi.list({}, getToken),
-        poApi.list({}, getToken),
-        grnApi.list(getToken),
-        invoiceApi.list(getToken),
-        paymentApi.list(getToken),
-      ]);
-      setState(prev => ({ ...prev, profile, rfqs, pos, grns, invoices, payments }));
-      setDataLoaded(true);
-    } catch (err) {
-      console.error('Failed to load portal data', err);
-    }
-  };
-
-  // Actions — all call API now:
-  const submitRegistration = async (profileData) => {
-    await vendorApi.updateProfile(profileData, getToken);
-    await vendorApi.submitRegistration(getToken);
-    const profile = await vendorApi.getProfile(getToken);
-    setState(prev => ({ ...prev, profile }));
-  };
-
-  const createRFQ = async (rfqData) => {
-    const rfq = await rfqApi.create(rfqData, getToken);
-    setState(prev => ({ ...prev, rfqs: [rfq, ...prev.rfqs] }));
-  };
-
-  const handleBidSubmit = async (rfqId, prices, leadTime, remarks, gstRate, validityDate, freight, moq) => {
-    await rfqApi.submitBid(rfqId, { unitPrices: prices, deliveryLeadTimeDays: leadTime, remarks, gstRate, validityDate, freight, moq }, getToken);
-    const rfqs = await rfqApi.list({}, getToken);
-    setState(prev => ({ ...prev, rfqs }));
-  };
-
-  const acknowledgePO = async (poId) => {
-    await poApi.acknowledge(poId, getToken);
-    const pos = await poApi.list({}, getToken);
-    setState(prev => ({ ...prev, pos }));
-  };
-
-  // ... all other actions similarly
-
-  // ❌ REMOVE: localStorage business data, all setTimeout simulations,
-  //            getInitialState() mock imports, logSAPEvent (now server-side)
-  // ✅ KEEP: activeTab UI state, consoleOpen UI state in localStorage
-}
+// sendMessage:
+//   → Create message in DB
+//   → Emit 'chat:message' to vendor's room immediately:
+//       emitToVendor(io, vendorClerkId, EVENTS.CHAT_MESSAGE, savedMessage)
+//   → Generate auto-reply after 2s:
+//       emitToVendor(io, vendorClerkId, EVENTS.CHAT_MESSAGE, replyMessage)
 ```
 
-#### ✏️ `src/lib/store.js` — strip down
+#### ✏️ `src/components/portal/ChatsView.js`
 ```javascript
-// Keep ONLY UI preference defaults (no business data):
-export const getUiDefaults = () => ({
-  activeTab: 'dashboard',
-  consoleOpen: false,
-  // performance defaults (until server returns real data)
-  performance: { deliveryOTIF: 0, qualityAcceptance: 0, priceIndex: 0, grade: 'N/A' }
-});
-// ❌ Remove all mock RFQs, POs, GRNs, invoices, payments, logs, profile
+// Replace setTimeout polling with Socket.io listener:
+// socket.on('chat:message', (msg) => {
+//   setChatMessages(prev => [...prev, msg])
+//   scrollToBottom()
+// })
+// 
+// Unread badge on Sidebar 'Communications' link:
+//   Count messages since last active tab switch
 ```
 
 #### 🧪 End of Day Test
 ```
-Sign in → portal loads with real vendor profile from Atlas
-Dashboard KPI cards show real PO/invoice counts
-Create RFQ from UI → appears in Atlas rfqs collection
-Refresh browser → data reloads from API (not localStorage)
+Send message → appears immediately (optimistic update)
+2 seconds later → buyer reply slides in via WebSocket (no polling)
+```
+
+---
+
+### Week 3 · Day 4 — File Upload System
+
+#### 📁 `middleware/upload.js`
+```javascript
+// Multer diskStorage:
+//   destination: backend/uploads/{vendorId}/
+//   filename: Date.now() + '_' + sanitize(originalname)
+//
+// File filter:
+//   Allowed MIME types: pdf, doc, docx, jpg, jpeg, png, xlsx
+//   Reject all others → 400 error
+//
+// Size limits:
+//   Document: 10 MB
+//   Image: 5 MB
+```
+
+#### `models/Document.js` + `controllers/upload.controller.js`
+```javascript
+// uploadFile(req, res):
+//   → multer processes file
+//   → Create Document in MongoDB: { vendorId, filename, originalName, mimeType, size, path, linkedTo }
+//   → Return { documentId, url: /api/uploads/:id }
+//
+// downloadFile(req, res):
+//   → Find Document, verify vendorId === req.clerkUserId
+//   → Stream file to response with Content-Disposition: attachment
+//
+// listDocuments(req, res):
+//   → Find docs by vendorId + optional linkedTo filter
+```
+
+#### 📁 `src/components/shared/FileUploadZone.js`
+```javascript
+// Drag-and-drop zone with:
+//   - Client-side type + size validation (before upload)
+//   - Progress indicator on upload
+//   - File name + size display after upload
+//   - Remove button (DELETE /api/uploads/:id)
+//   - onUploadComplete(documentId) callback
+```
+
+#### ✏️ Wire into ASN form + Quotation form
+```javascript
+// PurchaseOrdersView.js ASN form:
+//   packingList, invoiceCopy, transportDoc → each use <FileUploadZone>
+//   documentIds[] collected → sent in ASN payload
+
+// RfqView.js ME47 quotation:
+//   technicalDocs → <FileUploadZone multiple>
+//   documentIds[] → sent in bid payload
+```
+
+#### 🧪 End of Day Test
+```
+Drag PDF into ASN upload zone → file saved to backend/uploads/
+Document record in Atlas documents collection
+Submit ASN → ASN.documentIds populated with MongoDB ObjectIds
+Download file → GET /api/uploads/:id → file streams to browser
+Upload .exe → 400 "File type not permitted"
+Upload 15MB PDF → 400 "File too large"
+```
+
+---
+
+### Week 3 · Day 5 — PDF Report Generation
+
+#### Install PDFKit
+```bash
+cd backend && npm install pdfkit
+```
+
+#### `controllers/reports.controller.js`
+```javascript
+// generateStatement(req, res):
+//   → Fetch vendor's payments (last 3 months)
+//   → Build PDF:
+//       Header: "VendorConnect Portal — Account Statement"
+//       Vendor: companyName, GSTIN, sapVendorCode
+//       Period: Q1 FY 2026-27
+//       Table: UTR | Invoice | Gross Amt | TDS (1%) | Net Received | Date | Method
+//       Footer: Total Paid, Total TDS, NEFT/RTGS breakdown
+//   → Stream to response: Content-Disposition: attachment; filename="statement-2026.pdf"
+//
+// generateInvoicePDF(req, res):
+//   → Fetch invoice + PO + vendor details
+//   → GST Invoice format:
+//       Seller: vendor GSTIN, PAN, address
+//       Buyer:  company code 1000, plant address
+//       Items: HSN code, quantity, unit, rate, CGST+SGST (or IGST)
+//       Amount in words
+//       Digital note: "Submitted via VendorConnect Portal"
+```
+
+#### Wire download buttons in frontend
+```javascript
+// DashboardView.js "Download Statement" button:
+//   Before: onClick={() => setActiveTab('payments')}  // placeholder
+//   After:  window.open(`${API_BASE}/api/reports/statement?token=${clerkToken}`, '_blank')
+//
+// PaymentsView.js "Download Advice" button → same
+// InvoicesView.js row download → /api/reports/invoice/:id
+```
+
+#### 🧪 End of Day Test
+```
+Click "Download Statement" → PDF downloads with payment data + TDS breakdown
+Invoice PDF has correct CGST+SGST split for INR amounts
+PDF filename: "statement-Q1-2026.pdf"
 ```
 
 ---
@@ -1434,345 +1303,13 @@ Messages persist after page refresh
 
 ---
 
-## Phase 5 — Real-Time with Socket.io (Week 5)
-> **Goal**: Live push events — GRN received, payment cleared, new PO, chat messages. Zero polling.
-
----
-
-### Week 5 · Day 1 — Socket.io Server (Clerk-authenticated rooms)
-
-#### ✏️ `backend/server.js`
-```javascript
-const http   = require('http');
-const { Server } = require('socket.io');
-const { createClerkClient } = require('@clerk/express');
-
-const server = http.createServer(app);
-const io = new Server(server, {
-  cors: { origin: process.env.FRONTEND_URL, credentials: true }
-});
-
-const clerkClient = createClerkClient({ secretKey: process.env.CLERK_SECRET_KEY });
-
-io.use(async (socket, next) => {
-  // Authenticate socket connections using Clerk token
-  const token = socket.handshake.auth.token;
-  if (!token) return next(new Error('No token'));
-  
-  try {
-    const { sub: clerkUserId } = await clerkClient.verifyToken(token);
-    socket.clerkUserId = clerkUserId;
-    next();
-  } catch (err) {
-    next(new Error('Invalid token'));
-  }
-});
-
-io.on('connection', (socket) => {
-  // Vendor joins their own private room (clerkUserId as room name)
-  socket.join(socket.clerkUserId);
-  
-  socket.on('join_procurement_room', () => socket.join('procurement'));
-  socket.on('disconnect', () => { /* cleanup */ });
-});
-
-// Export io for use in controllers
-app.set('io', io);
-
-// Change server.listen (not app.listen)
-server.listen(PORT);
-```
-
-#### 📁 `utils/socketEmitter.js`
-```javascript
-const EVENTS = {
-  PO_NEW:           'po:new',
-  GRN_RECEIVED:     'grn:received',
-  PAYMENT_CLEARED:  'payment:cleared',
-  RFQ_AWARDED:      'rfq:awarded',
-  BID_RECEIVED:     'rfq:bid_received',
-  CHAT_MESSAGE:     'chat:message',
-  VENDOR_APPROVED:  'vendor:approved',
-  LOG_NEW:          'log:new',
-};
-
-// Emit to a specific vendor's room
-const emitToVendor = (io, clerkUserId, event, data) =>
-  io.to(clerkUserId).emit(event, data);
-
-// Emit to all procurement staff
-const emitToProcurement = (io, event, data) =>
-  io.to('procurement').emit(event, data);
-
-module.exports = { EVENTS, emitToVendor, emitToProcurement };
-```
-
-#### Add Socket.io emits to existing controllers
-```javascript
-// In autoCreateGRN (po.controller.js):
-const io = req.app.get('io');
-emitToVendor(io, vendorClerkId, EVENTS.GRN_RECEIVED, { grnId, poId, acceptedQuantity });
-
-// In autoPaymentRun (invoice.controller.js):
-emitToVendor(io, vendorClerkId, EVENTS.PAYMENT_CLEARED, { utrCode, netAmount, invoiceId });
-
-// In simulatePO (po.controller.js):
-emitToVendor(io, vendorClerkId, EVENTS.PO_NEW, { poId, totalValue });
-```
-
-#### 🧪 End of Day Test
-```
-Open portal → check Network tab → WebSocket connection established
-Submit ASN → 10s later → GRN event received in browser WebSocket frame
-```
-
----
-
-### Week 5 · Day 2 — Socket.io Client (Frontend)
-
-#### 📁 `src/lib/socket.js`
-```javascript
-import { io } from 'socket.io-client';
-// Install: npm install socket.io-client
-
-let socket = null;
-
-export const initSocket = (clerkToken) => {
-  if (socket?.connected) return socket;
-  
-  socket = io(process.env.NEXT_PUBLIC_API_URL, {
-    auth: { token: clerkToken },  // Clerk token for socket auth
-    transports: ['websocket'],
-    reconnectionAttempts: 5,
-  });
-  
-  return socket;
-};
-
-export const getSocket   = () => socket;
-export const closeSocket = () => { socket?.disconnect(); socket = null; };
-```
-
-#### ✏️ `src/lib/store-context.js` — socket event handlers
-```javascript
-// After sign-in and data load:
-useEffect(() => {
-  if (!isSignedIn || !dataLoaded) return;
-  
-  let cleanupFn;
-  
-  const setup = async () => {
-    const token = await getToken();
-    const socket = initSocket(token);
-    
-    socket.on('grn:received', async (data) => {
-      const [grns, pos] = await Promise.all([grnApi.list(getToken), poApi.list({}, getToken)]);
-      setState(prev => ({ ...prev, grns, pos }));
-      showToast(`GRN received for ${data.poId}. Stores accepted your goods.`, 'success');
-    });
-    
-    socket.on('payment:cleared', async (data) => {
-      const [payments, invoices] = await Promise.all([paymentApi.list(getToken), invoiceApi.list(getToken)]);
-      setState(prev => ({ ...prev, payments, invoices }));
-      showToast(`Payment cleared! UTR: ${data.utrCode} · Net: ₹${data.netAmount.toLocaleString()}`, 'success');
-    });
-    
-    socket.on('po:new', async () => {
-      const pos = await poApi.list({}, getToken);
-      setState(prev => ({ ...prev, pos }));
-      showToast('New Purchase Order received from SAP!', 'info');
-    });
-    
-    socket.on('vendor:approved', async () => {
-      const profile = await vendorApi.getProfile(getToken);
-      setState(prev => ({ ...prev, profile }));
-      showToast('Your vendor registration has been approved!', 'success');
-    });
-    
-    socket.on('log:new', async () => {
-      const logs = await sapLogApi.list(getToken);
-      setState(prev => ({ ...prev, logs }));
-    });
-    
-    cleanupFn = () => socket.off();
-  };
-  
-  setup();
-  return () => cleanupFn?.();
-}, [isSignedIn, dataLoaded]);
-```
-
-#### 📁 `src/components/portal/ToastNotification.js`
-```javascript
-// Fixed position: bottom-right
-// Types: success(green), info(blue), warning(amber), error(red)
-// Auto-dismiss: 5 seconds
-// Max 3 visible (queue the rest)
-// Slide-in animation from right
-// Stone color system matches existing design
-```
-
-#### 🧪 End of Day Test
-```
-Submit ASN → wait 10 seconds → toast: "GRN received!" WITHOUT page refresh
-Post invoice → wait 12 seconds → toast: "Payment cleared! UTR: UTR..." WITHOUT refresh
-All SapLog entries appear in BapiConsole in real-time
-```
-
----
-
-### Week 5 · Day 3 — Real-Time Chat via Socket.io
-
-#### ✏️ `controllers/chat.controller.js` — add socket emit
-```javascript
-// sendMessage:
-//   → Create message in DB
-//   → Emit 'chat:message' to vendor's room immediately:
-//       emitToVendor(io, vendorClerkId, EVENTS.CHAT_MESSAGE, savedMessage)
-//   → Generate auto-reply after 2s:
-//       emitToVendor(io, vendorClerkId, EVENTS.CHAT_MESSAGE, replyMessage)
-```
-
-#### ✏️ `src/components/portal/ChatsView.js`
-```javascript
-// Replace setTimeout polling with Socket.io listener:
-// socket.on('chat:message', (msg) => {
-//   setChatMessages(prev => [...prev, msg])
-//   scrollToBottom()
-// })
-// 
-// Unread badge on Sidebar 'Communications' link:
-//   Count messages since last active tab switch
-```
-
-#### 🧪 End of Day Test
-```
-Send message → appears immediately (optimistic update)
-2 seconds later → buyer reply slides in via WebSocket (no polling)
-```
-
----
-
-### Week 5 · Day 4 — File Upload System
-
-#### 📁 `middleware/upload.js`
-```javascript
-// Multer diskStorage:
-//   destination: backend/uploads/{vendorId}/
-//   filename: Date.now() + '_' + sanitize(originalname)
-//
-// File filter:
-//   Allowed MIME types: pdf, doc, docx, jpg, jpeg, png, xlsx
-//   Reject all others → 400 error
-//
-// Size limits:
-//   Document: 10 MB
-//   Image: 5 MB
-```
-
-#### `models/Document.js` + `controllers/upload.controller.js`
-```javascript
-// uploadFile(req, res):
-//   → multer processes file
-//   → Create Document in MongoDB: { vendorId, filename, originalName, mimeType, size, path, linkedTo }
-//   → Return { documentId, url: /api/uploads/:id }
-//
-// downloadFile(req, res):
-//   → Find Document, verify vendorId === req.clerkUserId
-//   → Stream file to response with Content-Disposition: attachment
-//
-// listDocuments(req, res):
-//   → Find docs by vendorId + optional linkedTo filter
-```
-
-#### 📁 `src/components/shared/FileUploadZone.js`
-```javascript
-// Drag-and-drop zone with:
-//   - Client-side type + size validation (before upload)
-//   - Progress indicator on upload
-//   - File name + size display after upload
-//   - Remove button (DELETE /api/uploads/:id)
-//   - onUploadComplete(documentId) callback
-```
-
-#### ✏️ Wire into ASN form + Quotation form
-```javascript
-// PurchaseOrdersView.js ASN form:
-//   packingList, invoiceCopy, transportDoc → each use <FileUploadZone>
-//   documentIds[] collected → sent in ASN payload
-
-// RfqView.js ME47 quotation:
-//   technicalDocs → <FileUploadZone multiple>
-//   documentIds[] → sent in bid payload
-```
-
-#### 🧪 End of Day Test
-```
-Drag PDF into ASN upload zone → file saved to backend/uploads/
-Document record in Atlas documents collection
-Submit ASN → ASN.documentIds populated with MongoDB ObjectIds
-Download file → GET /api/uploads/:id → file streams to browser
-Upload .exe → 400 "File type not permitted"
-Upload 15MB PDF → 400 "File too large"
-```
-
----
-
-### Week 5 · Day 5 — PDF Report Generation
-
-#### Install PDFKit
-```bash
-cd backend && npm install pdfkit
-```
-
-#### `controllers/reports.controller.js`
-```javascript
-// generateStatement(req, res):
-//   → Fetch vendor's payments (last 3 months)
-//   → Build PDF:
-//       Header: "VendorConnect Portal — Account Statement"
-//       Vendor: companyName, GSTIN, sapVendorCode
-//       Period: Q1 FY 2026-27
-//       Table: UTR | Invoice | Gross Amt | TDS (1%) | Net Received | Date | Method
-//       Footer: Total Paid, Total TDS, NEFT/RTGS breakdown
-//   → Stream to response: Content-Disposition: attachment; filename="statement-2026.pdf"
-//
-// generateInvoicePDF(req, res):
-//   → Fetch invoice + PO + vendor details
-//   → GST Invoice format:
-//       Seller: vendor GSTIN, PAN, address
-//       Buyer:  company code 1000, plant address
-//       Items: HSN code, quantity, unit, rate, CGST+SGST (or IGST)
-//       Amount in words
-//       Digital note: "Submitted via VendorConnect Portal"
-```
-
-#### Wire download buttons in frontend
-```javascript
-// DashboardView.js "Download Statement" button:
-//   Before: onClick={() => setActiveTab('payments')}  // placeholder
-//   After:  window.open(`${API_BASE}/api/reports/statement?token=${clerkToken}`, '_blank')
-//
-// PaymentsView.js "Download Advice" button → same
-// InvoicesView.js row download → /api/reports/invoice/:id
-```
-
-#### 🧪 End of Day Test
-```
-Click "Download Statement" → PDF downloads with payment data + TDS breakdown
-Invoice PDF has correct CGST+SGST split for INR amounts
-PDF filename: "statement-Q1-2026.pdf"
-```
-
----
-
-## Phase 6 — Security Hardening (Week 6)
+## Phase 5 — Security Hardening (Week 5)
 > **Note**: Clerk has already handled authentication security. This phase covers input validation,  
 > API security, HTTP headers, secrets management, and logging.
 
 ---
 
-### Week 6 · Day 1 — Zod Input Validation
+### Week 5 · Day 1 — Zod Input Validation
 
 #### Install
 ```bash
@@ -1839,7 +1376,7 @@ Valid request → passes to controller unchanged
 
 ---
 
-### Week 6 · Day 2 — API Security Hardening
+### Week 5 · Day 2 — API Security Hardening
 
 #### Install
 ```bash
@@ -1901,7 +1438,7 @@ Try CORS from unknown origin → 403 CORS policy violation
 
 ---
 
-### Week 6 · Day 3 — Winston Structured Logging
+### Week 5 · Day 3 — Winston Structured Logging
 
 #### Install
 ```bash
@@ -1938,7 +1475,7 @@ Each log line has requestId
 
 ---
 
-### Week 6 · Day 4 — Environment + Secrets Validation
+### Week 5 · Day 4 — Environment + Secrets Validation
 
 #### 📁 `config/validateEnv.js`
 ```javascript
@@ -1984,7 +1521,7 @@ Remove CLERK_SECRET_KEY from .env → server exits with:
 
 ---
 
-### Week 6 · Day 5 — Admin Panel
+### Week 5 · Day 5 — Admin Panel
 
 #### 📁 `src/app/admin/page.js`
 ```
@@ -2021,12 +1558,12 @@ SapLog feed shows real-time entries
 
 ---
 
-## Phase 7 — SAP RFC Integration (Week 7)
+## Phase 6 — SAP RFC Integration (Week 6)
 > **Goal**: Build the real SAP integration scaffold. Mock mode first, real RFC calls when SAP is available.
 
 ---
 
-### Week 7 · Day 1 — SAP RFC Client + Feature Flag
+### Week 6 · Day 1 — SAP RFC Client + Feature Flag
 
 #### 📁 `sap/rfcClient.js`
 ```javascript
@@ -2061,7 +1598,7 @@ SAP_MOCK_MODE=false → attempts real RFC (expected to fail without SAP system �
 
 ---
 
-### Week 7 · Day 2 — BAPI Parameter Translators
+### Week 6 · Day 2 — BAPI Parameter Translators
 
 #### 📁 `sap/bapiTranslator.js`
 ```javascript
@@ -2095,7 +1632,7 @@ SAP_MOCK_MODE=false → attempts real RFC (expected to fail without SAP system �
 
 ---
 
-### Week 7 · Day 3 — IDoc Inbound Processor
+### Week 6 · Day 3 — IDoc Inbound Processor
 
 #### 📁 `sap/idocProcessor.js`
 ```javascript
@@ -2138,7 +1675,7 @@ Missing SAP secret → 401 rejected
 
 ---
 
-### Week 7 · Day 4 — Analytics API
+### Week 6 · Day 4 — Analytics API
 
 #### 📁 `controllers/analytics.controller.js`
 ```javascript
@@ -2157,7 +1694,7 @@ Missing SAP secret → 401 rejected
 
 ---
 
-### Week 7 · Day 5 — SAP Mock Server + Integration Tests
+### Week 6 · Day 5 — SAP Mock Server + Integration Tests
 
 #### 📁 `sap/mockSapServer.js`
 ```javascript
@@ -2178,6 +1715,469 @@ cd backend && npm install --save-dev jest supertest mongodb-memory-server
 // register vendor via webhook → createRFQ → submitBid → awardBid
 // → PO auto-created → acknowledgePO → submitASN → autoGRN → submitInvoice → autoPayment
 // All 11 steps verified with Supertest
+```
+
+---
+
+## Phase 7 — Clerk Authentication (Week 7)
+> **Goal**: Install Clerk on frontend AND backend. Wire webhooks to sync users to MongoDB.  
+> Lock down all existing API routes (RFQ, PO, Socket.io, etc.) with Clerk middleware. Remove all temporary dev headers.
+
+---
+
+### Week 7 · Day 1 — Clerk Setup (Frontend)
+
+**Objective**: Install and configure Clerk in the Next.js frontend.
+
+#### Step 1: Create Clerk Application
+```
+1. Go to dashboard.clerk.com
+2. Create new application: "VendorConnect Portal"
+3. Enable sign-in methods: Email + Password
+4. (Optional) Enable Google OAuth for quicker dev testing
+5. Copy: NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY, CLERK_SECRET_KEY
+```
+
+#### Step 2: Install Clerk for Next.js
+```bash
+cd a:\sap_vendor_portal
+npm install @clerk/nextjs
+```
+
+#### Step 3: ✏️ `.env.local`
+```env
+NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY=pk_test_xxxxxxxxxxxx
+CLERK_SECRET_KEY=sk_test_xxxxxxxxxxxx
+NEXT_PUBLIC_CLERK_SIGN_IN_URL=/sign-in
+NEXT_PUBLIC_CLERK_SIGN_UP_URL=/sign-up
+NEXT_PUBLIC_CLERK_AFTER_SIGN_IN_URL=/
+NEXT_PUBLIC_CLERK_AFTER_SIGN_UP_URL=/
+NEXT_PUBLIC_API_URL=http://localhost:5000
+```
+
+#### Step 4: ✏️ `src/app/layout.js`
+```javascript
+import { ClerkProvider } from '@clerk/nextjs';
+
+export default function RootLayout({ children }) {
+  return (
+    <ClerkProvider>
+      <html lang="en">
+        <body>
+          <StoreProvider>
+            {children}
+          </StoreProvider>
+        </body>
+      </html>
+    </ClerkProvider>
+  );
+}
+```
+
+#### Step 5: 📁 `src/middleware.js` (Next.js route protection)
+```javascript
+import { clerkMiddleware, createRouteMatcher } from '@clerk/nextjs/server';
+
+// Public routes: only sign-in and sign-up pages
+const isPublicRoute = createRouteMatcher(['/sign-in(.*)', '/sign-up(.*)']);
+
+export default clerkMiddleware((auth, request) => {
+  if (!isPublicRoute(request)) {
+    auth().protect(); // Redirect to /sign-in if no session
+  }
+});
+
+export const config = {
+  matcher: ['/((?!.*\\..*|_next).*)', '/', '/(api|trpc)(.*)'],
+};
+```
+
+#### Step 6: Clerk's hosted sign-in/sign-up pages
+```
+📁 src/app/sign-in/[[...sign-in]]/page.js
+  → <SignIn />  (Clerk's pre-built component — zero custom UI needed)
+
+📁 src/app/sign-up/[[...sign-up]]/page.js
+  → <SignUp />  (Clerk's pre-built component)
+```
+
+#### ❌ Do NOT build: custom login page, register page, password hashing, JWT generation
+
+#### 🧪 End of Day Test
+```
+Navigate to localhost:3000 → redirected to /sign-in (Clerk's hosted UI)
+Sign up with email → redirected back to portal
+useUser() in any component → returns { user: { id, primaryEmailAddress, ... } }
+```
+
+---
+
+### Week 7 · Day 2 — Clerk Setup (Backend) + Vendor Auto-Creation
+
+**Objective**: Install `@clerk/express` on backend. Protect all routes. Auto-create Vendor on first sign-in.
+
+#### Step 1: Install Clerk for Express
+```bash
+cd a:\sap_vendor_portal\backend
+npm install @clerk/express
+```
+
+#### Step 2: ✏️ `backend/.env`
+```env
+CLERK_SECRET_KEY=sk_test_xxxxxxxxxxxx
+CLERK_PUBLISHABLE_KEY=pk_test_xxxxxxxxxxxx
+CLERK_WEBHOOK_SIGNING_SECRET=whsec_xxxxxxxxxxxx   ← from Clerk dashboard (Day 3)
+```
+
+#### Step 3: ✏️ `backend/server.js` — add Clerk middleware
+```javascript
+const { clerkMiddleware, getAuth } = require('@clerk/express');
+
+// Add BEFORE your routes — Clerk attaches auth info to every request
+app.use(clerkMiddleware());
+
+// Now every request has req.auth = { userId, sessionId, ... }
+// userId is the Clerk user ID (e.g., 'user_2abc123xyz')
+```
+
+#### Step 4: 📁 `middleware/requireAuth.js`
+```javascript
+const { requireAuth, getAuth } = require('@clerk/express');
+const Vendor = require('../models/Vendor');
+
+// Combined middleware: Clerk token check + MongoDB vendor lookup
+const protect = [
+  requireAuth(),   // ← Clerk handles token verification — throws 401 if invalid
+  async (req, res, next) => {
+    const { userId } = getAuth(req);
+    
+    // Find or create vendor in MongoDB linked to this Clerk user
+    let vendor = await Vendor.findOne({ clerkId: userId });
+    
+    if (!vendor) {
+      // First-time sign-in: create a minimal vendor profile
+      // Full profile details come from Clerk webhook (Day 3) or profile form
+      vendor = await Vendor.create({
+        clerkId: userId,
+        email: req.auth.sessionClaims?.email || '',
+        companyName: 'New Vendor',
+        gstin: 'PENDING',
+        pan: 'PENDING',
+        status: 'Pending'
+      });
+    }
+    
+    req.vendor = vendor;       // MongoDB vendor document
+    req.clerkUserId = userId;  // Clerk user ID string
+    next();
+  }
+];
+
+module.exports = { protect };
+```
+
+#### Step 5: ✏️ Lock down all routes in `routes/index.js`
+```javascript
+const { protect } = require('../middleware/requireAuth');
+
+// Apply protect to every route that needs auth:
+router.use('/vendors', protect, require('./vendor.routes'));
+router.use('/rfqs', protect, require('./rfq.routes'));
+router.use('/pos', protect, require('./po.routes'));
+router.use('/grns', protect, require('./grn.routes'));
+router.use('/invoices', protect, require('./invoice.routes'));
+router.use('/payments', protect, require('./payment.routes'));
+
+// Public (no auth required):
+router.get('/health', healthCheck);
+router.post('/webhooks', require('./webhook.routes'));  // Clerk webhooks — own auth
+```
+
+#### Step 6: Update all controllers — replace `req.headers['x-vendor-id']` with `req.vendor` + `req.clerkUserId`
+
+#### 🧪 End of Day Test
+```
+GET /api/vendors/profile WITHOUT token → 401 Unauthorized (Clerk)
+GET /api/vendors/profile WITH Clerk Bearer token → vendor profile returned
+Token issued from: const { getToken } = useAuth(); const t = await getToken();
+```
+
+---
+
+### Week 7 · Day 3 — Clerk Webhook: User → MongoDB Vendor Sync
+
+**Objective**: When a user signs up in Clerk, automatically create a full Vendor document in MongoDB.
+
+#### Step 1: Expose backend locally for Clerk webhooks
+```bash
+# Install ngrok (or use Clerk's webhook dev tool)
+npx ngrok http 5000
+# Copy the https URL: https://abc123.ngrok.io
+```
+
+#### Step 2: Configure webhook in Clerk Dashboard
+```
+Clerk Dashboard → Webhooks → Add Endpoint
+URL: https://abc123.ngrok.io/api/webhooks
+Events to subscribe:
+  ✅ user.created
+  ✅ user.updated
+  ✅ user.deleted
+Copy: Signing Secret → CLERK_WEBHOOK_SIGNING_SECRET in .env
+```
+
+#### Step 3: Install Svix
+```bash
+cd backend && npm install svix
+```
+
+#### Step 4: 📁 `controllers/webhook.controller.js`
+```javascript
+const { Webhook } = require('svix');
+const Vendor = require('../models/Vendor');
+
+const handleClerkWebhook = async (req, res) => {
+  const WEBHOOK_SECRET = process.env.CLERK_WEBHOOK_SIGNING_SECRET;
+  
+  // ⚠️ Svix requires RAW body — must use bodyParser.raw on this route
+  const wh = new Webhook(WEBHOOK_SECRET);
+  let evt;
+  
+  try {
+    evt = wh.verify(req.body, {
+      'svix-id':        req.headers['svix-id'],
+      'svix-timestamp': req.headers['svix-timestamp'],
+      'svix-signature': req.headers['svix-signature'],
+    });
+  } catch (err) {
+    return res.status(400).json({ error: 'Invalid webhook signature' });
+  }
+  
+  const { type, data } = evt;
+  
+  if (type === 'user.created') {
+    const email = data.email_addresses?.[0]?.email_address || '';
+    
+    // Upsert: idempotent — safe to receive same event multiple times
+    await Vendor.findOneAndUpdate(
+      { clerkId: data.id },
+      {
+        $setOnInsert: {
+          clerkId:     data.id,
+          email:       email,
+          companyName: data.first_name ? `${data.first_name} ${data.last_name || ''}`.trim() : 'New Vendor',
+          gstin:       'PENDING',
+          pan:         'PENDING',
+          status:      'Pending'
+        }
+      },
+      { upsert: true, new: true }
+    );
+  }
+  
+  if (type === 'user.updated') {
+    // Sync email updates
+    const email = data.email_addresses?.[0]?.email_address || '';
+    await Vendor.findOneAndUpdate({ clerkId: data.id }, { email });
+  }
+  
+  if (type === 'user.deleted') {
+    // Mark as inactive — do NOT delete (preserve transaction history)
+    await Vendor.findOneAndUpdate({ clerkId: data.id }, { status: 'Rejected', rejectionReason: 'Account deleted' });
+  }
+  
+  res.status(200).json({ success: true });
+};
+```
+
+#### Step 5: 📁 `routes/webhook.routes.js`
+```javascript
+const express = require('express');
+const router = express.Router();
+const bodyParser = require('body-parser');
+const { handleClerkWebhook } = require('../controllers/webhook.controller');
+
+// ⚠️ CRITICAL: Use bodyParser.raw here — not express.json()
+// Svix verifies the raw body bytes, not the parsed JSON
+router.post('/', bodyParser.raw({ type: 'application/json' }), handleClerkWebhook);
+
+module.exports = router;
+```
+
+#### 🧪 End of Day Test
+```
+Sign up new user in Clerk UI → check Atlas vendors collection → vendor auto-created
+Update email in Clerk → vendor email updated in Atlas
+Webhook endpoint shows 200 in Clerk dashboard webhook log
+Test idempotency: replay same webhook twice → only one vendor document
+```
+
+---
+
+### Week 7 · Day 4 — Frontend API Client Layer
+
+**Objective**: Create the API client that all frontend views will use. Token injected from Clerk.
+
+#### 📁 `src/lib/api.js`
+```javascript
+const API_BASE = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000';
+
+// Core fetcher — used by all API methods
+// getToken() comes from Clerk's useAuth() hook (passed in as param)
+const apiFetch = async (endpoint, options = {}, getToken) => {
+  const token = getToken ? await getToken() : null;
+  
+  const response = await fetch(`${API_BASE}${endpoint}`, {
+    ...options,
+    headers: {
+      'Content-Type': 'application/json',
+      ...(token && { Authorization: `Bearer ${token}` }),
+      ...options.headers,
+    },
+  });
+  
+  if (!response.ok) {
+    const error = await response.json().catch(() => ({ error: 'Network error' }));
+    throw new Error(error.error || `HTTP ${response.status}`);
+  }
+  
+  return response.json();
+};
+
+// API namespaces (all take getToken as last arg):
+export const vendorApi = {
+  getProfile:          (getToken) => apiFetch('/api/vendors/profile', {}, getToken),
+  updateProfile:       (data, getToken) => apiFetch('/api/vendors/profile', { method: 'PUT', body: JSON.stringify(data) }, getToken),
+  submitRegistration:  (getToken) => apiFetch('/api/vendors/profile/submit', { method: 'POST' }, getToken),
+  getPerformance:      (getToken) => apiFetch('/api/vendors/performance', {}, getToken),
+};
+
+export const rfqApi = {
+  list:     (params, getToken) => apiFetch(`/api/rfqs?${new URLSearchParams(params)}`, {}, getToken),
+  getById:  (id, getToken) => apiFetch(`/api/rfqs/${id}`, {}, getToken),
+  create:   (data, getToken) => apiFetch('/api/rfqs', { method: 'POST', body: JSON.stringify(data) }, getToken),
+  submitBid:(id, data, getToken) => apiFetch(`/api/rfqs/${id}/bid`, { method: 'POST', body: JSON.stringify(data) }, getToken),
+  award:    (id, data, getToken) => apiFetch(`/api/rfqs/${id}/award`, { method: 'POST', body: JSON.stringify(data) }, getToken),
+  evaluate: (id, getToken) => apiFetch(`/api/rfqs/${id}/evaluate`, {}, getToken),
+  cancel:   (id, getToken) => apiFetch(`/api/rfqs/${id}/cancel`, { method: 'PUT' }, getToken),
+  reissue:  (id, data, getToken) => apiFetch(`/api/rfqs/${id}/reissue`, { method: 'PUT', body: JSON.stringify(data) }, getToken),
+};
+
+export const poApi = {
+  list:        (params, getToken) => apiFetch(`/api/pos?${new URLSearchParams(params)}`, {}, getToken),
+  getById:     (id, getToken) => apiFetch(`/api/pos/${id}`, {}, getToken),
+  acknowledge: (id, getToken) => apiFetch(`/api/pos/${id}/acknowledge`, { method: 'PUT' }, getToken),
+  submitASN:   (id, data, getToken) => apiFetch(`/api/pos/${id}/asn`, { method: 'POST', body: JSON.stringify(data) }, getToken),
+  simulate:    (getToken) => apiFetch('/api/pos/simulate', { method: 'POST' }, getToken),
+};
+
+export const grnApi    = { list: (getToken) => apiFetch('/api/grns', {}, getToken) };
+export const invoiceApi= { list: (getToken) => apiFetch('/api/invoices', {}, getToken), submit: (data, getToken) => apiFetch('/api/invoices', { method: 'POST', body: JSON.stringify(data) }, getToken) };
+export const paymentApi= { list: (getToken) => apiFetch('/api/payments', {}, getToken) };
+export const sapLogApi = { list: (getToken) => apiFetch('/api/logs', {}, getToken) };
+```
+
+#### 🧪 End of Day Test
+```
+In browser console (after Clerk sign-in):
+  const { getToken } = useAuth();
+  import('/src/lib/api.js').then(m => m.vendorApi.getProfile(getToken))
+  → returns vendor profile from API
+```
+
+---
+
+### Week 7 · Day 5 — Migrate store-context.js: Profile + RFQ + Auth Wiring
+
+**Objective**: Connect the StoreProvider to Clerk. Load real data on sign-in.
+
+#### ✏️ `src/lib/store-context.js`
+
+```javascript
+'use client';
+import { useAuth, useUser } from '@clerk/nextjs';
+
+export function StoreProvider({ children }) {
+  const { getToken, isSignedIn, isLoaded: clerkLoaded } = useAuth();
+  const { user } = useUser();
+
+  const [state, setState] = useState(getUiDefaults()); // only UI prefs
+  const [dataLoaded, setDataLoaded] = useState(false);
+
+  // Load all data from API once Clerk confirms sign-in
+  useEffect(() => {
+    if (!clerkLoaded || !isSignedIn) return;
+    loadAllData();
+  }, [clerkLoaded, isSignedIn]);
+
+  const loadAllData = async () => {
+    try {
+      const [profile, rfqs, pos, grns, invoices, payments] = await Promise.all([
+        vendorApi.getProfile(getToken),
+        rfqApi.list({}, getToken),
+        poApi.list({}, getToken),
+        grnApi.list(getToken),
+        invoiceApi.list(getToken),
+        paymentApi.list(getToken),
+      ]);
+      setState(prev => ({ ...prev, profile, rfqs, pos, grns, invoices, payments }));
+      setDataLoaded(true);
+    } catch (err) {
+      console.error('Failed to load portal data', err);
+    }
+  };
+
+  // Actions — all call API now:
+  const submitRegistration = async (profileData) => {
+    await vendorApi.updateProfile(profileData, getToken);
+    await vendorApi.submitRegistration(getToken);
+    const profile = await vendorApi.getProfile(getToken);
+    setState(prev => ({ ...prev, profile }));
+  };
+
+  const createRFQ = async (rfqData) => {
+    const rfq = await rfqApi.create(rfqData, getToken);
+    setState(prev => ({ ...prev, rfqs: [rfq, ...prev.rfqs] }));
+  };
+
+  const handleBidSubmit = async (rfqId, prices, leadTime, remarks, gstRate, validityDate, freight, moq) => {
+    await rfqApi.submitBid(rfqId, { unitPrices: prices, deliveryLeadTimeDays: leadTime, remarks, gstRate, validityDate, freight, moq }, getToken);
+    const rfqs = await rfqApi.list({}, getToken);
+    setState(prev => ({ ...prev, rfqs }));
+  };
+
+  const acknowledgePO = async (poId) => {
+    await poApi.acknowledge(poId, getToken);
+    const pos = await poApi.list({}, getToken);
+    setState(prev => ({ ...prev, pos }));
+  };
+
+  // ... all other actions similarly
+
+  // ❌ REMOVE: localStorage business data, all setTimeout simulations,
+  //            getInitialState() mock imports, logSAPEvent (now server-side)
+  // ✅ KEEP: activeTab UI state, consoleOpen UI state in localStorage
+}
+```
+
+#### ✏️ `src/lib/store.js` — strip down
+```javascript
+// Keep ONLY UI preference defaults (no business data):
+export const getUiDefaults = () => ({
+  activeTab: 'dashboard',
+  consoleOpen: false,
+  // performance defaults (until server returns real data)
+  performance: { deliveryOTIF: 0, qualityAcceptance: 0, priceIndex: 0, grade: 'N/A' }
+});
+// ❌ Remove all mock RFQs, POs, GRNs, invoices, payments, logs, profile
+```
+
+#### 🧪 End of Day Test
+```
+Sign in → portal loads with real vendor profile from Atlas
+Dashboard KPI cards show real PO/invoice counts
+Create RFQ from UI → appears in Atlas rfqs collection
+Refresh browser → data reloads from API (not localStorage)
 ```
 
 ---
@@ -2351,12 +2351,12 @@ CI/CD:
 |---|---|---|---|---|
 | **Backend Foundation** | 1 | Folder structure · All 8 Mongoose schemas · Vendor profile API · SapLogger utility | Open routes | ✅ **Completed** |
 | **RFQ & PO API** | 2 | RFQ lifecycle (ME41→ME58) · PO/ASN/GRN chain · Invoice 3-way match · F110 payment | Open routes | ⏳ **Next Up** |
-| **🔐 Clerk Auth** | 3 | Clerk on frontend+backend · Webhook user sync · `requireAuth()` on all routes · API client | ✅ **Secured** | 🔲 Planned |
-| **Frontend Migration** | 4 | Transition monolithic `store-context.js` to modular feature hooks (`useProfile`, `useRFQs`, etc.) and api-client | Clerk tokens | ✅ **Completed Ahead of Schedule** |
-| **Real-Time** | 5 | Socket.io (Clerk-authed) · GRN/payment/chat push events · File uploads · PDF reports | Clerk tokens | 🔲 Planned |
-| **Security** | 6 | Zod validation · Helmet/sanitize · Winston logging · Env validation · Admin panel | Clerk + Zod | 🔲 Planned |
-| **SAP RFC** | 7 | RFC client + mock mode · BAPI translators · IDoc handler · Analytics API · Jest tests | Clerk tokens | 🔲 Planned |
-| **Deploy** | 8 | Unit + integration tests · GitHub Actions CI/CD · Vercel + Railway production | Production Clerk | 🔲 Planned |
+| **Real-Time** | 3 | Socket.io (mock rooms) · GRN/payment/chat push events · File uploads · PDF reports | Open routes | 🔲 Planned |
+| **Frontend Migration** | 4 | Transition monolithic `store-context.js` to modular feature hooks (`useProfile`, `useRFQs`, etc.) and api-client | Open routes | ✅ **Completed Ahead of Schedule** |
+| **Security** | 5 | Zod validation · Helmet/sanitize · Winston logging · Env validation · Admin panel | Open routes | 🔲 Planned |
+| **SAP RFC** | 6 | RFC client + mock mode · BAPI translators · IDoc handler · Analytics API · Jest tests | Open routes | 🔲 Planned |
+| **🔐 Clerk Auth** | 7 | Clerk on frontend+backend · Webhook user sync · `requireAuth()` on all routes · Lock down socket.io | ✅ **Secured** | 🔲 Planned |
+| **Deploy** | 8 | Unit + integration tests · GitHub Actions CI/CD · Vercel + Railway production | Production Clerk | 🔲 Planned | Production Clerk | 🔲 Planned |
 
 ---
 

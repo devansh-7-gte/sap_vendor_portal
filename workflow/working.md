@@ -48,9 +48,11 @@ The application utilizes a decoupled, modern architecture:
 
 ## 3. Current System State
 
-- **Active Services**: The backend server (Express on Port `5000`) and the Next.js frontend (Port `3000`) are running concurrently.
-- **Client-Side Simulation vs. API**: The frontend views utilize custom hooks which manage local state in `localStorage` and trigger mock timeout delays (e.g., Goods Receipt posting after 5s) for legacy compatibility.
-- **Integration Gap**: Service endpoints exist in the frontend feature directories, but corresponding backend routes (for RFQs, POs, Invoices, Payments, and Chats) are not yet fully routed or persisted to MongoDB on the backend.
+- **Active Services**: Next.js client (running on Port `3000`/`3001` or Next.js dev server) and Express backend (Port `5000`) are fully running with real-time bidirectional Socket.io channels and database persistence.
+- **Full Backend Integration**: All frontend feature hooks (`usePOs`, `usePayments`, `useInvoices`, `useRFQs`, `useProfile`) and context (`portal-context.js`) are wired to call backend REST endpoints via `api-client.js`. Client-side local storage fallback structures and mock timeouts have been completely removed.
+- **Real-Time Synchronization**: Handled via Socket.io events (`po:new`, `grn:received`, `payment:cleared`, `chat:message`, `log:new`) which stream live transactional updates and developer console logs directly to the client session.
+- **RFQ & Bid comparative evaluation**: Fully integrated. Quotations maintain SAP info records in MongoDB, and the `Evaluate & Award (ME48)` comparative matrix calculates weighted scores and triggers PO creation dynamically.
+- **Rate-Limiter Optimization**: Configured `apiLimiter` to run only in production, preventing requests from being rate-limited in local development.
 
 ---
 
@@ -58,25 +60,25 @@ The application utilizes a decoupled, modern architecture:
 
 ```mermaid
 graph TD
-    A[Build Backend Routes: RFQ/PO/Invoice/Payment/Chat] --> B[Implement Clerk Authentication]
-    B --> C[Wire Services to backend API]
-    C --> D[Integrate Socket.io Real-Time Updates]
+    A[Completed: Wire Frontend to Live REST & Sockets] --> B[Security Hardening & Winston Logger]
+    B --> C[SAP RFC Integration & IDoc Processor]
+    C --> D[Implement Clerk Authentication]
 ```
 
 ### 📅 Action Plan
 
-1. **Step 1: Expand Backend APIs**
-   - Create controller handlers and router maps for RFQ lifecycle endpoints (`POST /api/rfqs`, `POST /api/rfqs/:id/bid`).
-   - Create endpoints for logistics tracking: PO retrieval (`GET /api/purchase-orders`), ASN submission (`POST /api/purchase-orders/:id/asn`), and GRN receipt list.
-   - Implement MIRO invoice posting APIs (`POST /api/invoices`, `POST /api/invoices/:id/miro`) and Chat persistence logic.
+1. **Step 1: Completed: REST and Socket.io Integration**
+   - Wired all custom hooks under `src/features/` and `portal-context.js` to real backend controllers.
+   - Synchronized ASN submissions, GRN auto-receipt updates, and invoice clearance events via live Socket.io channels.
+   - Cleaned up RFQ Monitor, Submit Quotation, and Evaluate & Award tabs to load all DB-managed RFQ records.
 
-2. **Step 2: Connect Clerk Authentication**
-   - Place Next.js frontend routes behind the Clerk wrapper (`<ClerkProvider>` in layout).
-   - Guard backend APIs using Clerk's middleware and decode `req.clerkUserId` from verified session tokens.
+2. **Step 2: Security Hardening (Week 5)**
+   - Implement Zod schema request validation in backend routes.
+   - Configure Helmet headers, MongoDB injection sanitizers, and Winston logger daily-rotation.
 
-3. **Step 3: Swap Frontend Mock States to Live REST Calls**
-   - Remove `setTimeout` triggers (like auto-approving bids or generating dummy GRNs) from custom React hooks.
-   - Connect hooks to return states directly from backend database fetches.
+3. **Step 3: SAP RFC Integration (Week 6)**
+   - Build translation models for BAPI parameters and integrate OData / IDoc processors.
 
-4. **Step 4: Configure Socket.io**
-   - Setup WebSockets to stream background events (such as automated GRN creation or invoice payment status updates) to the active client window.
+4. **Step 4: Connect Clerk Authentication (Week 7)**
+   - Wrap Next.js pages in `<ClerkProvider>` and implement route rules.
+   - Secure the Express server API endpoints and Socket connection rooms via `@clerk/express` middleware.

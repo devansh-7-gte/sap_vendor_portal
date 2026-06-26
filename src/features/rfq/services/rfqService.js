@@ -2,7 +2,7 @@ import { apiClient } from '../../../lib/api-client';
 
 export const rfqService = {
   async getRFQs() {
-    return apiClient.get('/rfqs').catch(() => null);
+    return apiClient.get('/rfqs?all=true').catch(() => null);
   },
 
   async getRFQById(rfqId) {

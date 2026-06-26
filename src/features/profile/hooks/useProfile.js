@@ -59,6 +59,8 @@ export function useProfile() {
   useEffect(() => {
     async function loadProfile() {
       try {
+        // Disabled retrieval to always access the registration form as requested by user
+        /*
         const data = await profileService.getProfile();
         if (data) {
           setProfile(data);
@@ -66,7 +68,9 @@ export function useProfile() {
             localStorage.setItem('sap_vendor_profile_data', JSON.stringify(data));
           } catch (e) {}
         }
+        */
       } catch (err) {
+        /*
         // Fallback to localStorage
         try {
           const saved = localStorage.getItem('sap_vendor_profile_data');
@@ -74,6 +78,7 @@ export function useProfile() {
             setProfile(JSON.parse(saved));
           }
         } catch (e) {}
+        */
       } finally {
         setLoading(false);
       }
