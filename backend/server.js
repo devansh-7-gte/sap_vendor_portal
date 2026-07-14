@@ -1,5 +1,6 @@
 const dotenv = require('dotenv');
-dotenv.config(); // Load environment variables first
+const path = require('path');
+dotenv.config({ path: path.join(__dirname, '../.env') }); // Load environment variables first
 
 const logger = require('./utils/logger');
 const validateEnv = require('./config/validateEnv');
