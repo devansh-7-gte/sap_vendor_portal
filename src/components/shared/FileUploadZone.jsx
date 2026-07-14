@@ -167,37 +167,37 @@ export default function FileUploadZone({
 
   return (
     <div className="space-y-1.5 w-full">
-      <span className="text-[10px] font-bold text-stone-500 uppercase tracking-wider block">{label}</span>
-      
+      <span className="label">{label}</span>
+
       {/* ERROR MESSAGE CARD */}
       {error && (
-        <div className="bg-red-50 border border-red-200 p-2 rounded text-red-950 flex items-start gap-2 animate-fade-in">
-          <AlertCircle className="size-3.5 text-red-600 shrink-0 mt-0.5" />
+        <div className="bg-[#FFF1F2] border border-[#FECDD3] p-2 rounded-md text-[#EF4444] flex items-start gap-2 animate-fade-in">
+          <AlertCircle className="size-3.5 text-[#EF4444] shrink-0 mt-0.5" />
           <span className="text-[10px] font-semibold leading-normal pr-4">{error}</span>
           <button onClick={() => setError(null)} className="ml-auto text-[10px] hover:underline cursor-pointer select-none">Dismiss</button>
         </div>
       )}
 
       {value ? (
-        /* UPLOADED FILE PREVIEW CARD (Steel Scaffold aesthetics) */
-        <div className="bg-white border border-stone-200 rounded p-2.5 flex items-center justify-between shadow-xs animate-fade-in">
+        /* UPLOADED FILE PREVIEW CARD */
+        <div className="card p-2.5 flex items-center justify-between animate-fade-in">
           <div className="flex items-center gap-2.5 min-w-0 pr-4">
-            <div className="size-7 rounded bg-stone-50 border border-stone-200 flex items-center justify-center text-stone-500 shrink-0">
+            <div className="size-7 rounded-md bg-surface2 border border-border flex items-center justify-center text-text-tertiary shrink-0">
               <File className="size-4" />
             </div>
             <div className="min-w-0">
-              <p className="text-xs font-bold text-stone-800 truncate leading-tight">{value.originalName}</p>
-              <p className="text-[9px] text-stone-400 font-mono mt-0.5">Uploaded &bull; {value.size ? formatSize(value.size) : 'Link Attached'}</p>
+              <p className="text-xs font-bold text-text-primary truncate leading-tight">{value.originalName}</p>
+              <p className="text-[9px] text-text-tertiary font-mono mt-0.5">Uploaded &bull; {value.size ? formatSize(value.size) : 'Link Attached'}</p>
             </div>
           </div>
-          
+
           <button
             onClick={handleRemove}
             disabled={uploading}
-            className="p-1.5 text-stone-400 hover:text-red-700 hover:bg-stone-50 transition-all rounded cursor-pointer shrink-0 disabled:opacity-50"
+            className="p-1.5 text-text-tertiary hover:text-red-500 hover:bg-surface2 transition-colors duration-150 rounded-md cursor-pointer shrink-0 disabled:opacity-50"
             title="Remove File"
           >
-            {uploading ? <Loader2 className="size-4 animate-spin text-stone-500" /> : <Trash2 className="size-4" />}
+            {uploading ? <Loader2 className="size-4 animate-spin text-text-tertiary" /> : <Trash2 className="size-4" />}
           </button>
         </div>
       ) : (
@@ -208,8 +208,8 @@ export default function FileUploadZone({
           onDragLeave={handleDrag}
           onDrop={handleDrop}
           onClick={() => fileInputRef.current?.click()}
-          className={`border border-dashed rounded p-5 flex flex-col items-center justify-center text-center cursor-pointer transition-all min-h-[100px] bg-stone-50/50 hover:bg-stone-50 border-stone-300 hover:border-amber-500 select-none ${
-            isDragActive ? 'border-amber-500 bg-amber-50/20' : ''
+          className={`border border-dashed rounded-md p-5 flex flex-col items-center justify-center text-center cursor-pointer transition-colors duration-150 min-h-[100px] bg-base hover:bg-surface2 border-border-em select-none ${
+            isDragActive ? 'border-[rgb(var(--color-emerald-default-rgb))] bg-surface2' : ''
           } ${uploading ? 'pointer-events-none opacity-80' : ''}`}
         >
           <input
@@ -220,25 +220,25 @@ export default function FileUploadZone({
             className="hidden"
             disabled={uploading}
           />
-          
+
           {uploading ? (
             <div className="space-y-2 flex flex-col items-center">
-              <Loader2 className="size-6 animate-spin text-amber-500" />
+              <Loader2 className="size-6 animate-spin" style={{ color: 'rgb(var(--color-emerald-default-rgb))' }} />
               <div className="space-y-0.5">
-                <p className="text-xs font-bold text-stone-700">Uploading attachment...</p>
-                <div className="w-24 bg-stone-200 h-1 rounded-full overflow-hidden border border-stone-300/40">
-                  <div className="bg-amber-500 h-full transition-all duration-300" style={{ width: `${progress}%` }}></div>
+                <p className="text-xs font-bold text-text-secondary">Uploading attachment...</p>
+                <div className="w-24 bg-surface2 h-1 rounded-full overflow-hidden border border-border">
+                  <div className="h-full transition-all duration-300" style={{ width: `${progress}%`, backgroundColor: 'rgb(var(--color-emerald-default-rgb))' }}></div>
                 </div>
               </div>
             </div>
           ) : (
             <div className="space-y-1.5 flex flex-col items-center">
-              <UploadCloud className={`size-6 transition-colors ${isDragActive ? 'text-amber-500 animate-bounce' : 'text-stone-400'}`} />
+              <UploadCloud className={`size-6 transition-colors duration-150 ${isDragActive ? 'text-text-primary' : 'text-text-tertiary'}`} />
               <div className="space-y-0.5">
-                <p className="text-xs font-bold text-stone-700">
+                <p className="text-xs font-bold text-text-secondary">
                   {isDragActive ? "Drop here to attach" : "Drag files here or click to browse"}
                 </p>
-                <p className="text-[9px] text-stone-400 font-mono">
+                <p className="text-[9px] text-text-tertiary font-mono">
                   Supports PDF, DOC, DOCX, XLS, JPG, PNG (Max {accept.includes('png') ? '5MB images' : '10MB documents'})
                 </p>
               </div>
