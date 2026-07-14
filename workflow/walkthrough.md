@@ -248,3 +248,24 @@ We have aligned the design and layout of the Reports & Analytics View with the p
 - Added an embedded top section header bar (`bg-stone-50/60` background, a colored status circle, and bold uppercase title) inside each card instead of standard text headers.
 - Wrapped content cells in clean nested padded grids (`grid grid-cols-2 md:grid-cols-3 gap-4 p-5`) matching the exact horizontal alignments of the Purchase Order detail tab.
 - Verified visual output compile cleanliness with `impeccable detect` (0 anti-patterns).
+
+---
+
+## 📁 Phase 7 & Auth Stability — Resolve Sign-In Infinite Redirection Loop (July 2026)
+
+We resolved the infinite redirection loop that occurred when visiting `/sign-in` or `/sign-up` without an active JWT token session.
+
+### 1. Interceptor Guarding
+- **[api-client.js](file:///a:/sap_vendor_portal/src/lib/api-client.js)**:
+  * Modified the `401 Unauthorized` interceptor handler to only set `window.location.href = '/sign-in'` if the current path is NOT an authentication page (i.e. `/sign-in` or `/sign-up`). This prevents the API client from repeatedly reloading the login page.
+
+### 2. Hook and Context Refactoring
+- Refactored the dashboard, billing, profile, RFQ, and purchase order hooks to return early and skip sending API requests if the `jwt_token` is missing in `localStorage`:
+  * **[useRFQs.js](file:///a:/sap_vendor_portal/src/features/rfq/hooks/useRFQs.js)**
+  * **[usePOs.js](file:///a:/sap_vendor_portal/src/features/purchase-order/hooks/usePOs.js)**
+  * **[useInvoices.js](file:///a:/sap_vendor_portal/src/features/billing/hooks/useInvoices.js)**
+  * **[usePayments.js](file:///a:/sap_vendor_portal/src/features/payments/hooks/usePayments.js)**
+  * **[useDashboard.js](file:///a:/sap_vendor_portal/src/features/dashboard/hooks/useDashboard.js)**
+  * **[shell-context.js](file:///a:/sap_vendor_portal/src/lib/shell-context.js)**
+- **[portal-context.js](file:///a:/sap_vendor_portal/src/lib/portal-context.js)**:
+  * Prevented the Socket.io WebSocket initialization from running when there is no active JWT session token.
