@@ -4,49 +4,49 @@ import { Award, CheckCircle2, TrendingUp, AlertTriangle, Activity } from 'lucide
 export default function PerformanceView({ state }) {
   const perf = state.performance;
   const metrics = [
-    { name: 'On-Time In-Full (OTIF)', val: `${perf.deliveryOTIF}%`, target: 'Target: >95.0%', style: 'border-stone-200' },
-    { name: 'QC Acceptance Rate', val: `${perf.qualityAcceptance}%`, target: 'Target: >98.0%', style: 'border-stone-200' },
-    { name: 'Pricing Index Competitiveness', val: `${perf.priceIndex}/100`, target: 'Target: >85.0', style: 'border-stone-200' },
-    { name: 'AP Response Window', val: `${perf.responseTimeHours} hrs`, target: 'Target: <4.0 hrs', style: 'border-stone-200' }
+    { name: 'On-Time In-Full (OTIF)', val: `${perf.deliveryOTIF}%`, target: 'Target: >95.0%', style: 'border-border' },
+    { name: 'QC Acceptance Rate', val: `${perf.qualityAcceptance}%`, target: 'Target: >98.0%', style: 'border-border' },
+    { name: 'Pricing Index Competitiveness', val: `${perf.priceIndex}/100`, target: 'Target: >85.0', style: 'border-border' },
+    { name: 'AP Response Window', val: `${perf.responseTimeHours} hrs`, target: 'Target: <4.0 hrs', style: 'border-border' }
   ];
 
   return (
     <div className="space-y-6 max-w-full mx-auto animate-fade-in pb-12">
       {/* Title Header */}
-      <div className="bg-white border border-border p-4 rounded-sm shadow-xs flex items-center justify-between">
+      <div className="card p-4 flex items-center justify-between">
         <div>
-          <h2 className="text-sm font-extrabold uppercase tracking-wider text-stone-900 flex items-center gap-2">
-            <Activity className="size-4.5 text-primary" /> Supplier Performance scorecard
+          <h2 className="text-[22px] font-bold text-text-primary flex items-center gap-2">
+            <Activity className="size-4.5 text-text-secondary" /> Supplier Performance scorecard
           </h2>
-          <p className="text-[11px] text-stone-500 mt-1 font-semibold">
+          <p className="text-[11px] text-text-secondary mt-1 font-semibold">
             Quality grades and logistics compliance KPI records evaluated dynamically against SAP transactional histories
           </p>
         </div>
-        <div className="size-14 rounded-sm border border-stone-250 bg-stone-50 flex flex-col items-center justify-center shadow-2xs shrink-0 select-none">
-          <span className="text-[8px] text-stone-550 font-bold uppercase tracking-wider">GRADE</span>
-          <span className="text-xl font-bold font-mono text-stone-900 leading-none mt-1">{perf.grade}</span>
+        <div className="size-14 rounded-md border border-border bg-surface2 flex flex-col items-center justify-center shrink-0 select-none">
+          <span className="text-[8px] text-text-tertiary font-bold uppercase tracking-wider">GRADE</span>
+          <span className="text-xl font-bold font-mono text-text-primary leading-none mt-1">{perf.grade}</span>
         </div>
       </div>
 
       {/* METRICS CARDS PANEL */}
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
         {metrics.map(m => (
-          <div key={m.name} className={`p-4.5 rounded-sm border flex flex-col justify-between min-h-[115px] shadow-sm bg-white ${m.style} hover:border-stone-300 transition-all`}>
+          <div key={m.name} className={`metric-panel justify-between min-h-[115px] ${m.style} hover:border-border-em transition-colors duration-150`}>
             <div>
-              <span className="text-[9px] text-stone-500 uppercase font-bold tracking-wider block leading-tight">{m.name}</span>
-              <span className="text-2xl font-mono font-bold block mt-2.5 text-stone-900">{m.val}</span>
+              <span className="label mb-0 leading-tight">{m.name}</span>
+              <span className="text-2xl font-mono font-bold block mt-2.5 text-text-primary tabular-nums">{m.val}</span>
             </div>
-            <span className="text-[10px] text-stone-400 font-semibold mt-2.5">{m.target}</span>
+            <span className="text-[10px] text-text-tertiary font-semibold mt-2.5">{m.target}</span>
           </div>
         ))}
       </div>
 
       {/* PERFORMANCE CRITERIA BARS SECTION */}
-      <div className="p-5 rounded-sm border border-stone-200 bg-white shadow-xs space-y-4">
-        <h3 className="text-xs font-extrabold text-stone-900 uppercase tracking-wider border-b border-stone-200 pb-2 flex items-center gap-2">
-          <TrendingUp className="size-4 text-stone-605" /> Operational Metrics Timeline Check
+      <div className="card p-5 space-y-4">
+        <h3 className="text-xs font-extrabold text-text-primary uppercase tracking-wider border-b border-border pb-2 flex items-center gap-2">
+          <TrendingUp className="size-4 text-text-secondary" /> Operational Metrics Timeline Check
         </h3>
-        
+
         <div className="space-y-4.5 max-w-2xl">
           {[
             { name: 'On-Time Delivery (OTIF)', val: perf.deliveryOTIF, target: 95 },
@@ -55,18 +55,18 @@ export default function PerformanceView({ state }) {
             { name: 'Planners Response Speed', val: 92, target: 85 }
           ].map((bar, idx) => {
             const isTargetMet = bar.val >= bar.target;
-            const barColor = isTargetMet ? 'bg-primary' : 'bg-amber-500';
+            const barColor = isTargetMet ? 'bg-emerald-500' : 'bg-amber-500';
             return (
               <div key={idx} className="space-y-1.5">
                 <div className="flex justify-between text-xs font-semibold">
-                  <span className="text-stone-750">{bar.name}</span>
-                  <span className={isTargetMet ? 'text-green-700 font-bold' : 'text-amber-605 font-bold'}>
-                    {bar.val}% <span className="text-stone-400 font-normal">/ target {bar.target}%</span>
+                  <span className="text-text-primary">{bar.name}</span>
+                  <span className={isTargetMet ? 'text-emerald-text font-bold tabular-nums' : 'text-amber-600 font-bold tabular-nums'}>
+                    {bar.val}% <span className="text-text-tertiary font-normal">/ target {bar.target}%</span>
                   </span>
                 </div>
-                <div className="w-full bg-stone-100 h-2 rounded-sm border border-stone-200 overflow-hidden">
-                  <div 
-                    className={`h-full rounded-sm transition-all duration-500 ${barColor}`} 
+                <div className="w-full bg-surface2 h-2 rounded-full border border-border overflow-hidden">
+                  <div
+                    className={`h-full rounded-full transition-all duration-500 ${barColor}`}
                     style={{ width: `${bar.val}%` }}
                   ></div>
                 </div>
@@ -77,26 +77,26 @@ export default function PerformanceView({ state }) {
       </div>
 
       {/* COMPLIANCE GUIDANCE CARD */}
-      <div className="p-5 rounded-sm border border-stone-200 bg-white shadow-xs space-y-3.5">
-        <h3 className="text-xs font-extrabold text-stone-900 uppercase tracking-wider border-b border-stone-200 pb-2">
+      <div className="card p-5 space-y-3.5">
+        <h3 className="text-xs font-extrabold text-text-primary uppercase tracking-wider border-b border-border pb-2">
           Operational Compliance Guidelines &amp; Protocol Rules
         </h3>
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-6 text-xs text-stone-500 leading-relaxed">
-          <div className="space-y-1 border-r border-stone-100 pr-4 last:border-r-0 last:pr-0">
-            <h4 className="font-extrabold text-stone-850 uppercase text-[10px] tracking-wider mb-1">Quality Stores Rejections</h4>
-            <p className="text-stone-550 leading-normal">
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-6 text-xs text-text-secondary leading-relaxed">
+          <div className="space-y-1 border-r border-border pr-4 last:border-r-0 last:pr-0">
+            <h4 className="font-extrabold text-text-primary uppercase text-[10px] tracking-wider mb-1">Quality Stores Rejections</h4>
+            <p className="text-text-secondary leading-normal">
               Inspection discrepancies logged at store gates during MIGO posting directly reduce the Quality index. Verify and securely pack materials to avoid QC rejections.
             </p>
           </div>
-          <div className="space-y-1 border-r border-stone-100 pr-4 last:border-r-0 last:pr-0">
-            <h4 className="font-extrabold text-stone-850 uppercase text-[10px] tracking-wider mb-1">Lead-Time Compliance</h4>
-            <p className="text-stone-550 leading-normal">
+          <div className="space-y-1 border-r border-border pr-4 last:border-r-0 last:pr-0">
+            <h4 className="font-extrabold text-text-primary uppercase text-[10px] tracking-wider mb-1">Lead-Time Compliance</h4>
+            <p className="text-text-secondary leading-normal">
               OTIF scores compare tracking dispatch stamps against agreed contractual delivery dates. Keeping dispatches within allocated slots preserves your priority vendor status.
             </p>
           </div>
-          <div className="space-y-1 border-r border-stone-100 pr-4 last:border-r-0 last:pr-0">
-            <h4 className="font-extrabold text-stone-850 uppercase text-[10px] tracking-wider mb-1">LIV Invoice Consistency</h4>
-            <p className="text-stone-550 leading-normal">
+          <div className="space-y-1 border-r border-border pr-4 last:border-r-0 last:pr-0">
+            <h4 className="font-extrabold text-text-primary uppercase text-[10px] tracking-wider mb-1">LIV Invoice Consistency</h4>
+            <p className="text-text-secondary leading-normal">
               Quantities and prices listed in posted invoices are checked against PO schedules and GRN MIGO records. Perfect match entries speed up settlement cycles.
             </p>
           </div>

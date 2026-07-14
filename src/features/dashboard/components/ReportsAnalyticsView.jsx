@@ -7,6 +7,8 @@ import {
   Clock, Activity, Filter, Receipt, ShieldCheck, Zap, AlertTriangle, MapPin
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
+import StatusBadge from '@/components/ui/StatusBadge';
+import { msmeStatusVariant, paymentStatusVariant } from '@/lib/statusColors';
 import ErrorBoundary from '@/components/ErrorBoundary';
 import { usePortal } from '@/lib/portal-context';
 
@@ -42,17 +44,17 @@ const formatDate = (dateStr) => {
 function SapReadOnlyField({ label, value, isFile, isMonospace = true, valueClassName = '', containerClassName = '', icon: Icon }) {
   return (
     <div className="flex flex-col gap-1 items-center select-none focus-within:outline-none">
-      <span className="text-[9px] font-extrabold text-stone-600 uppercase tracking-wider flex items-center gap-1 leading-none" title={label}>
-        {Icon && <Icon className="size-3 text-stone-500 shrink-0" />}
+      <span className="text-[9px] font-extrabold text-text-secondary uppercase tracking-wider flex items-center gap-1 leading-none" title={label}>
+        {Icon && <Icon className="size-3 text-text-tertiary shrink-0" />}
         <span>{label}</span>
       </span>
       <div
-        className={`inline-flex items-center gap-1.5 border rounded-[3px] px-2.5 text-xs h-6.5 font-semibold cursor-default box-border w-fit max-w-full overflow-hidden text-ellipsis whitespace-nowrap focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-blue-400 focus-visible:ring-offset-1 select-all transition-all duration-150 ${isMonospace ? 'font-mono' : 'font-sans'
-          } ${containerClassName || 'bg-stone-50 text-stone-900 border-stone-200'} ${valueClassName}`}
+        className={`inline-flex items-center gap-1.5 border rounded-md px-2.5 text-xs h-6.5 font-semibold cursor-default box-border w-fit max-w-full overflow-hidden text-ellipsis whitespace-nowrap tabular-nums focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-border-em focus-visible:ring-offset-1 select-all transition-colors duration-150 ${isMonospace ? 'font-mono' : 'font-sans'
+          } ${containerClassName || 'bg-surface2 text-text-primary border-border'} ${valueClassName}`}
         title={value || ''}
         tabIndex={0}
       >
-        {isFile && <FileText className="size-3.5 text-stone-500 shrink-0" />}
+        {isFile && <FileText className="size-3.5 text-text-tertiary shrink-0" />}
         <span>{value || '—'}</span>
       </div>
     </div>
@@ -62,8 +64,8 @@ function SapReadOnlyField({ label, value, isFile, isMonospace = true, valueClass
 function SapInputField({ label, required, children, icon: Icon }) {
   return (
     <div className="flex flex-col gap-1 items-center focus-within:outline-none">
-      <span className="text-[9px] font-extrabold text-stone-600 uppercase tracking-wider flex items-center gap-1 leading-none">
-        {Icon && <Icon className="size-3 text-stone-500 shrink-0" />}
+      <span className="text-[9px] font-extrabold text-text-secondary uppercase tracking-wider flex items-center gap-1 leading-none">
+        {Icon && <Icon className="size-3 text-text-tertiary shrink-0" />}
         <span>
           {label}
           {required && <span className="text-red-500 font-bold ml-0.5">*</span>}
@@ -224,44 +226,44 @@ export default function ReportsAnalyticsView({ state }) {
       <div className="space-y-6 max-w-full mx-auto animate-fade-in pb-16 relative">
         
         {/* PAGE HEADER */}
-        <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 border-b border-stone-200 pb-4 select-none">
+        <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 border-b border-border pb-4 select-none">
           <div className="space-y-1">
-            <h2 className="text-xl font-bold tracking-tight text-stone-900 flex items-center gap-2.5">
-              <FileSpreadsheet className="size-5 text-stone-500 shrink-0" /> Reports &amp; Analytics
+            <h2 className="text-[22px] font-bold text-text-primary flex items-center gap-2.5">
+              <FileSpreadsheet className="size-5 text-text-tertiary shrink-0" /> Reports &amp; Analytics
             </h2>
-            <p className="text-stone-500 text-xs font-semibold">
+            <p className="text-text-tertiary text-xs font-semibold">
               Operational spend analytics, treasury payables ledger aging, and self-service report scheduling
             </p>
           </div>
           <div className="flex flex-wrap items-center gap-2.5">
             <div 
               tabIndex={0}
-              className="flex items-center gap-2 bg-white border border-stone-300 hover:border-stone-400 focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-stone-500 rounded-lg py-1.5 px-3 text-xs text-stone-700 font-semibold h-9 shadow-sm transition-all cursor-pointer"
+              className="flex items-center gap-2 bg-surface border border-border hover:border-border-em focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-border-em rounded-lg py-1.5 px-3 text-xs text-text-secondary font-semibold h-9 shadow-sm transition-all cursor-pointer"
             >
-              <Calendar className="size-4 text-stone-450 shrink-0" />
+              <Calendar className="size-4 text-text-tertiary shrink-0" />
               <span>01 Jan 2026 - 31 Dec 2026</span>
             </div>
             <button 
               type="button"
-              className="flex items-center gap-2 bg-white border border-stone-300 hover:border-stone-400 hover:bg-stone-50 text-stone-700 font-semibold px-3 h-9 rounded-md transition-all text-xs cursor-pointer shadow-sm focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-stone-500"
+              className="flex items-center gap-2 bg-surface border border-border hover:border-border-em hover:bg-surface2 text-text-secondary font-semibold px-3 h-9 rounded-md transition-all text-xs cursor-pointer shadow-sm focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-border-em"
               onClick={() => addToast('info', 'Opening Filters panel...')}
             >
-              <Filter className="size-4 text-stone-450 shrink-0" />
+              <Filter className="size-4 text-text-tertiary shrink-0" />
               <span>Filters</span>
             </button>
             <button 
               type="button"
-              className="flex items-center gap-2 bg-white border border-stone-300 hover:border-stone-400 hover:bg-stone-50 text-stone-700 font-semibold px-3 h-9 rounded-md transition-all text-xs cursor-pointer shadow-sm focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-stone-500"
+              className="flex items-center gap-2 bg-surface border border-border hover:border-border-em hover:bg-surface2 text-text-secondary font-semibold px-3 h-9 rounded-md transition-all text-xs cursor-pointer shadow-sm focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-border-em"
               onClick={() => addToast('success', 'Operational analytics report exported successfully!')}
             >
-              <Download className="size-4 text-stone-450 shrink-0" />
+              <Download className="size-4 text-text-tertiary shrink-0" />
               <span>Export</span>
             </button>
           </div>
         </div>
 
         {/* TAB HEADERS */}
-        <div className="flex items-center gap-6 border-b border-stone-200">
+        <div className="flex items-center gap-6 border-b border-border">
           {[
             { id: 'procurement', label: '1. Procurement Dashboard' },
             { id: 'finance', label: '2. Finance & AP Reports' },
@@ -272,8 +274,8 @@ export default function ReportsAnalyticsView({ state }) {
               key={t.id}
               onClick={() => setDetailTab(t.id)}
               className={`pb-2.5 text-xs font-bold border-b-2 transition-all cursor-pointer ${detailTab === t.id
-                  ? 'border-stone-850 text-stone-900'
-                  : 'border-transparent text-stone-400 hover:text-stone-700'
+                  ? 'border-text-primary text-text-primary'
+                  : 'border-transparent text-text-tertiary hover:text-text-secondary'
                 }`}
             >
               {t.label}
@@ -282,16 +284,16 @@ export default function ReportsAnalyticsView({ state }) {
         </div>
 
         {/* TAB CONTENT BLOCK */}
-        <div className="bg-stone-50/30 p-1 rounded-xl">
+        <div className="bg-surface2/30 p-1 rounded-xl">
 
           {/* TAB CONTENT: 1. PROCUREMENT DASHBOARD */}
           {detailTab === 'procurement' && (
             <div className="space-y-6 animate-fade-in">
               {/* Section 1: Dashboard KPI Cards */}
-              <div className="bg-white border border-stone-200 rounded-xl shadow-sm overflow-hidden">
-                <div className="flex items-center gap-2 px-5 py-3 border-b border-stone-100 bg-stone-50/60">
+              <div className="card overflow-hidden">
+                <div className="flex items-center gap-2 px-5 py-3 border-b border-border bg-surface2/40">
                   <div className="size-1.5 rounded-full bg-blue-500"></div>
-                  <span className="text-[10px] font-extrabold text-stone-500 uppercase tracking-widest">Procurement Key Performance Indicators</span>
+                  <span className="text-[10px] font-extrabold text-text-tertiary uppercase tracking-widest">Procurement Key Performance Indicators</span>
                 </div>
                 <div className="grid grid-cols-2 md:grid-cols-3 gap-4 p-5">
                   <SapReadOnlyField label="Total Spend YTD" value="₹ 1,245,600.00" icon={TrendingUp} containerClassName="bg-blue-50 text-blue-700 border-blue-200" />
@@ -302,10 +304,10 @@ export default function ReportsAnalyticsView({ state }) {
               </div>
 
               {/* Section 2: Spend Analytics */}
-              <div className="bg-white border border-stone-200 rounded-xl shadow-sm overflow-hidden">
-                <div className="flex items-center gap-2 px-5 py-3 border-b border-stone-100 bg-stone-50/60">
+              <div className="card overflow-hidden">
+                <div className="flex items-center gap-2 px-5 py-3 border-b border-border bg-surface2/40">
                   <div className="size-1.5 rounded-full bg-teal-500"></div>
-                  <span className="text-[10px] font-extrabold text-stone-500 uppercase tracking-widest">Spend Analytics Breakdown</span>
+                  <span className="text-[10px] font-extrabold text-text-tertiary uppercase tracking-widest">Spend Analytics Breakdown</span>
                 </div>
                 <div className="grid grid-cols-2 md:grid-cols-3 gap-4 p-5">
                   <SapReadOnlyField label="Spend by Vendor - Top 10" value="₹ 450,000.00" icon={Users} containerClassName="bg-blue-50 text-blue-700 border-blue-200" />
@@ -316,33 +318,33 @@ export default function ReportsAnalyticsView({ state }) {
 
               {/* Spend Table */}
               <div className="space-y-4">
-                <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b border-stone-200 pb-2">
-                  <h4 className="text-xs font-bold text-stone-900 uppercase tracking-wider">
+                <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b border-border pb-2">
+                  <h4 className="text-xs font-bold text-text-primary uppercase tracking-wider">
                     Top Spend Categories &amp; Material Groups
                   </h4>
                 </div>
-                <div className="w-full overflow-x-auto overflow-y-auto max-h-[320px] custom-scrollbar border border-stone-200 rounded-lg bg-white shadow-xs">
+                <div className="w-full overflow-x-auto overflow-y-auto max-h-[320px] custom-scrollbar card">
                   <table className="w-full text-xs text-left border-collapse min-w-[800px]">
                     <thead className="sticky top-0 z-10">
-                      <tr className="bg-stone-50 border-b border-stone-200 text-stone-900 font-bold uppercase text-[10px] tracking-wider font-sans">
-                        <th className="py-2.5 px-3 border-r border-stone-200 w-16">No</th>
-                        <th className="py-2.5 px-3 border-r border-stone-200 w-44">Material Group Code</th>
-                        <th className="py-2.5 px-3 border-r border-stone-200 min-w-[200px]">Description Category</th>
-                        <th className="py-2.5 px-3 border-r border-stone-200 w-28 text-right">Active POs</th>
-                        <th className="py-2.5 px-3 border-r border-stone-200 w-36 text-right">YTD Spend</th>
-                        <th className="py-2.5 px-3 border-r border-stone-200 w-24 text-center">Trend</th>
+                      <tr className="bg-surface2 border-b border-border text-text-primary font-bold uppercase text-[10px] tracking-wider font-sans">
+                        <th className="py-2.5 px-3 border-r border-border w-16">No</th>
+                        <th className="py-2.5 px-3 border-r border-border w-44">Material Group Code</th>
+                        <th className="py-2.5 px-3 border-r border-border min-w-[200px]">Description Category</th>
+                        <th className="py-2.5 px-3 border-r border-border w-28 text-right">Active POs</th>
+                        <th className="py-2.5 px-3 border-r border-border w-36 text-right">YTD Spend</th>
+                        <th className="py-2.5 px-3 border-r border-border w-24 text-center">Trend</th>
                         <th className="py-2.5 px-3 text-center w-28">Status</th>
                       </tr>
                     </thead>
-                    <tbody className="divide-y divide-stone-200 text-stone-700">
+                    <tbody className="divide-y divide-border text-text-secondary">
                       {dynamicSpendData.map((item, idx) => (
-                        <tr key={idx} className="hover:bg-stone-50/50 transition-colors">
-                          <td className="py-2 px-3 border-r border-stone-200 text-stone-600 font-semibold font-mono">{idx + 1}</td>
-                          <td className="py-2 px-3 border-r border-stone-200 font-mono font-bold text-stone-900">{item.code}</td>
-                          <td className="py-2 px-3 border-r border-stone-200 font-sans font-medium text-stone-855">{item.group}</td>
-                          <td className="py-2 px-3 border-r border-stone-200 text-right font-mono">{item.poCount}</td>
-                          <td className="py-2 px-3 border-r border-stone-200 text-right font-mono font-bold text-stone-900">₹ {item.spend.toLocaleString('en-IN')}.00</td>
-                          <td className={`py-2 px-3 border-r border-stone-200 text-center font-mono font-bold ${
+                        <tr key={idx} className="hover:bg-surface2 transition-colors">
+                          <td className="py-2 px-3 border-r border-border text-text-secondary font-semibold font-mono tabular-nums">{idx + 1}</td>
+                          <td className="py-2 px-3 border-r border-border font-mono font-bold text-text-primary">{item.code}</td>
+                          <td className="py-2 px-3 border-r border-border font-sans font-medium text-text-primary">{item.group}</td>
+                          <td className="py-2 px-3 border-r border-border text-right font-mono tabular-nums">{item.poCount}</td>
+                          <td className="py-2 px-3 border-r border-border text-right font-mono font-bold text-text-primary tabular-nums">₹ {item.spend.toLocaleString('en-IN')}.00</td>
+                          <td className={`py-2 px-3 border-r border-border text-center font-mono font-bold tabular-nums ${
                             item.trend.startsWith('+') ? 'text-rose-600' : 'text-emerald-700'
                           }`}>{item.trend}</td>
                           <td className="py-2 px-3 text-center">
@@ -351,7 +353,7 @@ export default function ReportsAnalyticsView({ state }) {
                                 ? 'bg-emerald-50 text-emerald-800 border-emerald-200' 
                                 : item.status === 'Increasing'
                                   ? 'bg-amber-50 text-amber-700 border-amber-200'
-                                  : 'bg-stone-50 text-stone-600 border-stone-200'
+                                  : 'bg-surface2 text-text-secondary border-border'
                             }`}>
                               {item.status}
                             </span>
@@ -364,10 +366,10 @@ export default function ReportsAnalyticsView({ state }) {
               </div>
 
               {/* Section 3: Delivery Performance */}
-              <div className="bg-white border border-stone-200 rounded-xl shadow-sm overflow-hidden">
-                <div className="flex items-center gap-2 px-5 py-3 border-b border-stone-100 bg-stone-50/60">
+              <div className="card overflow-hidden">
+                <div className="flex items-center gap-2 px-5 py-3 border-b border-border bg-surface2/40">
                   <div className="size-1.5 rounded-full bg-emerald-500"></div>
-                  <span className="text-[10px] font-extrabold text-stone-500 uppercase tracking-widest">Delivery Compliance Metrics</span>
+                  <span className="text-[10px] font-extrabold text-text-tertiary uppercase tracking-widest">Delivery Compliance Metrics</span>
                 </div>
                 <div className="grid grid-cols-2 md:grid-cols-3 gap-4 p-5">
                   <SapReadOnlyField label="On-Time Delivery %" value="96.2%" icon={CheckCircle2} containerClassName="bg-emerald-50 text-emerald-800 border-emerald-200" />
@@ -377,30 +379,30 @@ export default function ReportsAnalyticsView({ state }) {
               </div>
 
               {/* Section 4: Filters & Export */}
-              <div className="bg-white border border-stone-200 rounded-xl shadow-sm overflow-hidden">
-                <div className="flex items-center gap-2 px-5 py-3 border-b border-stone-100 bg-stone-50/60">
+              <div className="card overflow-hidden">
+                <div className="flex items-center gap-2 px-5 py-3 border-b border-border bg-surface2/40">
                   <div className="size-1.5 rounded-full bg-blue-500"></div>
-                  <span className="text-[10px] font-extrabold text-stone-500 uppercase tracking-widest">Filter Parameters</span>
+                  <span className="text-[10px] font-extrabold text-text-tertiary uppercase tracking-widest">Filter Parameters</span>
                 </div>
                 <div className="grid grid-cols-2 md:grid-cols-3 gap-4 p-5">
                   <SapReadOnlyField label="Company Code" value="1000" icon={Building2} containerClassName="bg-blue-50 text-blue-700 border-blue-200 hover:bg-blue-100 cursor-pointer" />
                   <SapReadOnlyField label="Plant" value="1000 - Mumbai" isMonospace={false} icon={MapPin} containerClassName="bg-blue-50 text-blue-700 border-blue-200 hover:bg-blue-100 cursor-pointer" />
-                  <SapReadOnlyField label="Date Range" value="2026-01-01 to 2026-12-31" icon={Calendar} containerClassName="bg-stone-100 text-stone-700 border-stone-200" />
-                  <SapReadOnlyField label="Vendor Category" value="Domestic" isMonospace={false} icon={Users} containerClassName="bg-stone-100 text-stone-700 border-stone-200" />
+                  <SapReadOnlyField label="Date Range" value="2026-01-01 to 2026-12-31" icon={Calendar} containerClassName="bg-surface2 text-text-secondary border-border" />
+                  <SapReadOnlyField label="Vendor Category" value="Domestic" isMonospace={false} icon={Users} containerClassName="bg-surface2 text-text-secondary border-border" />
                 </div>
               </div>
 
               {/* Footer buttons */}
-              <div className="flex justify-between items-center bg-white border border-stone-200 rounded-md p-4 shadow-sm w-full">
+              <div className="flex justify-between items-center card p-4 w-full">
                 <div className="flex gap-2">
-                  <Button onClick={() => addToast('success', 'PDF spend analytics report generated successfully.')} variant="outline" className="border-stone-300 text-stone-700 hover:bg-stone-50 font-bold text-xs px-5 rounded-md h-9 cursor-pointer">
+                  <Button onClick={() => addToast('success', 'PDF spend analytics report generated successfully.')} variant="outline" className="font-bold text-xs px-5 h-9">
                     Export PDF
                   </Button>
-                  <Button onClick={() => addToast('success', 'Excel spend datasheet exported successfully.')} variant="outline" className="border-stone-300 text-stone-700 hover:bg-stone-50 font-bold text-xs px-5 rounded-md h-9 cursor-pointer">
+                  <Button onClick={() => addToast('success', 'Excel spend datasheet exported successfully.')} variant="outline" className="font-bold text-xs px-5 h-9">
                     Export Excel
                   </Button>
                 </div>
-                <Button onClick={() => addToast('info', 'Redirecting to report scheduling config...')} className="bg-stone-850 hover:bg-black text-white font-bold text-xs px-6 rounded-md h-9 transition-all shadow-xs cursor-pointer">
+                <Button onClick={() => addToast('info', 'Redirecting to report scheduling config...')} className="font-bold text-xs px-6 h-9">
                   Schedule Automatic Report
                 </Button>
               </div>
@@ -411,59 +413,55 @@ export default function ReportsAnalyticsView({ state }) {
           {detailTab === 'finance' && (
             <div className="space-y-6 animate-fade-in">
               {/* Section 1: AP Aging Summary */}
-              <div className="bg-white border border-stone-200 rounded-xl shadow-sm overflow-hidden">
-                <div className="flex items-center gap-2 px-5 py-3 border-b border-stone-100 bg-stone-50/60">
+              <div className="card overflow-hidden">
+                <div className="flex items-center gap-2 px-5 py-3 border-b border-border bg-surface2/40">
                   <div className="size-1.5 rounded-full bg-blue-500"></div>
-                  <span className="text-[10px] font-extrabold text-stone-500 uppercase tracking-widest">Accounts Payable Aging Summary</span>
+                  <span className="text-[10px] font-extrabold text-text-tertiary uppercase tracking-widest">Accounts Payable Aging Summary</span>
                 </div>
                 <div className="grid grid-cols-2 md:grid-cols-3 gap-4 p-5">
                   <SapReadOnlyField label="Payables 0-30 Days" value="₹ 45,000.00" icon={Clock} containerClassName="bg-blue-50 text-blue-700 border-blue-200" />
                   <SapReadOnlyField label="Payables 31-60 Days" value="₹ 18,200.00" icon={Clock} containerClassName="bg-orange-50 text-orange-700 border-orange-200" />
-                  <SapReadOnlyField label="Payables 61-90 Days" value="₹ 0.00" icon={Clock} containerClassName="bg-stone-100 text-stone-700 border-stone-200" />
+                  <SapReadOnlyField label="Payables 61-90 Days" value="₹ 0.00" icon={Clock} containerClassName="bg-surface2 text-text-secondary border-border" />
                   <SapReadOnlyField label="Overdue &gt; 90 Days" value="₹ 0.00" icon={AlertTriangle} containerClassName="bg-rose-50 text-rose-800 border-rose-200" />
                 </div>
               </div>
 
               {/* AP Aging Table */}
               <div className="space-y-4">
-                <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b border-stone-200 pb-2">
-                  <h4 className="text-xs font-bold text-stone-900 uppercase tracking-wider">
+                <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b border-border pb-2">
+                  <h4 className="text-xs font-bold text-text-primary uppercase tracking-wider">
                     Accounts Payable Invoices Aging Details
                   </h4>
                 </div>
-                <div className="w-full overflow-x-auto overflow-y-auto max-h-[320px] custom-scrollbar border border-stone-200 rounded-lg bg-white shadow-xs">
+                <div className="w-full overflow-x-auto overflow-y-auto max-h-[320px] custom-scrollbar card">
                   <table className="w-full text-xs text-left border-collapse min-w-[900px] whitespace-nowrap">
                     <thead className="sticky top-0 z-10">
-                      <tr className="bg-stone-50 border-b border-stone-200 text-stone-900 font-bold uppercase text-[10px] tracking-wider font-sans">
-                        <th className="py-2.5 px-3 border-r border-stone-200 w-32">Invoice Ref</th>
-                        <th className="py-2.5 px-3 border-r border-stone-200 w-24 text-center">Posting Date</th>
-                        <th className="py-2.5 px-3 border-r border-stone-200 min-w-[150px]">Vendor Name</th>
-                        <th className="py-2.5 px-3 border-r border-stone-200 w-36">GSTIN</th>
-                        <th className="py-2.5 px-3 border-r border-stone-200 w-24 text-center">MSME Type</th>
-                        <th className="py-2.5 px-3 border-r border-stone-200 w-24 text-right">Age (Days)</th>
-                        <th className="py-2.5 px-3 border-r border-stone-200 w-32 text-right">Net Value</th>
+                      <tr className="bg-surface2 border-b border-border text-text-primary font-bold uppercase text-[10px] tracking-wider font-sans">
+                        <th className="py-2.5 px-3 border-r border-border w-32">Invoice Ref</th>
+                        <th className="py-2.5 px-3 border-r border-border w-24 text-center">Posting Date</th>
+                        <th className="py-2.5 px-3 border-r border-border min-w-[150px]">Vendor Name</th>
+                        <th className="py-2.5 px-3 border-r border-border w-36">GSTIN</th>
+                        <th className="py-2.5 px-3 border-r border-border w-24 text-center">MSME Type</th>
+                        <th className="py-2.5 px-3 border-r border-border w-24 text-right">Age (Days)</th>
+                        <th className="py-2.5 px-3 border-r border-border w-32 text-right">Net Value</th>
                         <th className="py-2.5 px-3 text-center w-36">Compliance Alert</th>
                       </tr>
                     </thead>
-                    <tbody className="divide-y divide-stone-200 text-stone-700">
+                    <tbody className="divide-y divide-border text-text-secondary">
                       {dynamicApAgingData.map((item, idx) => {
                         const isMsme = item.type === 'Micro' || item.type === 'Small';
                         const isOverdue = isMsme && item.days > 45;
                         return (
-                          <tr key={idx} className={`hover:bg-stone-50/50 transition-colors ${isOverdue ? 'bg-rose-50/20' : ''}`}>
-                            <td className="py-2 px-3 border-r border-stone-200 font-mono font-bold text-stone-900">{item.ref}</td>
-                            <td className="py-2 px-3 border-r border-stone-200 text-center font-mono">{item.date}</td>
-                            <td className="py-2 px-3 border-r border-stone-200 font-semibold">{item.vendor}</td>
-                            <td className="py-2 px-3 border-r border-stone-200 font-mono text-stone-600">{item.gstin}</td>
-                            <td className="py-2 px-3 border-r border-stone-200 text-center font-extrabold text-blue-650">{item.type}</td>
-                            <td className={`py-2 px-3 border-r border-stone-200 text-right font-mono font-bold ${isOverdue ? 'text-rose-600' : ''}`}>{item.days}</td>
-                            <td className="py-2 px-3 border-r border-stone-200 text-right font-mono font-bold text-stone-900">₹ {item.amount.toLocaleString('en-IN')}.00</td>
+                          <tr key={idx} className={`hover:bg-surface2 transition-colors ${isOverdue ? 'bg-rose-50/20' : ''}`}>
+                            <td className="py-2 px-3 border-r border-border font-mono font-bold text-text-primary">{item.ref}</td>
+                            <td className="py-2 px-3 border-r border-border text-center font-mono tabular-nums">{item.date}</td>
+                            <td className="py-2 px-3 border-r border-border font-semibold">{item.vendor}</td>
+                            <td className="py-2 px-3 border-r border-border font-mono text-text-secondary">{item.gstin}</td>
+                            <td className="py-2 px-3 border-r border-border text-center font-extrabold text-blue-650">{item.type}</td>
+                            <td className={`py-2 px-3 border-r border-border text-right font-mono font-bold tabular-nums ${isOverdue ? 'text-rose-600' : ''}`}>{item.days}</td>
+                            <td className="py-2 px-3 border-r border-border text-right font-mono font-bold text-text-primary tabular-nums">₹ {item.amount.toLocaleString('en-IN')}.00</td>
                             <td className="py-2 px-3 text-center">
-                              <span className={`px-2 py-0.5 rounded text-[10px] font-bold border ${
-                                isOverdue ? 'bg-rose-50 text-rose-700 border-rose-200' : 'bg-emerald-50 text-emerald-705 border-emerald-200'
-                              }`}>
-                                {item.status}
-                              </span>
+                              <StatusBadge label={item.status} variant={msmeStatusVariant(item.status)} />
                             </td>
                           </tr>
                         );
@@ -474,10 +472,10 @@ export default function ReportsAnalyticsView({ state }) {
               </div>
 
               {/* Section 2: Tax & Compliance */}
-              <div className="bg-white border border-stone-200 rounded-xl shadow-sm overflow-hidden">
-                <div className="flex items-center gap-2 px-5 py-3 border-b border-stone-100 bg-stone-50/60">
+              <div className="card overflow-hidden">
+                <div className="flex items-center gap-2 px-5 py-3 border-b border-border bg-surface2/40">
                   <div className="size-1.5 rounded-full bg-emerald-500"></div>
-                  <span className="text-[10px] font-extrabold text-stone-500 uppercase tracking-widest">Tax Withheld &amp; GST Compliance</span>
+                  <span className="text-[10px] font-extrabold text-text-tertiary uppercase tracking-widest">Tax Withheld &amp; GST Compliance</span>
                 </div>
                 <div className="grid grid-cols-2 md:grid-cols-3 gap-4 p-5">
                   <SapReadOnlyField label="TDS Liability - Quarter" value="₹ 12,450.00" icon={Receipt} containerClassName="bg-rose-50 text-rose-800 border-rose-200" />
@@ -487,10 +485,10 @@ export default function ReportsAnalyticsView({ state }) {
               </div>
 
               {/* Section 3: Invoice Processing KPIs */}
-              <div className="bg-white border border-stone-200 rounded-xl shadow-sm overflow-hidden">
-                <div className="flex items-center gap-2 px-5 py-3 border-b border-stone-100 bg-stone-50/60">
+              <div className="card overflow-hidden">
+                <div className="flex items-center gap-2 px-5 py-3 border-b border-border bg-surface2/40">
                   <div className="size-1.5 rounded-full bg-teal-500"></div>
-                  <span className="text-[10px] font-extrabold text-stone-500 uppercase tracking-widest">Invoice Processing Speed Indicators</span>
+                  <span className="text-[10px] font-extrabold text-text-tertiary uppercase tracking-widest">Invoice Processing Speed Indicators</span>
                 </div>
                 <div className="grid grid-cols-2 md:grid-cols-3 gap-4 p-5">
                   <SapReadOnlyField label="Invoice Processing TAT" value="4.2 Days" icon={Clock} containerClassName="bg-blue-50 text-blue-700 border-blue-200" />
@@ -500,30 +498,30 @@ export default function ReportsAnalyticsView({ state }) {
               </div>
 
               {/* Section 4: Filters */}
-              <div className="bg-white border border-stone-200 rounded-xl shadow-sm overflow-hidden">
-                <div className="flex items-center gap-2 px-5 py-3 border-b border-stone-100 bg-stone-50/60">
+              <div className="card overflow-hidden">
+                <div className="flex items-center gap-2 px-5 py-3 border-b border-border bg-surface2/40">
                   <div className="size-1.5 rounded-full bg-blue-500"></div>
-                  <span className="text-[10px] font-extrabold text-stone-500 uppercase tracking-widest">Filter Parameters</span>
+                  <span className="text-[10px] font-extrabold text-text-tertiary uppercase tracking-widest">Filter Parameters</span>
                 </div>
                 <div className="grid grid-cols-2 md:grid-cols-3 gap-4 p-5">
-                  <SapReadOnlyField label="Fiscal Year" value="2026" icon={Calendar} containerClassName="bg-stone-100 text-stone-700 border-stone-200" />
-                  <SapReadOnlyField label="Posting Period" value="03" icon={Clock} containerClassName="bg-stone-100 text-stone-700 border-stone-200" />
+                  <SapReadOnlyField label="Fiscal Year" value="2026" icon={Calendar} containerClassName="bg-surface2 text-text-secondary border-border" />
+                  <SapReadOnlyField label="Posting Period" value="03" icon={Clock} containerClassName="bg-surface2 text-text-secondary border-border" />
                   <SapReadOnlyField label="Vendor" value="VND10023" icon={Users} containerClassName="bg-blue-50 text-blue-700 border-blue-200 hover:bg-blue-100 cursor-pointer" />
                   <SapReadOnlyField label="Payment Status" value="Cleared" isMonospace={false} icon={CheckCircle2} containerClassName="bg-emerald-50 text-emerald-800 border-emerald-250" />
                 </div>
               </div>
 
               {/* Footer buttons */}
-              <div className="flex justify-between items-center bg-white border border-stone-200 rounded-md p-4 shadow-sm w-full">
+              <div className="flex justify-between items-center card p-4 w-full">
                 <div className="flex gap-2">
-                  <Button onClick={() => addToast('success', 'Accounts Payable aging spreadsheet exported successfully.')} variant="outline" className="border-stone-300 text-stone-700 hover:bg-stone-50 font-bold text-xs px-5 rounded-md h-9 cursor-pointer">
+                  <Button onClick={() => addToast('success', 'Accounts Payable aging spreadsheet exported successfully.')} variant="outline" className="font-bold text-xs px-5 h-9">
                     Export AP Aging (Excel)
                   </Button>
-                  <Button onClick={() => addToast('success', 'MSME compliance registry report generated successfully.')} variant="outline" className="border-stone-300 text-stone-700 hover:bg-stone-50 font-bold text-xs px-5 rounded-md h-9 cursor-pointer">
+                  <Button onClick={() => addToast('success', 'MSME compliance registry report generated successfully.')} variant="outline" className="font-bold text-xs px-5 h-9">
                     Export MSME Report
                   </Button>
                 </div>
-                <Button onClick={() => addToast('success', 'TDS withholding liability statement generated.')} className="bg-stone-850 hover:bg-black text-white font-bold text-xs px-6 rounded-md h-9 transition-all shadow-xs cursor-pointer">
+                <Button onClick={() => addToast('success', 'TDS withholding liability statement generated.')} className="font-bold text-xs px-6 h-9">
                   Export TDS Summary
                 </Button>
               </div>
@@ -534,10 +532,10 @@ export default function ReportsAnalyticsView({ state }) {
           {detailTab === 'selfservice' && (
             <div className="space-y-6 animate-fade-in">
               {/* Section 1: My Account Snapshot */}
-              <div className="bg-white border border-stone-200 rounded-xl shadow-sm overflow-hidden">
-                <div className="flex items-center gap-2 px-5 py-3 border-b border-stone-100 bg-stone-50/60">
+              <div className="card overflow-hidden">
+                <div className="flex items-center gap-2 px-5 py-3 border-b border-border bg-surface2/40">
                   <div className="size-1.5 rounded-full bg-blue-500"></div>
-                  <span className="text-[10px] font-extrabold text-stone-500 uppercase tracking-widest">Account Snapshot</span>
+                  <span className="text-[10px] font-extrabold text-text-tertiary uppercase tracking-widest">Account Snapshot</span>
                 </div>
                 <div className="grid grid-cols-2 md:grid-cols-3 gap-4 p-5">
                   <SapReadOnlyField label="Open POs Value" value="₹ 142,500.00" icon={ShoppingBag} containerClassName="bg-blue-50 text-blue-700 border-blue-200" />
@@ -549,43 +547,41 @@ export default function ReportsAnalyticsView({ state }) {
 
               {/* Ledger Statement Table */}
               <div className="space-y-4">
-                <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b border-stone-200 pb-2">
-                  <h4 className="text-xs font-bold text-stone-900 uppercase tracking-wider">
+                <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b border-border pb-2">
+                  <h4 className="text-xs font-bold text-text-primary uppercase tracking-wider">
                     Partner Ledger Account Statement log
                   </h4>
                 </div>
-                <div className="w-full overflow-x-auto overflow-y-auto max-h-[320px] custom-scrollbar border border-stone-200 rounded-lg bg-white shadow-xs">
+                <div className="w-full overflow-x-auto overflow-y-auto max-h-[320px] custom-scrollbar card">
                   <table className="w-full text-xs text-left border-collapse min-w-[850px] whitespace-nowrap">
                     <thead className="sticky top-0 z-10">
-                      <tr className="bg-stone-50 border-b border-stone-200 text-stone-900 font-bold uppercase text-[10px] tracking-wider font-sans">
-                        <th className="py-2.5 px-3 border-r border-stone-200 w-24 text-center">Posting Date</th>
-                        <th className="py-2.5 px-3 border-r border-stone-200 w-28">Doc Type</th>
-                        <th className="py-2.5 px-3 border-r border-stone-200 w-32">Document Ref</th>
-                        <th className="py-2.5 px-3 border-r border-stone-200 min-w-[200px]">Description/Invoice Ref</th>
-                        <th className="py-2.5 px-3 border-r border-stone-200 w-28 text-right">Debit (₹)</th>
-                        <th className="py-2.5 px-3 border-r border-stone-200 w-28 text-right">Credit (₹)</th>
-                        <th className="py-2.5 px-3 border-r border-stone-200 w-32 text-right">Balance</th>
+                      <tr className="bg-surface2 border-b border-border text-text-primary font-bold uppercase text-[10px] tracking-wider font-sans">
+                        <th className="py-2.5 px-3 border-r border-border w-24 text-center">Posting Date</th>
+                        <th className="py-2.5 px-3 border-r border-border w-28">Doc Type</th>
+                        <th className="py-2.5 px-3 border-r border-border w-32">Document Ref</th>
+                        <th className="py-2.5 px-3 border-r border-border min-w-[200px]">Description/Invoice Ref</th>
+                        <th className="py-2.5 px-3 border-r border-border w-28 text-right">Debit (₹)</th>
+                        <th className="py-2.5 px-3 border-r border-border w-28 text-right">Credit (₹)</th>
+                        <th className="py-2.5 px-3 border-r border-border w-32 text-right">Balance</th>
                         <th className="py-2.5 px-3 text-center w-28">Status</th>
                       </tr>
                     </thead>
-                    <tbody className="divide-y divide-stone-200 text-stone-700">
+                    <tbody className="divide-y divide-border text-text-secondary">
                       {dynamicLedgerData.map((item, idx) => (
-                        <tr key={idx} className="hover:bg-stone-50/50 transition-colors">
-                          <td className="py-2 px-3 border-r border-stone-200 text-center font-mono font-medium">{item.date}</td>
-                          <td className="py-2 px-3 border-r border-stone-200 font-medium font-sans text-stone-600">{item.type}</td>
-                          <td className="py-2 px-3 border-r border-stone-200 font-mono font-bold text-stone-900">{item.doc}</td>
-                          <td className="py-2 px-3 border-r border-stone-200 font-medium">{item.desc}</td>
-                          <td className="py-2 px-3 border-r border-stone-200 text-right font-mono">{item.debit > 0 ? `₹ ${item.debit.toLocaleString('en-IN')}.00` : '—'}</td>
-                          <td className="py-2 px-3 border-r border-stone-200 text-right font-mono">{item.credit > 0 ? `₹ ${item.credit.toLocaleString('en-IN')}.00` : '—'}</td>
-                          <td className="py-2 px-3 border-r border-stone-200 text-right font-mono font-bold text-stone-900">₹ {item.balance.toLocaleString('en-IN')}.05</td>
+                        <tr key={idx} className="hover:bg-surface2 transition-colors">
+                          <td className="py-2 px-3 border-r border-border text-center font-mono font-medium tabular-nums">{item.date}</td>
+                          <td className="py-2 px-3 border-r border-border font-medium font-sans text-text-secondary">{item.type}</td>
+                          <td className="py-2 px-3 border-r border-border font-mono font-bold text-text-primary">{item.doc}</td>
+                          <td className="py-2 px-3 border-r border-border font-medium">{item.desc}</td>
+                          <td className="py-2 px-3 border-r border-border text-right font-mono tabular-nums">{item.debit > 0 ? `₹ ${item.debit.toLocaleString('en-IN')}.00` : '—'}</td>
+                          <td className="py-2 px-3 border-r border-border text-right font-mono tabular-nums">{item.credit > 0 ? `₹ ${item.credit.toLocaleString('en-IN')}.00` : '—'}</td>
+                          <td className="py-2 px-3 border-r border-border text-right font-mono font-bold text-text-primary tabular-nums">₹ {item.balance.toLocaleString('en-IN')}.05</td>
                           <td className="py-2 px-3 text-center">
-                            <span className={`px-2 py-0.5 rounded text-[10px] font-bold border ${
-                              item.status === 'Cleared' 
-                                ? 'bg-emerald-50 text-emerald-800 border-emerald-200' 
-                                : 'bg-amber-50 text-amber-700 border-amber-250 font-bold animate-pulse'
-                            }`}>
-                              {item.status}
-                            </span>
+                            <StatusBadge
+                              label={item.status}
+                              variant={paymentStatusVariant(item.status)}
+                              className={item.status !== 'Cleared' ? 'animate-pulse' : ''}
+                            />
                           </td>
                         </tr>
                       ))}
@@ -595,26 +591,26 @@ export default function ReportsAnalyticsView({ state }) {
               </div>
 
               {/* Section 2: Account Statement */}
-              <div className="bg-white border border-stone-200 rounded-xl shadow-sm overflow-hidden">
-                <div className="flex items-center gap-2 px-5 py-3 border-b border-stone-100 bg-stone-50/60">
+              <div className="card overflow-hidden">
+                <div className="flex items-center gap-2 px-5 py-3 border-b border-border bg-surface2/40">
                   <div className="size-1.5 rounded-full bg-teal-500"></div>
-                  <span className="text-[10px] font-extrabold text-stone-500 uppercase tracking-widest">Statement Ledger Range</span>
+                  <span className="text-[10px] font-extrabold text-text-tertiary uppercase tracking-widest">Statement Ledger Range</span>
                 </div>
                 <div className="grid grid-cols-2 md:grid-cols-3 gap-4 p-5">
-                  <SapReadOnlyField label="Date Range" value="2026-05-01 to 2026-05-31" icon={Calendar} containerClassName="bg-stone-100 text-stone-700 border-stone-200" />
+                  <SapReadOnlyField label="Date Range" value="2026-05-01 to 2026-05-31" icon={Calendar} containerClassName="bg-surface2 text-text-secondary border-border" />
                   <SapReadOnlyField label="Document Type Filter" value="RE (Invoice)" isMonospace={false} icon={FileText} containerClassName="bg-teal-50 text-teal-700 border-teal-200" />
                   <SapReadOnlyField label="Currency" value="INR" isMonospace={false} icon={Receipt} containerClassName="bg-emerald-50 text-emerald-800 border-emerald-200" />
                 </div>
               </div>
 
               {/* Section 3: Statement Line Columns */}
-              <div className="bg-white border border-stone-200 rounded-xl shadow-sm overflow-hidden">
-                <div className="flex items-center gap-2 px-5 py-3 border-b border-stone-100 bg-stone-50/60">
+              <div className="card overflow-hidden">
+                <div className="flex items-center gap-2 px-5 py-3 border-b border-border bg-surface2/40">
                   <div className="size-1.5 rounded-full bg-emerald-500"></div>
-                  <span className="text-[10px] font-extrabold text-stone-500 uppercase tracking-widest">Last Transaction Parameters</span>
+                  <span className="text-[10px] font-extrabold text-text-tertiary uppercase tracking-widest">Last Transaction Parameters</span>
                 </div>
                 <div className="grid grid-cols-2 md:grid-cols-3 gap-4 p-5">
-                  <SapReadOnlyField label="Document Date" value="2026-05-28" icon={Calendar} containerClassName="bg-stone-100 text-stone-700 border-stone-200" />
+                  <SapReadOnlyField label="Document Date" value="2026-05-28" icon={Calendar} containerClassName="bg-surface2 text-text-secondary border-border" />
                   <SapReadOnlyField label="Invoice / Payment Ref" value="INV-2025-0058" icon={FileText} containerClassName="bg-blue-50 text-blue-700 border-blue-200" />
                   <SapReadOnlyField label="Clearing Status" value="OPEN (UN-CLEARED)" isMonospace={false} icon={Clock} containerClassName="bg-amber-50 text-amber-700 border-amber-300 animate-pulse" />
                   <SapReadOnlyField label="Debit - Invoice" value="₹ 84,600.00" icon={Receipt} containerClassName="bg-rose-50 text-rose-805 border-rose-200" />
@@ -624,29 +620,29 @@ export default function ReportsAnalyticsView({ state }) {
               </div>
 
               {/* Section 4: TDS Summary */}
-              <div className="bg-white border border-stone-200 rounded-xl shadow-sm overflow-hidden">
-                <div className="flex items-center gap-2 px-5 py-3 border-b border-stone-100 bg-stone-50/60">
+              <div className="card overflow-hidden">
+                <div className="flex items-center gap-2 px-5 py-3 border-b border-border bg-surface2/40">
                   <div className="size-1.5 rounded-full bg-blue-500"></div>
-                  <span className="text-[10px] font-extrabold text-stone-500 uppercase tracking-widest">Withholding Tax Summary</span>
+                  <span className="text-[10px] font-extrabold text-text-tertiary uppercase tracking-widest">Withholding Tax Summary</span>
                 </div>
                 <div className="grid grid-cols-2 md:grid-cols-3 gap-4 p-5">
-                  <SapReadOnlyField label="Fiscal Year" value="2026" icon={Calendar} containerClassName="bg-stone-100 text-stone-700 border-stone-200" />
+                  <SapReadOnlyField label="Fiscal Year" value="2026" icon={Calendar} containerClassName="bg-surface2 text-text-secondary border-border" />
                   <SapReadOnlyField label="Quarter / Section" value="Q1 / 194C" isMonospace={false} icon={Receipt} containerClassName="bg-blue-50 text-blue-750 border-blue-200" />
                   <SapReadOnlyField label="Total TDS Deducted" value="₹ 846.00" icon={ShieldCheck} containerClassName="bg-emerald-50 text-emerald-800 border-emerald-200" />
                 </div>
               </div>
 
               {/* Footer buttons */}
-              <div className="flex justify-between items-center bg-white border border-stone-200 rounded-md p-4 shadow-sm w-full">
+              <div className="flex justify-between items-center card p-4 w-full">
                 <div className="flex gap-2">
-                  <Button onClick={() => addToast('success', 'Partner ledger spreadsheet exported successfully.')} variant="outline" className="border-stone-300 text-stone-700 hover:bg-stone-50 font-bold text-xs px-5 rounded-md h-9 cursor-pointer">
+                  <Button onClick={() => addToast('success', 'Partner ledger spreadsheet exported successfully.')} variant="outline" className="font-bold text-xs px-5 h-9">
                     Export Statement (Excel)
                   </Button>
-                  <Button onClick={() => addToast('success', 'PDF account ledger statement generated successfully.')} variant="outline" className="border-stone-300 text-stone-700 hover:bg-stone-50 font-bold text-xs px-5 rounded-md h-9 cursor-pointer">
+                  <Button onClick={() => addToast('success', 'PDF account ledger statement generated successfully.')} variant="outline" className="font-bold text-xs px-5 h-9">
                     Export Statement (PDF)
                   </Button>
                 </div>
-                <Button onClick={() => addToast('success', 'Withholding tax summary downloaded successfully.')} className="bg-stone-850 hover:bg-black text-white font-bold text-xs px-6 rounded-md h-9 transition-all shadow-xs cursor-pointer">
+                <Button onClick={() => addToast('success', 'Withholding tax summary downloaded successfully.')} className="font-bold text-xs px-6 h-9">
                   Download TDS Summary Advice
                 </Button>
               </div>
@@ -657,10 +653,10 @@ export default function ReportsAnalyticsView({ state }) {
           {detailTab === 'library' && (
             <div className="space-y-6 animate-fade-in">
               {/* Section 1: Standard SAP Reports */}
-              <div className="bg-white border border-stone-200 rounded-xl shadow-sm overflow-hidden">
-                <div className="flex items-center gap-2 px-5 py-3 border-b border-stone-100 bg-stone-50/60">
+              <div className="card overflow-hidden">
+                <div className="flex items-center gap-2 px-5 py-3 border-b border-border bg-surface2/40">
                   <div className="size-1.5 rounded-full bg-blue-500"></div>
-                  <span className="text-[10px] font-extrabold text-stone-500 uppercase tracking-widest">Standard System Reports</span>
+                  <span className="text-[10px] font-extrabold text-text-tertiary uppercase tracking-widest">Standard System Reports</span>
                 </div>
                 <div className="grid grid-cols-2 md:grid-cols-3 gap-4 p-5">
                   <SapReadOnlyField label="Vendor Balance" value="₹ 127,100.00" icon={Table} containerClassName="bg-blue-50 text-blue-700 border-blue-200" />
@@ -673,10 +669,10 @@ export default function ReportsAnalyticsView({ state }) {
               </div>
 
               {/* Section 2: Custom Portal Reports */}
-              <div className="bg-white border border-stone-200 rounded-xl shadow-sm overflow-hidden">
-                <div className="flex items-center gap-2 px-5 py-3 border-b border-stone-100 bg-stone-50/60">
+              <div className="card overflow-hidden">
+                <div className="flex items-center gap-2 px-5 py-3 border-b border-border bg-surface2/40">
                   <div className="size-1.5 rounded-full bg-teal-500"></div>
-                  <span className="text-[10px] font-extrabold text-stone-500 uppercase tracking-widest">Custom Portal Reports</span>
+                  <span className="text-[10px] font-extrabold text-text-tertiary uppercase tracking-widest">Custom Portal Reports</span>
                 </div>
                 <div className="grid grid-cols-2 md:grid-cols-3 gap-4 p-5">
                   <SapReadOnlyField label="Vendor Master Compliance" value="COMPLIANT" isMonospace={false} icon={CheckCircle2} containerClassName="bg-emerald-50 text-emerald-700 border-emerald-300" />
@@ -689,10 +685,10 @@ export default function ReportsAnalyticsView({ state }) {
               </div>
 
               {/* Section 3: Scheduled Report Config */}
-              <div className="bg-white border border-stone-200 rounded-xl shadow-sm overflow-hidden">
-                <div className="flex items-center gap-2 px-5 py-3 border-b border-stone-100 bg-stone-50/60">
+              <div className="card overflow-hidden">
+                <div className="flex items-center gap-2 px-5 py-3 border-b border-border bg-surface2/40">
                   <div className="size-1.5 rounded-full bg-blue-500"></div>
-                  <span className="text-[10px] font-extrabold text-stone-500 uppercase tracking-widest">Configure Self-Service Report Schedule</span>
+                  <span className="text-[10px] font-extrabold text-text-tertiary uppercase tracking-widest">Configure Self-Service Report Schedule</span>
                 </div>
                 <div className="grid grid-cols-2 md:grid-cols-3 gap-4 p-5">
                   <SapInputField label="Report Name" required icon={FileText}>
@@ -701,7 +697,7 @@ export default function ReportsAnalyticsView({ state }) {
                       placeholder="e.g. Weekly AP Aging"
                       value={schedulerForm.reportName}
                       onChange={e => setSchedulerForm({ ...schedulerForm, reportName: e.target.value })}
-                      className="w-56 bg-white border border-stone-200 focus:border-blue-400 rounded-[3px] px-2.5 h-6.5 text-xs outline-none text-stone-900 font-bold transition-all duration-150"
+                      className="w-56 !py-1 font-bold"
                     />
                   </SapInputField>
 
@@ -711,7 +707,7 @@ export default function ReportsAnalyticsView({ state }) {
                       placeholder="CFO, Finance Director, etc."
                       value={schedulerForm.recipients}
                       onChange={e => setSchedulerForm({ ...schedulerForm, recipients: e.target.value })}
-                      className="w-64 bg-white border border-stone-200 focus:border-blue-400 rounded-[3px] px-2.5 h-6.5 text-xs outline-none text-stone-900 font-mono font-bold transition-all duration-150"
+                      className="w-64 !py-1 font-mono font-bold"
                     />
                   </SapInputField>
 
@@ -719,7 +715,7 @@ export default function ReportsAnalyticsView({ state }) {
                     <select
                       value={schedulerForm.frequency}
                       onChange={e => setSchedulerForm({ ...schedulerForm, frequency: e.target.value })}
-                      className="w-36 bg-white border border-stone-200 focus:border-blue-400 rounded-[3px] px-2.5 h-6.5 text-xs outline-none text-stone-900 font-semibold transition-all duration-150 cursor-pointer"
+                      className="w-36 !py-1 font-semibold cursor-pointer"
                     >
                       <option value="Daily">Daily</option>
                       <option value="Weekly">Weekly</option>
@@ -731,7 +727,7 @@ export default function ReportsAnalyticsView({ state }) {
                     <select
                       value={schedulerForm.format}
                       onChange={e => setSchedulerForm({ ...schedulerForm, format: e.target.value })}
-                      className="w-32 bg-white border border-stone-200 focus:border-blue-400 rounded-[3px] px-2.5 h-6.5 text-xs outline-none text-stone-900 font-semibold transition-all duration-150 cursor-pointer"
+                      className="w-32 !py-1 font-semibold cursor-pointer"
                     >
                       <option value="Excel">Excel (.xlsx)</option>
                       <option value="PDF">PDF Document</option>
@@ -742,7 +738,7 @@ export default function ReportsAnalyticsView({ state }) {
                     <select
                       value={schedulerForm.companyCode}
                       onChange={e => setSchedulerForm({ ...schedulerForm, companyCode: e.target.value })}
-                      className="w-32 bg-white border border-stone-200 focus:border-blue-400 rounded-[3px] px-2.5 h-6.5 text-xs outline-none text-stone-900 font-semibold transition-all duration-150 cursor-pointer"
+                      className="w-32 !py-1 font-semibold cursor-pointer"
                     >
                       <option value="1000">1000 (Mumbai)</option>
                       <option value="2000">2000 (Delhi)</option>
@@ -755,46 +751,40 @@ export default function ReportsAnalyticsView({ state }) {
                       type="date"
                       value={schedulerForm.nextRun}
                       onChange={e => setSchedulerForm({ ...schedulerForm, nextRun: e.target.value })}
-                      className="w-44 bg-white border border-stone-200 focus:border-blue-400 rounded-[3px] px-2.5 h-6.5 text-xs outline-none text-stone-900 font-semibold transition-all duration-150 cursor-pointer"
+                      className="w-44 !py-1 font-semibold cursor-pointer"
                     />
                   </SapInputField>
                 </div>
               </div>
               {/* Scheduled Registry Table */}
               <div className="space-y-4">
-                <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b border-stone-200 pb-2">
-                  <h4 className="text-xs font-bold text-stone-900 uppercase tracking-wider">
+                <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b border-border pb-2">
+                  <h4 className="text-xs font-bold text-text-primary uppercase tracking-wider">
                     Active Scheduled Email Reports Registry
                   </h4>
                 </div>
-                <div className="w-full overflow-x-auto overflow-y-auto max-h-[320px] custom-scrollbar border border-stone-200 rounded-lg bg-white shadow-xs">
+                <div className="w-full overflow-x-auto overflow-y-auto max-h-[320px] custom-scrollbar card">
                   <table className="w-full text-xs text-left border-collapse min-w-[850px]">
                     <thead className="sticky top-0 z-10">
-                      <tr className="bg-stone-50 border-b border-stone-200 text-stone-900 font-bold uppercase text-[10px] tracking-wider font-sans">
-                        <th className="py-2.5 px-3 border-r border-stone-200 min-w-[200px]">Report Name</th>
-                        <th className="py-2.5 px-3 border-r border-stone-200 w-44">Frequency</th>
-                        <th className="py-2.5 px-3 border-r border-stone-200 min-w-[200px]">Recipients List</th>
-                        <th className="py-2.5 px-3 border-r border-stone-200 w-24 text-center">Format</th>
-                        <th className="py-2.5 px-3 border-r border-stone-200 w-28 text-center font-mono">Next Execution</th>
+                      <tr className="bg-surface2 border-b border-border text-text-primary font-bold uppercase text-[10px] tracking-wider font-sans">
+                        <th className="py-2.5 px-3 border-r border-border min-w-[200px]">Report Name</th>
+                        <th className="py-2.5 px-3 border-r border-border w-44">Frequency</th>
+                        <th className="py-2.5 px-3 border-r border-border min-w-[200px]">Recipients List</th>
+                        <th className="py-2.5 px-3 border-r border-border w-24 text-center">Format</th>
+                        <th className="py-2.5 px-3 border-r border-border w-28 text-center font-mono">Next Execution</th>
                         <th className="py-2.5 px-3 text-center w-24">Status</th>
                       </tr>
                     </thead>
-                    <tbody className="divide-y divide-stone-200 text-stone-700">
+                    <tbody className="divide-y divide-border text-text-secondary">
                       {scheduledReports.map((item, idx) => (
-                        <tr key={idx} className="hover:bg-stone-50/50 transition-colors">
-                          <td className="py-2 px-3 border-r border-stone-200 font-semibold text-stone-900">{item.name}</td>
-                          <td className="py-2 px-3 border-r border-stone-200 font-medium font-sans text-stone-600">{item.frequency}</td>
-                          <td className="py-2 px-3 border-r border-stone-200 font-mono text-stone-600 truncate max-w-[200px]" title={item.recipients}>{item.recipients}</td>
-                          <td className="py-2 px-3 border-r border-stone-200 text-center font-bold text-stone-700">{item.format}</td>
-                          <td className="py-2 px-3 border-r border-stone-200 text-center font-mono text-stone-500">{item.nextRun}</td>
+                        <tr key={idx} className="hover:bg-surface2 transition-colors">
+                          <td className="py-2 px-3 border-r border-border font-semibold text-text-primary">{item.name}</td>
+                          <td className="py-2 px-3 border-r border-border font-medium font-sans text-text-secondary">{item.frequency}</td>
+                          <td className="py-2 px-3 border-r border-border font-mono text-text-secondary truncate max-w-[200px]" title={item.recipients}>{item.recipients}</td>
+                          <td className="py-2 px-3 border-r border-border text-center font-bold text-text-secondary">{item.format}</td>
+                          <td className="py-2 px-3 border-r border-border text-center font-mono text-text-tertiary tabular-nums">{item.nextRun}</td>
                           <td className="py-2 px-3 text-center">
-                            <span className={`px-2 py-0.5 rounded text-[10px] font-bold border ${
-                              item.status === 'Active'
-                                ? 'bg-emerald-50 text-emerald-800 border-emerald-200'
-                                : 'bg-stone-100 text-stone-700 border-stone-200'
-                            }`}>
-                              {item.status}
-                            </span>
+                            <StatusBadge label={item.status} variant={paymentStatusVariant(item.status)} />
                           </td>
                         </tr>
                       ))}
@@ -804,11 +794,11 @@ export default function ReportsAnalyticsView({ state }) {
               </div>
 
               {/* Footer buttons */}
-              <div className="flex justify-between items-center bg-white border border-stone-200 rounded-md p-4 shadow-sm w-full">
-                <Button onClick={() => addToast('info', 'Triggering instant report execution in background...')} variant="outline" className="border-stone-300 text-stone-750 hover:bg-stone-50 font-bold text-xs px-5 rounded-md h-9 cursor-pointer">
+              <div className="flex justify-between items-center card p-4 w-full">
+                <Button onClick={() => addToast('info', 'Triggering instant report execution in background...')} variant="outline" className="border-border text-text-secondary hover:bg-surface2 font-bold text-xs px-5 rounded-md h-9 cursor-pointer">
                   Run Report Now
                 </Button>
-                <Button onClick={handleSaveSchedule} className="bg-stone-850 hover:bg-black text-white font-bold text-xs px-6 rounded-md h-9 transition-all shadow-xs cursor-pointer">
+                <Button onClick={handleSaveSchedule} className="font-bold text-xs px-6 h-9">
                   Save Schedule Config
                 </Button>
               </div>
