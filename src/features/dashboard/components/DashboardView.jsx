@@ -380,6 +380,7 @@ export default function DashboardView({ state, setActiveTab }) {
                     </div>
                     <div className="space-y-0.5">
                       <h5 className="font-bold text-[10px] text-foreground">{alert.title}</h5>
+                      <p className="text-[9px] text-muted-foreground leading-normal mt-0.5">{alert.desc}</p>
                       <button
                         onClick={() => setActiveTab(alert.tab)}
                         className="text-foreground hover:text-accent font-semibold text-[9px] flex items-center gap-0.5 hover:underline pt-0.5 cursor-pointer uppercase tracking-wider"
@@ -401,6 +402,7 @@ export default function DashboardView({ state, setActiveTab }) {
                     </div>
                     <div className="space-y-0.5">
                       <h5 className="font-bold text-[10px] text-foreground">{alert.title}</h5>
+                      <p className="text-[9px] text-muted-foreground leading-normal mt-0.5">{alert.desc}</p>
                       <button
                         onClick={() => setActiveTab(alert.tab)}
                         className="text-foreground hover:text-accent font-semibold text-[9px] flex items-center gap-0.5 hover:underline pt-0.5 cursor-pointer uppercase tracking-wider"

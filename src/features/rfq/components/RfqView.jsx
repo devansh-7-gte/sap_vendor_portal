@@ -20,7 +20,10 @@ import {
   X,
   File,
   ChevronDown,
-  ArrowRight
+  ArrowRight,
+  ChevronsLeft,
+  ChevronsRight,
+  Menu
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import SkeletonLoader from '@/components/shared/SkeletonLoader';
@@ -71,6 +74,9 @@ const EnterpriseFieldCard = ({ label, required, error, children, labelWidth = 's
     </label>
     <div className="flex-1 w-full min-w-0 flex flex-col justify-center">
       {children}
+      {error && (
+        <span className="text-[10px] font-bold text-red-600 mt-1 select-none">{error}</span>
+      )}
     </div>
   </div>
 );
@@ -155,6 +161,7 @@ export default function RfqView({
   // Procurement tabs: 'monitor', 'me41', 'me47' (Submit Quotation), 'me48'
   const [activeProcTab, setActiveProcTab] = useState('monitor');
   const [listSearch, setListSearch] = useState('');
+  const [showRfqList, setShowRfqList] = useState(true);
 
   // 3. ME41 Create RFQ local form states
   const [rfqForm, rfqFormSet] = useState(getInitialRfqForm);
@@ -185,19 +192,13 @@ export default function RfqView({
   }, [activeProcTab]);
 
   const materialMasterList = [
-    { code: 'FAST-HEX-M12-050', desc: 'Hexagonal Bolt M12 x 50mm Grade 8.8', uom: 'EA', target: 15.50 },
-    { code: 'FAST-WASHER-M12', desc: 'Plain Washer M12 Medium Carbon Steel', uom: 'EA', target: 2.20 },
-    { code: 'FAST-NUT-M12', desc: 'Hexagonal Nut M12 Grade 8', uom: 'EA', target: 4.80 },
-    { code: 'PIP-FLG-SS316-04', desc: 'Weld Neck Flange 4 inch Class 150 SS316', uom: 'EA', target: 2450.00 },
-    { code: 'MECH-GASK-001', desc: 'Spiral Wound Gasket 3 inch SS316/Graphite', uom: 'EA', target: 320.00 }
+    { code: 'FAST-HEX-M12-050', desc: 'Hexagonal Bolt M12 x 50mm Grade 8.8', uom: 'EA', target: 15.50 }
   ];
 
 
-  const [selectedVendors, setSelectedVendors] = useState(['VND-4001', 'VND-4002']);
+  const [selectedVendors, setSelectedVendors] = useState(['VND-CURRENT']);
 
   const vendorMasterList = [
-    { id: 'VND-4001', name: 'Apex Fasteners', rating: 92, category: 'Fasteners & Hardware' },
-    { id: 'VND-4002', name: 'Quality Steel Corp', rating: 88, category: 'Raw Materials & Piping' },
     { id: 'VND-CURRENT', name: state.profile.companyName || 'Your Firm (Current Vendor)', rating: 95, category: 'General Engineering' }
   ];
 
@@ -562,49 +563,64 @@ export default function RfqView({
       <div className="space-y-4 max-w-full animate-fade-in pb-16">
 
       {/* PROCUREMENT SUB NAVIGATION */}
-      <div className="flex border-b border-border select-none bg-white p-1 rounded-sm shadow-xs">
-        <button
-          onClick={() => { setActiveProcTab('monitor'); setListSearch(''); }}
-          className={`pb-2.5 px-5 text-xs font-bold border-b-2 transition-all cursor-pointer flex items-center gap-2 ${activeProcTab === 'monitor'
-            ? 'border-primary text-primary'
-            : 'border-transparent text-stone-400 hover:text-stone-750'
-            }`}
-        >
-          <ClipboardList className="size-4" /> RFQ Monitor &amp; History
-        </button>
-        <button
-          onClick={() => { setActiveProcTab('me41'); setListSearch(''); }}
-          className={`pb-2.5 px-5 text-xs font-bold border-b-2 transition-all cursor-pointer flex items-center gap-2 ${activeProcTab === 'me41'
-            ? 'border-primary text-primary'
-            : 'border-transparent text-stone-400 hover:text-stone-750'
-            }`}
-        >
-          <Plus className="size-4" /> Create RFQ (ME41)
-        </button>
-        <button
-          onClick={() => { setActiveProcTab('me47'); setListSearch(''); }}
-          className={`pb-2.5 px-5 text-xs font-bold border-b-2 transition-all cursor-pointer flex items-center gap-2 ${activeProcTab === 'me47'
-            ? 'border-primary text-primary'
-            : 'border-transparent text-stone-400 hover:text-stone-750'
-            }`}
-        >
-          <Percent className="size-4" /> Submit Quotation (ME47)
-        </button>
-        <button
-          onClick={() => { setActiveProcTab('me48'); setListSearch(''); }}
-          className={`pb-2.5 px-5 text-xs font-bold border-b-2 transition-all cursor-pointer flex items-center gap-2 ${activeProcTab === 'me48'
-            ? 'border-primary text-primary'
-            : 'border-transparent text-stone-400 hover:text-stone-750'
-            }`}
-        >
-          <Layers className="size-4" /> Evaluate &amp; Award (ME48)
-        </button>
+      <div className="flex items-center justify-between border-b border-border select-none bg-white p-1 rounded-sm shadow-xs">
+        <div className="flex">
+          <button
+            onClick={() => { setActiveProcTab('monitor'); setListSearch(''); }}
+            className={`pb-2.5 px-5 text-xs font-bold border-b-2 transition-all cursor-pointer flex items-center gap-2 ${activeProcTab === 'monitor'
+              ? 'border-primary text-primary'
+              : 'border-transparent text-stone-400 hover:text-stone-750'
+              }`}
+          >
+            <ClipboardList className="size-4" /> RFQ Monitor &amp; History
+          </button>
+          <button
+            onClick={() => { setActiveProcTab('me41'); setListSearch(''); }}
+            className={`pb-2.5 px-5 text-xs font-bold border-b-2 transition-all cursor-pointer flex items-center gap-2 ${activeProcTab === 'me41'
+              ? 'border-primary text-primary'
+              : 'border-transparent text-stone-400 hover:text-stone-750'
+              }`}
+          >
+            <Plus className="size-4" /> Create RFQ (ME41)
+          </button>
+          <button
+            onClick={() => { setActiveProcTab('me47'); setListSearch(''); }}
+            className={`pb-2.5 px-5 text-xs font-bold border-b-2 transition-all cursor-pointer flex items-center gap-2 ${activeProcTab === 'me47'
+              ? 'border-primary text-primary'
+              : 'border-transparent text-stone-400 hover:text-stone-750'
+              }`}
+          >
+            <Percent className="size-4" /> Submit Quotation (ME47)
+          </button>
+          <button
+            onClick={() => { setActiveProcTab('me48'); setListSearch(''); }}
+            className={`pb-2.5 px-5 text-xs font-bold border-b-2 transition-all cursor-pointer flex items-center gap-2 ${activeProcTab === 'me48'
+              ? 'border-primary text-primary'
+              : 'border-transparent text-stone-400 hover:text-stone-750'
+              }`}
+          >
+            <Layers className="size-4" /> Evaluate &amp; Award (ME48)
+          </button>
+        </div>
+        {activeProcTab === 'monitor' && (
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={() => setShowRfqList(!showRfqList)}
+            className="text-stone-700 hover:bg-stone-50 border-stone-300 mr-2 h-7 rounded px-3 text-xs font-bold transition-all shadow-sm flex items-center gap-1.5 cursor-pointer"
+          >
+            {showRfqList ? <ChevronsLeft className="size-3.5" /> : <Menu className="size-3.5" />}
+            <span>{showRfqList ? 'Hide List' : 'Show List'}</span>
+          </Button>
+        )}
       </div>
 
       {activeProcTab !== 'me41' && activeProcTab !== 'me47' && activeProcTab !== 'me48' ? (
         <div className="flex border border-border bg-white rounded-sm shadow-md overflow-hidden min-h-[500px]">
           {/* LEFT SIDEBAR PANEL: RFQ LIST */}
-          <div className="w-80 shrink-0 border-r border-border bg-white flex flex-col h-[calc(100vh-13.5rem)]">
+          <div className={`shrink-0 bg-white flex flex-col h-[calc(100vh-13.5rem)] transition-all duration-300 ease-in-out overflow-hidden ${
+            showRfqList ? 'w-80 border-r border-border opacity-100' : 'w-0 opacity-0 border-r-0'
+          }`}>
             <div className="p-3 border-b border-border bg-stone-50">
               <h3 className="text-xs font-bold text-stone-900 uppercase tracking-wider mb-2">RFQ List</h3>
               <div className="relative">
@@ -674,13 +690,24 @@ export default function RfqView({
                 <div className="flex-1 flex flex-col overflow-hidden">
                   {/* Detail Header */}
                   <div className="p-4 border-b border-border bg-stone-50/70 flex items-center justify-between">
-                    <div>
-                      <h3 className="text-xs font-bold text-stone-900 uppercase">
-                        (RFQ-{activeRfq.id}) / (Cat.-{activeRfq.description}) / (Typ-{activeRfq.rfqType})
-                      </h3>
-                      <p className="text-[10px] text-stone-550 font-mono mt-0.5 whitespace-nowrap">
-                        Vendor: {currentVendorCode} &bull; Created: {formatDate(activeRfq.createdDate)} &bull; Org: {activeRfq.purchasingOrg}
-                      </p>
+                    <div className="flex items-center gap-3">
+                      <Button
+                        variant="ghost"
+                        size="icon"
+                        onClick={() => setShowRfqList(!showRfqList)}
+                        className="h-8 w-8 text-stone-500 hover:text-stone-900 hover:bg-stone-200/50 rounded-lg shrink-0 cursor-pointer flex items-center justify-center border border-stone-200"
+                        title={showRfqList ? "Hide RFQ List" : "Show RFQ List"}
+                      >
+                        {showRfqList ? <ChevronsLeft className="size-4" /> : <Menu className="size-4" />}
+                      </Button>
+                      <div>
+                        <h3 className="text-xs font-bold text-stone-900 uppercase">
+                          (RFQ-{activeRfq.id}) / (Cat.-{activeRfq.description}) / (Typ-{activeRfq.rfqType})
+                        </h3>
+                        <p className="text-[10px] text-stone-550 font-mono mt-0.5 whitespace-nowrap">
+                          Vendor: {currentVendorCode} &bull; Created: {formatDate(activeRfq.createdDate)} &bull; Org: {activeRfq.purchasingOrg}
+                        </p>
+                      </div>
                     </div>
                     <span className={`px-2.5 py-0.5 rounded text-[10px] font-bold border ${getRfqStatusBadge(activeRfq.status)}`}>
                       {activeRfq.status}
@@ -713,7 +740,7 @@ export default function RfqView({
                                 <td className="py-2.5 px-4 font-semibold">{item.description}</td>
                                 <td className="py-2.5 px-4 text-right font-mono font-bold">{item.quantity.toLocaleString()}</td>
                                 <td className="py-2.5 px-4 text-center font-bold">{item.uom}</td>
-                                <td className="py-2.5 px-4 text-right font-mono text-stone-600 whitespace-nowrap">₹{item.targetPrice.toFixed(2)}</td>
+                                <td className="py-2.5 px-4 text-right font-mono text-stone-600 whitespace-nowrap">₹{item.targetPrice ? item.targetPrice.toFixed(2) : '0.00'}</td>
                                 <td className="py-2.5 px-4 font-mono text-stone-500 whitespace-nowrap">{formatDate(item.deliveryDate)}</td>
                               </tr>
                             ))}

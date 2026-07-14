@@ -18,6 +18,10 @@ export default function FileUploadZone({
   const getHeaders = () => {
     const headers = {};
     if (typeof window !== 'undefined') {
+      const token = localStorage.getItem('jwt_token');
+      if (token) {
+        headers['Authorization'] = `Bearer ${token}`;
+      }
       const clerkId = localStorage.getItem('clerk_user_id') || 'mock_vendor_id';
       if (clerkId) {
         headers['x-vendor-id'] = clerkId;

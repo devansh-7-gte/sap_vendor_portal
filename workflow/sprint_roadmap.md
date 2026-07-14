@@ -1,6 +1,6 @@
-# VendorConnect Portal — Sprint Roadmap (Clerk Auth Edition)
+# VendorConnect Portal — Sprint Roadmap (JWT Auth Edition)
 > **8-Week Production Build Plan · June 2026**  
-> **Authentication**: Clerk (Phase 3 — Week 3, Day 1–3)  
+> **Authentication**: Custom JWT (Phase 7 — Week 7)  
 > **Philosophy**: Ship the entire API first. Add auth in one dedicated sprint. Never mix concerns.
 
 ---
@@ -1719,9 +1719,9 @@ cd backend && npm install --save-dev jest supertest mongodb-memory-server
 
 ---
 
-## Phase 7 — Clerk Authentication (Week 7)
-> **Goal**: Install Clerk on frontend AND backend. Wire webhooks to sync users to MongoDB.  
-> Lock down all existing API routes (RFQ, PO, Socket.io, etc.) with Clerk middleware. Remove all temporary dev headers.
+## Phase 7 — JWT Authentication (Week 7)
+> **Goal**: Implement custom JWT verification on frontend AND backend.  
+> Lock down all existing API routes (RFQ, PO, Socket.io, etc.) with JWT middleware. Remove all temporary dev headers.
 
 ---
 
@@ -2355,26 +2355,22 @@ CI/CD:
 | **Frontend Migration** | 4 | Transition monolithic `store-context.js` to modular feature hooks (`useProfile`, `useRFQs`, etc.) and api-client | Open routes | ✅ **Completed Ahead of Schedule** |
 | **Security** | 5 | Zod validation · Helmet/sanitize · Winston logging · Env validation · Admin panel | Open routes | 🔲 Planned |
 | **SAP RFC** | 6 | RFC client + mock mode · BAPI translators · IDoc handler · Analytics API · Jest tests | Open routes | 🔲 Planned |
-| **🔐 Clerk Auth** | 7 | Clerk on frontend+backend · Webhook user sync · `requireAuth()` on all routes · Lock down socket.io | ✅ **Secured** | 🔲 Planned |
+| **🔐 JWT Auth** | 7 | JWT on frontend+backend · Password hashing · `protect` middleware on all routes · Lock down socket.io | ✅ **Secured** | 🔲 Planned |
 | **Deploy** | 8 | Unit + integration tests · GitHub Actions CI/CD · Vercel + Railway production | Production Clerk | 🔲 Planned | Production Clerk | 🔲 Planned |
 
 ---
 
-## What Clerk Eliminates (vs. Previous Plan)
+## Custom JWT Implementation Details
 
-| ❌ Removed | ✅ Replaced By |
+| Component | Responsibility |
 |---|---|
-| `bcryptjs` password hashing | Clerk handles passwords |
-| `jsonwebtoken` sign/verify | Clerk session tokens |
-| `generateToken.js` | `@clerk/express` built-in |
-| Custom `auth.controller.js` | Clerk dashboard + webhooks |
-| Custom `auth.routes.js` | Not needed |
-| `/login` page build | `<SignIn />` Clerk component |
-| `/register` page build | `<SignUp />` Clerk component |
-| JWT secret env vars | Clerk keys only |
-| Token refresh logic | Clerk auto-refreshes |
-| Session expiry handling | Clerk built-in |
+| `bcryptjs` password hashing | Hashes vendor passwords before saving to MongoDB Atlas |
+| `jsonwebtoken` sign/verify | Issues signed session tokens on successful login |
+| Custom `auth.controller.js` | Handles user registration, login verification, and profile retrieval |
+| Custom `auth.routes.js` | Exposes /register, /login, and /me API routes |
+| `/login` and `/register` views | Custom Next.js login/onboarding views |
+| JWT secret env vars | Signs token payload integrity |
 
 ---
 
-*Roadmap Version 2.0 · Clerk Auth Edition · June 2026 · VendorConnect Portal*
+*Roadmap Version 2.0 · JWT Auth Edition · July 2026 · VendorConnect Portal*

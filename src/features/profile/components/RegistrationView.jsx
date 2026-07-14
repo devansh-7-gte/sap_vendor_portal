@@ -457,8 +457,8 @@ export default function RegistrationView({
   submitRegistration
 }) {
   const isApproved = state.profile.status === 'Approved';
-  const isPending = state.profile.status === 'Pending Approval';
-  const isDraft = state.profile.status === 'Draft' || state.profile.status === 'Rejected';
+  const isPending = state.profile.status === 'Pending Approval' || state.profile.status === 'Under Review';
+  const isDraft = state.profile.status === 'Draft' || state.profile.status === 'Rejected' || state.profile.status === 'Pending';
 
   const [currentStep, setCurrentStep] = useState(1);
   const [isSapView, setIsSapView] = useState(false);
@@ -1200,7 +1200,7 @@ export default function RegistrationView({
           <button
             type="button"
             onClick={approveRegistration}
-            className="px-5 py-2.5 bg-stone-850 hover:bg-black text-stone-700 hover:text-white rounded-lg text-xs font-bold transition-all cursor-pointer shadow-sm"
+            className="px-5 py-2.5 bg-stone-850 hover:bg-black text-white rounded-lg text-xs font-bold transition-all cursor-pointer shadow-sm"
           >
             Acknowledge compliance checks manually
           </button>
@@ -1232,7 +1232,7 @@ export default function RegistrationView({
 
           {/* DETAILED LEDGER PROFILE INFORMATION */}
           <div className="p-6 rounded-xl border border-stone-200 bg-white shadow-sm space-y-4">
-            <h3 className="text-xs font-bold text-stone-400 uppercase tracking-wider border-b border-stone-100 pb-2">
+            <h3 className="text-xs font-bold text-stone-750 uppercase tracking-wider border-b border-stone-100 pb-2">
               Registered Master Ledger Details
             </h3>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-x-8 gap-y-3.5 text-xs text-stone-700">
@@ -1262,7 +1262,7 @@ export default function RegistrationView({
                 { label: 'Income Tax Return Archives', val: state.profile.itReturns || 'Not Uploaded', isFile: true }
               ].map((row, idx) => (
                 <div key={idx} className="flex justify-between items-center border-b border-stone-100 pb-2 gap-4">
-                  <span className="text-stone-400 font-semibold shrink-0">{row.label}</span>
+                  <span className="text-stone-750 font-bold shrink-0">{row.label}</span>
                   <span className={`font-semibold text-right truncate max-w-[220px] ${row.isMono || row.isFile ? 'font-mono' : ''
                     } ${row.isGreen ? 'text-stone-900 font-bold' : 'text-stone-950'
                     } ${row.isFile ? 'text-emerald-700 bg-emerald-50 px-2 py-0.5 border border-emerald-100 rounded text-[10px] flex items-center gap-1 select-none font-semibold' : ''

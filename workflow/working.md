@@ -62,7 +62,7 @@ The application utilizes a decoupled, modern architecture:
 graph TD
     A[Completed: Wire Frontend to Live REST & Sockets] --> B[Security Hardening & Winston Logger]
     B --> C[SAP RFC Integration & IDoc Processor]
-    C --> D[Implement Clerk Authentication]
+    C --> D[Implement JWT Authentication]
 ```
 
 ### 📅 Action Plan
@@ -79,6 +79,6 @@ graph TD
 3. **Step 3: SAP RFC Integration (Week 6)**
    - Build translation models for BAPI parameters and integrate OData / IDoc processors.
 
-4. **Step 4: Connect Clerk Authentication (Week 7)**
-   - Wrap Next.js pages in `<ClerkProvider>` and implement route rules.
-   - Secure the Express server API endpoints and Socket connection rooms via `@clerk/express` middleware.
+4. **Step 4: JWT Authentication (Week 7)**
+   - Create registration and login forms on Next.js frontend and implement route guards.
+   - Secure the Express server API endpoints and Socket connection rooms via custom JWT protect middleware.

@@ -12,8 +12,8 @@ import {
 
 export default function OnboardingView({ state, companyForm, setCompanyForm, handleCompanySubmit, approveRegistration }) {
   const isApproved = state.profile.status === 'Approved';
-  const isPending = state.profile.status === 'Pending Approval';
-  const isDraft = state.profile.status === 'Draft' || state.profile.status === 'Rejected';
+  const isPending = state.profile.status === 'Pending Approval' || state.profile.status === 'Under Review';
+  const isDraft = state.profile.status === 'Draft' || state.profile.status === 'Rejected' || state.profile.status === 'Pending';
 
   return (
     <div className="space-y-6 max-w-4xl animate-fade-in">
@@ -67,7 +67,7 @@ export default function OnboardingView({ state, companyForm, setCompanyForm, han
 
           {/* Company details */}
           <div className="p-6 rounded-xl border border-stone-200 bg-white shadow-sm space-y-4">
-            <h3 className="text-xs font-bold text-stone-450 tracking-wider uppercase border-b border-stone-100 pb-2 flex items-center gap-2">
+            <h3 className="text-xs font-bold text-stone-750 tracking-wider uppercase border-b border-stone-100 pb-2 flex items-center gap-2">
               <Building2 className="size-4 text-stone-550" /> Company profile specifications
             </h3>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -123,7 +123,7 @@ export default function OnboardingView({ state, companyForm, setCompanyForm, han
 
           {/* Address details */}
           <div className="p-6 rounded-xl border border-stone-200 bg-white shadow-sm space-y-4">
-            <h3 className="text-xs font-bold text-stone-450 tracking-wider uppercase border-b border-stone-100 pb-2 flex items-center gap-2">
+            <h3 className="text-xs font-bold text-stone-750 tracking-wider uppercase border-b border-stone-100 pb-2 flex items-center gap-2">
               <Truck className="size-4 text-stone-550" /> Dispatch & registered office address
             </h3>
             <div className="space-y-1.5">
@@ -168,7 +168,7 @@ export default function OnboardingView({ state, companyForm, setCompanyForm, han
 
           {/* Banking details */}
           <div className="p-6 rounded-xl border border-stone-200 bg-white shadow-sm space-y-4">
-            <h3 className="text-xs font-bold text-stone-450 tracking-wider uppercase border-b border-stone-100 pb-2 flex items-center gap-2">
+            <h3 className="text-xs font-bold text-stone-750 tracking-wider uppercase border-b border-stone-100 pb-2 flex items-center gap-2">
               <CreditCard className="size-4 text-stone-550" /> Banking settlement specifications
             </h3>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -268,7 +268,7 @@ export default function OnboardingView({ state, companyForm, setCompanyForm, han
 
           {/* PROFILE SUMMARY */}
           <div className="p-6 rounded-xl border border-stone-200 bg-white shadow-sm space-y-4">
-            <h3 className="text-[10px] font-bold text-stone-450 uppercase tracking-wider border-b border-stone-100 pb-2">Registered Entity Profile Details</h3>
+            <h3 className="text-[10px] font-bold text-stone-750 uppercase tracking-wider border-b border-stone-100 pb-2">Registered Entity Profile Details</h3>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-x-8 gap-y-3.5 text-xs">
               <div className="flex justify-between border-b border-stone-100 pb-2">
                 <span className="text-stone-500">Legal Entity Name</span>

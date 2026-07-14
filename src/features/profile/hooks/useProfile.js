@@ -1,14 +1,15 @@
 'use client';
 
 import { useState, useEffect } from 'react';
+import { usePathname } from 'next/navigation';
 import { useShell } from '../../../lib/shell-context';
 import { profileService } from '../services/profileService';
 
-const getOrGenerateClerkId = () => {
+const getOrGenerateVendorId = () => {
   if (typeof window !== 'undefined') {
     const saved = localStorage.getItem('clerk_user_id');
     if (saved) return saved;
-    const generated = `user_${Math.floor(Math.random() * 100000)}`;
+    const generated = `mock_vendor_${Math.floor(Math.random() * 100000)}`;
     localStorage.setItem('clerk_user_id', generated);
     return generated;
   }
@@ -55,12 +56,19 @@ export function useProfile() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
 
-  // Hydrate profile on mount
+  const pathname = usePathname();
+
+  // Hydrate profile on mount or page transitions
   useEffect(() => {
     async function loadProfile() {
+      if (typeof window === 'undefined') return;
+      const token = localStorage.getItem('jwt_token');
+      if (!token) {
+        setLoading(false);
+        return;
+      }
+
       try {
-        // Disabled retrieval to always access the registration form as requested by user
-        /*
         const data = await profileService.getProfile();
         if (data) {
           setProfile(data);
@@ -68,9 +76,7 @@ export function useProfile() {
             localStorage.setItem('sap_vendor_profile_data', JSON.stringify(data));
           } catch (e) {}
         }
-        */
       } catch (err) {
-        /*
         // Fallback to localStorage
         try {
           const saved = localStorage.getItem('sap_vendor_profile_data');
@@ -78,13 +84,12 @@ export function useProfile() {
             setProfile(JSON.parse(saved));
           }
         } catch (e) {}
-        */
       } finally {
         setLoading(false);
       }
     }
     loadProfile();
-  }, []);
+  }, [pathname]);
 
   const persistLocally = (updated) => {
     try {
@@ -93,11 +98,11 @@ export function useProfile() {
   };
 
   const saveDraft = async (profileData) => {
-    const clerkId = profile.clerkId || getOrGenerateClerkId();
+    const vendorId = profile.vendorId || getOrGenerateVendorId();
     const updated = {
       ...profile,
       ...profileData,
-      clerkId,
+      vendorId,
       status: 'Draft'
     };
     setProfile(updated);
@@ -109,11 +114,11 @@ export function useProfile() {
   };
 
   const submitRegistration = async (profileData) => {
-    const clerkId = profile.clerkId || getOrGenerateClerkId();
+    const vendorId = profile.vendorId || getOrGenerateVendorId();
     const updated = {
       ...profile,
       ...profileData,
-      clerkId,
+      vendorId,
       status: 'Pending Approval',
       submittedAt: new Date().toISOString()
     };

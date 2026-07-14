@@ -12,12 +12,13 @@ import {
   Activity,
   BarChart3,
   Building2,
-  Database
+  Database,
+  LogOut
 } from 'lucide-react';
 import { usePortal } from '@/lib/portal-context';
 
 export default function Sidebar({ activeTab, setActiveTab, state, onReset }) {
-  const { sidebarCollapsed } = usePortal();
+  const { sidebarCollapsed, logout } = usePortal();
   const [mounted, setMounted] = React.useState(false);
 
   React.useEffect(() => {
@@ -27,6 +28,12 @@ export default function Sidebar({ activeTab, setActiveTab, state, onReset }) {
   const navigationItems = [
     { id: 'dashboard', name: 'Vendor Dashboard', icon: LayoutDashboard }
   ];
+
+  // Only show Admin Console link for internal organisation administrators (hidden from external suppliers)
+  const isInternalAdmin = state.profile?.email?.endsWith('@enterprise.com') || state.profile?.role === 'admin';
+  if (isInternalAdmin) {
+    navigationItems.push({ id: 'admin', name: 'Admin Console', icon: Database });
+  }
 
   const moduleItems = [
     { id: 'registration', name: 'Vendor Registration', icon: UserCheck },
@@ -131,22 +138,41 @@ export default function Sidebar({ activeTab, setActiveTab, state, onReset }) {
 
         {/* Database Clean Reset Trigger */}
         {sidebarCollapsed ? (
-          <button
-            onClick={onReset}
-            className="text-muted-foreground hover:text-destructive flex items-center justify-center p-1.5 rounded hover:bg-muted cursor-pointer mt-0.5"
-            title="Reset ERP Database"
-          >
-            <Database className="size-4" />
-          </button>
+          <div className="flex flex-col gap-1 mt-1">
+            <button
+              onClick={onReset}
+              className="text-muted-foreground hover:text-destructive flex items-center justify-center p-1.5 rounded hover:bg-muted cursor-pointer"
+              title="Reset ERP Database"
+            >
+              <Database className="size-4" />
+            </button>
+            <button
+              onClick={logout}
+              className="text-muted-foreground hover:text-destructive flex items-center justify-center p-1.5 rounded hover:bg-muted cursor-pointer"
+              title="Log Out"
+            >
+              <LogOut className="size-4" />
+            </button>
+          </div>
         ) : (
-          <button
-            onClick={onReset}
-            className="text-left text-[9px] font-mono text-destructive hover:text-red-700 hover:underline flex items-center gap-0.5 mt-0.5 cursor-pointer"
-            title="Reset local state back to defaults"
-          >
-            <Database className="size-3" />
-            <span>Reset ERP Database</span>
-          </button>
+          <div className="flex flex-col gap-1 mt-1">
+            <button
+              onClick={onReset}
+              className="text-left text-[10px] font-mono text-destructive hover:text-red-700 hover:underline flex items-center gap-1.5 cursor-pointer"
+              title="Reset local state back to defaults"
+            >
+              <Database className="size-3.5 shrink-0" />
+              <span>Reset ERP Database</span>
+            </button>
+            <button
+              onClick={logout}
+              className="text-left text-[10px] font-mono text-stone-500 hover:text-red-600 hover:underline flex items-center gap-1.5 cursor-pointer"
+              title="Log out of session"
+            >
+              <LogOut className="size-3.5 shrink-0" />
+              <span>Log Out</span>
+            </button>
+          </div>
         )}
       </div>
     </aside>

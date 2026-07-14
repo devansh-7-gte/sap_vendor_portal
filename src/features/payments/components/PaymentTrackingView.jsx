@@ -71,13 +71,10 @@ export default function PaymentTrackingView({ state }) {
   const [fromDateFilter, setFromDateFilter] = useState('');
   const [toDateFilter, setToDateFilter] = useState('');
   const [paymentMethodFilter, setPaymentMethodFilter] = useState('all');
-  const [currentPage, setCurrentPage] = useState(1);
-  const itemsPerPage = 5;
 
   // TDS Certificates Filter and Search States
   const [tdsYearFilter, setTdsYearFilter] = useState('all');
   const [tdsQuarterFilter, setTdsQuarterFilter] = useState('all');
-  const [tdsCurrentPage, setTdsCurrentPage] = useState(1);
 
   // 1. Unified fallback & live data merger to guarantee rich dummy data is always visible for testing
   const dbPayments = state?.payments || [];
@@ -91,127 +88,6 @@ export default function PaymentTrackingView({ state }) {
       tdsDeducted: 430,
       paymentDate: '2026-06-01',
       utrCode: 'UTR202606010012',
-      paymentMethod: 'NEFT'
-    },
-    {
-      id: 'PMT-100235',
-      invoiceId: 'INV-2026-0002',
-      poId: 'PO-2026-0002',
-      amount: 123750,
-      grossAmount: 125000,
-      tdsDeducted: 1250,
-      paymentDate: '2026-06-05',
-      utrCode: 'UTR202606050098',
-      paymentMethod: 'RTGS'
-    },
-    {
-      id: 'PMT-100236',
-      invoiceId: 'INV-2026-0003',
-      poId: 'PO-2026-0003',
-      amount: 84150,
-      grossAmount: 85000,
-      tdsDeducted: 850,
-      paymentDate: '2026-06-10',
-      utrCode: 'UTR202606100143',
-      paymentMethod: 'NEFT'
-    },
-    {
-      id: 'PMT-100237',
-      invoiceId: 'INV-2026-0004',
-      poId: 'PO-2026-0004',
-      amount: 316800,
-      grossAmount: 320000,
-      tdsDeducted: 3200,
-      paymentDate: '2026-06-15',
-      utrCode: 'UTR202606150821',
-      paymentMethod: 'RTGS'
-    },
-    {
-      id: 'PMT-100238',
-      invoiceId: 'INV-2026-0005',
-      poId: 'PO-2026-0005',
-      amount: 14850,
-      grossAmount: 15000,
-      tdsDeducted: 150,
-      paymentDate: '2026-06-20',
-      utrCode: 'UTR202606200259',
-      paymentMethod: 'NEFT'
-    },
-    {
-      id: 'PMT-100239',
-      invoiceId: 'INV-2026-0006',
-      poId: 'PO-2026-0006',
-      amount: 94050,
-      grossAmount: 95000,
-      tdsDeducted: 950,
-      paymentDate: '2026-06-25',
-      utrCode: 'UTR202606250912',
-      paymentMethod: 'NEFT'
-    },
-    {
-      id: 'PMT-100240',
-      invoiceId: 'INV-2026-0007',
-      poId: 'PO-2026-0007',
-      amount: 54450,
-      grossAmount: 55000,
-      tdsDeducted: 550,
-      paymentDate: '2026-06-26',
-      utrCode: 'UTR202606260843',
-      paymentMethod: 'NEFT'
-    },
-    {
-      id: 'PMT-100241',
-      invoiceId: 'INV-2026-0008',
-      poId: 'PO-2026-0008',
-      amount: 209880,
-      grossAmount: 212000,
-      tdsDeducted: 2120,
-      paymentDate: '2026-06-27',
-      utrCode: 'UTR202606270119',
-      paymentMethod: 'RTGS'
-    },
-    {
-      id: 'PMT-100242',
-      invoiceId: 'INV-2026-0009',
-      poId: 'PO-2026-0009',
-      amount: 65340,
-      grossAmount: 66000,
-      tdsDeducted: 660,
-      paymentDate: '2026-06-28',
-      utrCode: 'UTR202606280456',
-      paymentMethod: 'NEFT'
-    },
-    {
-      id: 'PMT-100243',
-      invoiceId: 'INV-2026-0010',
-      poId: 'PO-2026-0010',
-      amount: 34155,
-      grossAmount: 34500,
-      tdsDeducted: 345,
-      paymentDate: '2026-06-29',
-      utrCode: 'UTR202606290882',
-      paymentMethod: 'NEFT'
-    },
-    {
-      id: 'PMT-100244',
-      invoiceId: 'INV-2026-0011',
-      poId: 'PO-2026-0011',
-      amount: 178200,
-      grossAmount: 180000,
-      tdsDeducted: 1800,
-      paymentDate: '2026-06-30',
-      utrCode: 'UTR202606300445',
-      paymentMethod: 'RTGS'
-    },
-    {
-      id: 'PMT-100245',
-      invoiceId: 'INV-2026-0012',
-      poId: 'PO-2026-0012',
-      amount: 72270,
-      grossAmount: 73000,
-      tdsDeducted: 730,
-      paymentDate: '2026-07-02',
-      utrCode: 'UTR202607020138',
       paymentMethod: 'NEFT'
     }
   ];
@@ -326,10 +202,7 @@ export default function PaymentTrackingView({ state }) {
     }
   ];
 
-  // Sync TDS page to 1 when TDS filters change
-  useEffect(() => {
-    setTdsCurrentPage(1);
-  }, [tdsYearFilter, tdsQuarterFilter]);
+  // Sync TDS page to 1 when TDS filters change (no-op retained for filter reset)
 
   // Filter TDS Certificates
   const filteredTds = tdsCertificates.filter(cert => {
@@ -338,14 +211,9 @@ export default function PaymentTrackingView({ state }) {
     return matchesYear && matchesQuarter;
   });
 
-  const tdsItemsPerPage = 5;
-  const tdsTotalPages = Math.ceil(filteredTds.length / tdsItemsPerPage);
-  const paginatedTds = filteredTds.slice((tdsCurrentPage - 1) * tdsItemsPerPage, tdsCurrentPage * tdsItemsPerPage);
+  // All filtered TDS — shown in scrollable container
+  const allTds = filteredTds;
 
-  // Sync current page back to 1 when filters or data length change
-  useEffect(() => {
-    setCurrentPage(1);
-  }, [searchQuery, fromDateFilter, toDateFilter, paymentMethodFilter, cleanPayments.length]);
 
   // Filter payments based on query, date range, and method
   const filteredPayments = cleanPayments.filter(payment => {
@@ -396,18 +264,22 @@ export default function PaymentTrackingView({ state }) {
     return matchesSearch && matchesDate && matchesMethod;
   });
 
-  const totalPages = Math.ceil(filteredPayments.length / itemsPerPage);
-  const paginatedPayments = filteredPayments.slice((currentPage - 1) * itemsPerPage, currentPage * itemsPerPage);
+  // All filtered payments — shown in scrollable container, no pagination
 
   const handleDownloadStatement = async () => {
     try {
+      const headers = {};
+      const token = localStorage.getItem('jwt_token');
+      if (token) {
+        headers['Authorization'] = `Bearer ${token}`;
+      }
       const clerkId = localStorage.getItem('clerk_user_id') || 'mock_vendor_id';
+      if (clerkId) {
+        headers['x-vendor-id'] = clerkId;
+      }
+
       const baseUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000/api';
-      const response = await fetch(`${baseUrl}/reports/statement`, {
-        headers: {
-          'x-vendor-id': clerkId
-        }
-      });
+      const response = await fetch(`${baseUrl}/reports/statement`, { headers });
       if (!response.ok) throw new Error('Failed to download statement');
       const blob = await response.blob();
       const url = window.URL.createObjectURL(blob);
@@ -556,11 +428,11 @@ export default function PaymentTrackingView({ state }) {
                 </div>
               </div>
 
-              {/* Combined Invoice & Payment Ledger Table */}
-              <div className="w-full overflow-x-auto border border-stone-200 rounded-lg bg-white shadow-xs">
+              {/* Payments Table — scrollable, all rows visible */}
+              <div className="w-full overflow-x-auto overflow-y-auto max-h-[520px] border border-stone-200 rounded-lg bg-white shadow-xs custom-scrollbar">
                 <table className="w-full text-xs text-left border-collapse min-w-[1100px]">
-                  <thead>
-                    <tr className="bg-stone-50/75 border-b border-stone-200 text-black font-bold uppercase text-[10px] tracking-wider font-sans">
+                  <thead className="sticky top-0 z-10">
+                    <tr className="bg-stone-50 border-b border-stone-200 text-black font-bold uppercase text-[10px] tracking-wider font-sans">
                       <th className="py-2.5 px-3 border-r border-stone-200 w-36">Invoice Number</th>
                       <th className="py-2.5 px-3 border-r border-stone-200 w-36">SAP Document No.</th>
                       <th className="py-2.5 px-3 border-r border-stone-200 w-28">Clearing Date</th>
@@ -574,7 +446,7 @@ export default function PaymentTrackingView({ state }) {
                     </tr>
                   </thead>
                   <tbody className="divide-y divide-stone-200 text-stone-700">
-                    {paginatedPayments.map((payment, idx) => {
+                    {filteredPayments.map((payment, idx) => {
                       const invData = getInvoiceForPayment(payment);
                       const payAmt = payment.amount !== undefined ? payment.amount : (payment.netAmount || 0);
                       const tdsAmt = payment.tdsDeducted !== undefined ? payment.tdsDeducted : Math.round(payAmt * 0.01);
@@ -646,35 +518,6 @@ export default function PaymentTrackingView({ state }) {
                 </table>
               </div>
 
-              {/* Table Pagination Footer */}
-              {totalPages > 1 && (
-                <div className="flex items-center justify-between bg-stone-50 border border-stone-200 rounded-lg px-4 py-2 text-stone-500 text-xs font-semibold select-none">
-                  <div>
-                    Showing {(currentPage - 1) * itemsPerPage + 1} to {Math.min(currentPage * itemsPerPage, filteredPayments.length)} of {filteredPayments.length} invoices
-                  </div>
-                  <div className="flex items-center gap-2">
-                    <button
-                      type="button"
-                      disabled={currentPage === 1}
-                      onClick={() => setCurrentPage(prev => Math.max(1, prev - 1))}
-                      className="p-1 border border-stone-200 rounded-lg hover:bg-stone-100 disabled:opacity-40 disabled:hover:bg-white text-stone-700 cursor-pointer transition-colors"
-                    >
-                      <ChevronLeft className="size-4" />
-                    </button>
-                    <span className="font-mono">
-                      Page {currentPage} of {totalPages}
-                    </span>
-                    <button
-                      type="button"
-                      disabled={currentPage >= totalPages}
-                      onClick={() => setCurrentPage(prev => Math.min(totalPages, prev + 1))}
-                      className="p-1 border border-stone-200 rounded-lg hover:bg-stone-100 disabled:opacity-40 disabled:hover:bg-white text-stone-700 cursor-pointer transition-colors"
-                    >
-                      <ChevronRight className="size-4" />
-                    </button>
-                  </div>
-                </div>
-              )}
             </div>
           )}
 
@@ -712,11 +555,11 @@ export default function PaymentTrackingView({ state }) {
                 </div>
               </div>
 
-              {/* TDS Registry Table */}
-              <div className="w-full overflow-x-auto custom-scrollbar border border-stone-200 rounded-lg bg-white shadow-xs">
+              {/* TDS Registry Table — scrollable, all rows visible */}
+              <div className="w-full overflow-x-auto overflow-y-auto max-h-[520px] custom-scrollbar border border-stone-200 rounded-lg bg-white shadow-xs">
                 <table className="w-full text-xs text-left border-collapse min-w-[1100px]">
-                  <thead>
-                    <tr className="bg-stone-50/75 border-b border-stone-200 text-black font-bold uppercase text-[10px] tracking-wider font-sans">
+                  <thead className="sticky top-0 z-10">
+                    <tr className="bg-stone-50 border-b border-stone-200 text-black font-bold uppercase text-[10px] tracking-wider font-sans">
                       <th className="py-2.5 px-4 border-r border-stone-200 whitespace-nowrap">Fiscal Year</th>
                       <th className="py-2.5 px-4 border-r border-stone-200 whitespace-nowrap">Quarter</th>
                       <th className="py-2.5 px-4 border-r border-stone-200 whitespace-nowrap">Section</th>
@@ -729,7 +572,7 @@ export default function PaymentTrackingView({ state }) {
                     </tr>
                   </thead>
                   <tbody className="divide-y divide-stone-200 text-stone-700 font-mono text-xs">
-                    {paginatedTds.map((cert) => (
+                    {allTds.map((cert) => (
                       <tr key={cert.id} className="hover:bg-stone-50/50 transition-colors">
                         <td className="py-2.5 px-4 border-r border-stone-200 font-semibold font-sans text-stone-800 whitespace-nowrap">
                           {cert.fiscalYear}
@@ -778,36 +621,6 @@ export default function PaymentTrackingView({ state }) {
                   </tbody>
                 </table>
               </div>
-
-              {/* TDS Table Pagination Footer */}
-              {tdsTotalPages > 1 && (
-                <div className="flex items-center justify-between bg-stone-50 border border-stone-200 rounded-lg px-4 py-2 text-stone-500 text-xs font-semibold select-none">
-                  <div>
-                    Showing {(tdsCurrentPage - 1) * tdsItemsPerPage + 1} to {Math.min(tdsCurrentPage * tdsItemsPerPage, filteredTds.length)} of {filteredTds.length} certificates
-                  </div>
-                  <div className="flex items-center gap-2">
-                    <button
-                      type="button"
-                      disabled={tdsCurrentPage === 1}
-                      onClick={() => setTdsCurrentPage(prev => Math.max(1, prev - 1))}
-                      className="p-1 border border-stone-200 rounded-lg hover:bg-stone-100 disabled:opacity-40 disabled:hover:bg-white text-stone-700 cursor-pointer transition-colors"
-                    >
-                      <ChevronLeft className="size-4" />
-                    </button>
-                    <span className="font-mono">
-                      Page {tdsCurrentPage} of {tdsTotalPages}
-                    </span>
-                    <button
-                      type="button"
-                      disabled={tdsCurrentPage >= tdsTotalPages}
-                      onClick={() => setTdsCurrentPage(prev => Math.min(tdsTotalPages, prev + 1))}
-                      className="p-1 border border-stone-200 rounded-lg hover:bg-stone-100 disabled:opacity-40 disabled:hover:bg-white text-stone-700 cursor-pointer transition-colors"
-                    >
-                      <ChevronRight className="size-4" />
-                    </button>
-                  </div>
-                </div>
-              )}
             </div>
           )}
         </div>

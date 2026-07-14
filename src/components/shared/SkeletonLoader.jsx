@@ -20,7 +20,7 @@ export default function SkeletonLoader({ type = 'list', rows = 5, cols = 4, coun
                 <div 
                   key={`td-${rIdx}-${cIdx}`} 
                   className={`h-4 mr-8 ${pulseClass}`} 
-                  style={{ width: `${Math.max(40, Math.floor(Math.random() * 50) + 40)}px` }} 
+                  style={{ width: `${40 + ((rIdx * 7 + cIdx * 13) % 50)}px` }} 
                 />
               ))}
             </div>

@@ -45,8 +45,8 @@ export default function BapiConsole({ state, consoleOpen, setConsoleOpen, consol
               Console idle. Complete onboarding or transactional tasks to view integration payloads.
             </div>
           ) : (
-            state.logs.map((log) => (
-              <div key={log.id} className="border-b border-stone-200 pb-3 last:border-0">
+            state.logs.map((log, idx) => (
+              <div key={log.id || log._id || idx} className="border-b border-stone-200 pb-3 last:border-0">
                 {/* LOG ITEM META */}
                 <div className="flex items-center gap-3 mb-1.5 flex-wrap">
                   <span className="text-stone-400 text-[10px]">

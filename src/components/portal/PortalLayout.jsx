@@ -6,7 +6,10 @@ import Sidebar from './Sidebar';
 import BapiConsole from './BapiConsole';
 import { usePortal } from '@/lib/portal-context';
 
+import { usePathname } from 'next/navigation';
+
 export default function PortalLayout({ children }) {
+  const pathname = usePathname();
   const {
     activeTab,
     setActiveTab,
@@ -16,6 +19,27 @@ export default function PortalLayout({ children }) {
     consoleEndRef,
     handleResetDatabase
   } = usePortal();
+
+  const isAuthPage = pathname === '/sign-in' || pathname === '/sign-up';
+
+  React.useEffect(() => {
+    if (isAuthPage) {
+      document.body.classList.add('auth-mode');
+    } else {
+      document.body.classList.remove('auth-mode');
+    }
+    return () => {
+      document.body.classList.remove('auth-mode');
+    };
+  }, [isAuthPage]);
+
+  if (isAuthPage) {
+    return (
+      <div className="auth-page-wrapper min-h-screen w-full bg-[#0d0d0c] flex items-center justify-center py-8 px-4">
+        {children}
+      </div>
+    );
+  }
 
   return (
     <div className="flex flex-col h-screen overflow-hidden bg-background text-foreground font-sans">

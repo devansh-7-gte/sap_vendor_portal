@@ -31,16 +31,54 @@ export function PortalProvider({ children }) {
     setToasts(prev => prev.filter(t => t.id !== id));
   };
 
+  const pathname = usePathname();
+  const router = useRouter();
+
+  // Redirect to sign-in if no token is found and not on auth pages
   useEffect(() => {
-    const clerkId = profileHook.profile?.clerkId || (typeof window !== 'undefined' ? localStorage.getItem('clerk_user_id') : null) || 'mock_vendor_id';
+    if (typeof window !== 'undefined') {
+      const token = localStorage.getItem('jwt_token');
+      const isAuthPage = pathname === '/sign-in' || pathname === '/sign-up';
+      if (!token && !isAuthPage) {
+        router.push('/sign-in');
+      }
+    }
+  }, [pathname, router]);
+
+  // Multi-tab storage sync: logout if jwt_token is removed in another tab
+  useEffect(() => {
+    if (typeof window === 'undefined') return;
+
+    const handleStorageChange = (e) => {
+      if (e.key === 'jwt_token' && !e.newValue) {
+        router.push('/sign-in');
+      }
+    };
+
+    window.addEventListener('storage', handleStorageChange);
+    return () => window.removeEventListener('storage', handleStorageChange);
+  }, [router]);
+
+  const logout = () => {
+    if (typeof window !== 'undefined') {
+      localStorage.removeItem('jwt_token');
+      localStorage.removeItem('clerk_user_id');
+      localStorage.removeItem('sap_vendor_profile_data');
+    }
+    router.push('/sign-in');
+  };
+
+  useEffect(() => {
+    const vendorId = profileHook.profile?.vendorId || (typeof window !== 'undefined' ? localStorage.getItem('clerk_user_id') : null) || 'mock_vendor_id';
     
-    console.log('[PortalContext] Initializing WebSockets connection for vendor:', clerkId);
-    const socket = initSocket(null, clerkId);
+    console.log('[PortalContext] Initializing WebSockets connection for vendor:', vendorId);
+    const token = typeof window !== 'undefined' ? localStorage.getItem('jwt_token') : null;
+    const socket = initSocket(token, vendorId);
 
     socket.on('po:new', (po) => {
       poHook.refreshPOs();
       addToast('info', `New Purchase Order received! ID: ${po.id}`);
-      shell.addSapLog('ODATA', 'ZPD_PO_SRV/PurchaseOrderSet', 'INBOUND', po, 'SUCCESS');
+      shell.addSapLog('OData', '/API_PURCHASEORDER_PROCESS_SRV', 'INBOUND', po, 'SUCCESS');
     });
 
     socket.on('grn:received', (grn) => {
@@ -48,14 +86,15 @@ export function PortalProvider({ children }) {
       poHook.refreshPOs();
       poHook.refreshASNs();
       addToast('success', `Goods Receipt Note (GRN) received for PO: ${grn.poId}. Stores accepted your goods.`);
-      shell.addSapLog('IDoc', 'MBGMCR03_GRN_IDoc', 'INBOUND', grn, 'SUCCESS');
+      shell.addSapLog('BAPI', 'BAPI_GOODSMVT_CREATE', 'INBOUND', grn, 'SUCCESS');
+      shell.addSapLog('RFC', 'BAPI_GOODSMVT_GETDETAIL', 'INBOUND', { migoDoc: grn.sapMigoDoc, items: grn.items }, 'SUCCESS');
     });
 
     socket.on('payment:cleared', (pmt) => {
       paymentHook.refreshPayments();
       invoiceHook.refreshInvoices();
       addToast('success', `Payment cleared! UTR: ${pmt.utrCode} · Net Amount: ₹${pmt.netAmount.toLocaleString('en-IN')}`);
-      shell.addSapLog('IDoc', 'PAYEXT_F110_PAYMENT', 'INBOUND', pmt, 'SUCCESS');
+      shell.addSapLog('OData', 'FBL1N_RFITEMGL', 'INBOUND', pmt, 'SUCCESS');
     });
 
     socket.on('chat:message', (msg) => {
@@ -71,10 +110,7 @@ export function PortalProvider({ children }) {
     return () => {
       closeSocket();
     };
-  }, [profileHook.profile?.clerkId]);
-
-  const pathname = usePathname();
-  const router = useRouter();
+  }, [profileHook.profile?.vendorId]);
 
   // Determine active tab from pathname
   const activeTab = pathname === '/' ? 'dashboard' : pathname.replace(/^\//, '');
@@ -361,6 +397,7 @@ export function PortalProvider({ children }) {
         handleInvoiceSubmit,
         handleSendMessage,
         handleResetDatabase,
+        logout,
         awardVendorBidWrapper,
         addToast
       }}

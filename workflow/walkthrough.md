@@ -229,3 +229,22 @@ We have fully connected the frontend dashboard features to call backend REST end
   * Updated `submitBid` to dynamically invite uninvited bidding vendors rather than throwing a `403 Forbidden` error.
 - **[rfqService.js](file:///a:/sap_vendor_portal/src/features/rfq/services/rfqService.js)**:
   * Updated `getRFQs()` to call `/rfqs?all=true` to populate all Fiori RFQ Monitor tabs.
+
+---
+
+## 📁 Phase 5 & 6 Enhancements — Reports & Analytics View Alignment (July 2026)
+
+We have aligned the design and layout of the Reports & Analytics View with the premium aesthetic of the Purchase Order Detail View.
+
+### 1. Field Component Realignment
+- Redesigned `SapReadOnlyField` and `SapInputField` inside [ReportsAnalyticsView.jsx](file:///a:/sap_vendor_portal/src/features/dashboard/components/ReportsAnalyticsView.jsx):
+  - Swapped side-by-side flex layout for a vertical stack (label directly above value/input).
+  - Standardized label font size to `text-[9px]`, color to `text-stone-600`, and casing to uppercase bold.
+  - Set box widths to `w-fit max-w-full` for read-only values so they wrap cleanly to the exact length of data.
+  - Assigned custom tailored placeholder widths (e.g., `w-56`, `w-64`) for form inputs.
+
+### 2. Card Panel Standardisation
+- Converted KPI grids across all four tabs into rounded-xl containers (`rounded-xl` and `shadow-sm`).
+- Added an embedded top section header bar (`bg-stone-50/60` background, a colored status circle, and bold uppercase title) inside each card instead of standard text headers.
+- Wrapped content cells in clean nested padded grids (`grid grid-cols-2 md:grid-cols-3 gap-4 p-5`) matching the exact horizontal alignments of the Purchase Order detail tab.
+- Verified visual output compile cleanliness with `impeccable detect` (0 anti-patterns).

@@ -14,9 +14,11 @@ export const initSocket = (token, vendorId) => {
   
   console.log(`[Socket.io] Connecting to ${apiUrl}...`);
   
+  const jwtToken = token || (typeof window !== 'undefined' ? localStorage.getItem('jwt_token') : null);
+
   socket = io(apiUrl, {
     auth: { 
-      token,
+      token: jwtToken,
       vendorId: vendorId || (typeof window !== 'undefined' ? localStorage.getItem('clerk_user_id') : null)
     },
     transports: ['websocket'],
