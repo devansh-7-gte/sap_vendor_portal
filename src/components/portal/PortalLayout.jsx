@@ -35,14 +35,14 @@ export default function PortalLayout({ children }) {
 
   if (isAuthPage) {
     return (
-      <div className="auth-page-wrapper min-h-screen w-full bg-[#0d0d0c] flex items-center justify-center py-8 px-4">
+      <div id="main-content" className="auth-page-wrapper min-h-screen w-full bg-base flex items-center justify-center py-8 px-4">
         {children}
       </div>
     );
   }
 
   return (
-    <div className="flex flex-col h-screen overflow-hidden bg-background text-foreground font-sans">
+    <div className="flex flex-col h-screen overflow-hidden bg-base text-text-primary font-sans">
       <Header />
 
       <div className="flex-1 flex overflow-hidden relative">
@@ -53,8 +53,8 @@ export default function PortalLayout({ children }) {
           onReset={handleResetDatabase}
         />
 
-        <main className="flex-1 flex flex-col min-w-0 relative h-full">
-          <div className={`flex-1 overflow-y-auto py-2.5 px-4 md:py-4 md:px-6 custom-scrollbar transition-all duration-305 ${consoleOpen ? 'pb-72' : 'pb-14'}`}>
+        <main id="main-content" className="flex-1 flex flex-col min-w-0 relative h-full">
+          <div className={`flex-1 overflow-y-auto py-2.5 px-4 md:py-4 md:px-6 custom-scrollbar transition-all duration-300 ${consoleOpen ? 'pb-72' : 'pb-14'}`}>
             {children}
           </div>
 

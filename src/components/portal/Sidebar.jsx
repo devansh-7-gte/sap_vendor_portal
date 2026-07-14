@@ -54,30 +54,34 @@ export default function Sidebar({ activeTab, setActiveTab, state, onReset }) {
         key={item.id}
         onClick={() => setActiveTab(item.id)}
         title={sidebarCollapsed ? item.name : undefined}
-        className={`w-full flex items-center text-[11px] transition-all duration-150 relative cursor-pointer ${
-          sidebarCollapsed ? 'justify-center px-0 py-2' : 'gap-2 px-3 py-1.5 text-left'
-        } ${
-          isActive
-            ? 'bg-blue-100/60 text-blue-900 font-bold border-l-[3px] border-primary rounded-l-none'
-            : 'text-stone-600 hover:text-blue-900 hover:bg-blue-50/50'
+        className={`sidebar-link relative ${isActive ? 'active' : ''} ${
+          sidebarCollapsed ? 'justify-center px-0 py-2' : ''
         }`}
       >
-        <Icon className={`size-4 shrink-0 ${isActive ? 'text-primary' : 'text-stone-400'}`} />
-        {!sidebarCollapsed && <span>{item.name}</span>}
-        
+        <Icon className="size-4 shrink-0" />
+        {!sidebarCollapsed && <span className="truncate">{item.name}</span>}
+
         {/* Dynamic Badge counts */}
         {mounted && item.id === 'pos' && state.pos.filter(p => p.status === 'Open').length > 0 && (
           <span className={sidebarCollapsed
-            ? "absolute top-1 right-3.5 size-4 rounded-full bg-primary text-white text-[8px] flex items-center justify-center font-bold"
-            : "ml-auto size-4.5 rounded-full bg-blue-50 text-primary border border-blue-200 text-[9px] flex items-center justify-center font-bold"
+            ? "absolute top-1 right-3.5 size-4 rounded-full text-white text-[8px] flex items-center justify-center font-bold"
+            : "ml-auto size-4.5 rounded-full text-[9px] flex items-center justify-center font-bold"
+          }
+          style={sidebarCollapsed
+            ? { backgroundColor: 'rgb(var(--color-emerald-default-rgb))' }
+            : { backgroundColor: 'var(--color-emerald-dim)', color: 'rgb(var(--color-emerald-text-rgb))' }
           }>
             {state.pos.filter(p => p.status === 'Open').length}
           </span>
         )}
         {mounted && item.id === 'rfqs' && state.rfqs.filter(r => r.status === 'Bidding Open').length > 0 && (
           <span className={sidebarCollapsed
-            ? "absolute top-1 right-3.5 size-4 rounded-full bg-primary text-white text-[8px] flex items-center justify-center font-bold"
-            : "ml-auto size-4.5 rounded-full bg-blue-50 text-primary border border-blue-200 text-[9px] flex items-center justify-center font-bold"
+            ? "absolute top-1 right-3.5 size-4 rounded-full text-white text-[8px] flex items-center justify-center font-bold"
+            : "ml-auto size-4.5 rounded-full text-[9px] flex items-center justify-center font-bold"
+          }
+          style={sidebarCollapsed
+            ? { backgroundColor: 'rgb(var(--color-emerald-default-rgb))' }
+            : { backgroundColor: 'var(--color-emerald-dim)', color: 'rgb(var(--color-emerald-text-rgb))' }
           }>
             {state.rfqs.filter(r => r.status === 'Bidding Open').length}
           </span>
@@ -87,14 +91,14 @@ export default function Sidebar({ activeTab, setActiveTab, state, onReset }) {
   };
 
   return (
-    <aside className={`bg-sidebar border-r border-border flex flex-col shrink-0 select-none h-full transition-all duration-300 ease-in-out ${
-      sidebarCollapsed ? 'w-16' : 'w-48'
+    <aside className={`bg-surface border-r border-border flex flex-col shrink-0 select-none h-full transition-all duration-200 ease-in-out ${
+      sidebarCollapsed ? 'w-[60px]' : 'w-[220px]'
     }`}>
       {/* NAVIGATION SECTION */}
       <div className={`px-2 pt-2.5 ${sidebarCollapsed ? 'flex flex-col items-center' : ''}`}>
         {!sidebarCollapsed ? (
-          <p className="text-[9px] tracking-wider text-stone-500 font-bold uppercase mb-1.5 px-2">
-            NAVIGATION
+          <p className="text-[10px] tracking-[0.12em] text-text-tertiary font-bold uppercase mb-1.5 px-2">
+            Navigation
           </p>
         ) : (
           <div className="h-4 w-full border-b border-border mb-4" />
@@ -107,8 +111,8 @@ export default function Sidebar({ activeTab, setActiveTab, state, onReset }) {
       {/* MODULES SECTION */}
       <div className={`flex-1 px-2.5 pt-3 overflow-y-auto custom-scrollbar ${sidebarCollapsed ? 'flex flex-col items-center' : ''}`}>
         {!sidebarCollapsed ? (
-          <p className="text-[9px] tracking-wider text-stone-500 font-bold uppercase mb-1.5 px-2">
-            MODULES
+          <p className="text-[10px] tracking-[0.12em] text-text-tertiary font-bold uppercase mb-1.5 px-2">
+            Modules
           </p>
         ) : (
           <div className="h-4 w-full border-b border-border mb-4" />
@@ -119,17 +123,17 @@ export default function Sidebar({ activeTab, setActiveTab, state, onReset }) {
       </div>
 
       {/* VENDOR PROFILE BOX */}
-      <div className={`p-3 pb-8 border-t border-border bg-card flex flex-col gap-2 ${sidebarCollapsed ? 'items-center' : ''}`}>
+      <div className={`p-3 pb-6 border-t border-border bg-surface flex flex-col gap-2 ${sidebarCollapsed ? 'items-center' : ''}`}>
         <div className="flex items-center gap-2 w-full justify-center">
-          <div className="size-7 rounded-full bg-muted flex items-center justify-center text-primary border border-border shrink-0">
+          <div className="size-7 rounded-full bg-surface2 flex items-center justify-center text-text-primary border border-border shrink-0">
             <Building2 className="size-3.5" />
           </div>
           {!sidebarCollapsed && (
             <div className="overflow-hidden min-w-0 flex-1">
-              <h4 className="text-[10px] font-bold text-foreground truncate" title={(mounted && state.profile.companyName) || 'Guest Vendor'}>
+              <h4 className="text-[11px] font-bold text-text-primary truncate" title={(mounted && state.profile.companyName) || 'Guest Vendor'}>
                 {(mounted && state.profile.companyName) || 'Guest Vendor'}
               </h4>
-              <p className="text-[9px] text-muted-foreground font-mono truncate">
+              <p className="text-[10px] text-text-tertiary font-mono truncate">
                 {(mounted && state.profile.sapVendorCode) || 'Pending Master'}
               </p>
             </div>
@@ -141,14 +145,14 @@ export default function Sidebar({ activeTab, setActiveTab, state, onReset }) {
           <div className="flex flex-col gap-1 mt-1">
             <button
               onClick={onReset}
-              className="text-muted-foreground hover:text-destructive flex items-center justify-center p-1.5 rounded hover:bg-muted cursor-pointer"
+              className="text-text-tertiary hover:text-red-500 flex items-center justify-center p-1.5 rounded-md hover:bg-surface2 transition-colors duration-150 cursor-pointer"
               title="Reset ERP Database"
             >
               <Database className="size-4" />
             </button>
             <button
               onClick={logout}
-              className="text-muted-foreground hover:text-destructive flex items-center justify-center p-1.5 rounded hover:bg-muted cursor-pointer"
+              className="text-text-tertiary hover:text-red-500 flex items-center justify-center p-1.5 rounded-md hover:bg-surface2 transition-colors duration-150 cursor-pointer"
               title="Log Out"
             >
               <LogOut className="size-4" />
@@ -158,7 +162,7 @@ export default function Sidebar({ activeTab, setActiveTab, state, onReset }) {
           <div className="flex flex-col gap-1 mt-1">
             <button
               onClick={onReset}
-              className="text-left text-[10px] font-mono text-destructive hover:text-red-700 hover:underline flex items-center gap-1.5 cursor-pointer"
+              className="text-left text-[11px] font-mono text-text-tertiary hover:text-red-500 hover:underline flex items-center gap-1.5 cursor-pointer transition-colors duration-150"
               title="Reset local state back to defaults"
             >
               <Database className="size-3.5 shrink-0" />
@@ -166,7 +170,7 @@ export default function Sidebar({ activeTab, setActiveTab, state, onReset }) {
             </button>
             <button
               onClick={logout}
-              className="text-left text-[10px] font-mono text-stone-500 hover:text-red-600 hover:underline flex items-center gap-1.5 cursor-pointer"
+              className="text-left text-[11px] font-mono text-text-tertiary hover:text-red-500 hover:underline flex items-center gap-1.5 cursor-pointer transition-colors duration-150"
               title="Log out of session"
             >
               <LogOut className="size-3.5 shrink-0" />

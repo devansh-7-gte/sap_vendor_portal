@@ -25,7 +25,8 @@ export default function RootLayout({ children }) {
       lang="en"
       className={`${geistSans.variable} ${geistMono.variable} h-full antialiased`}
     >
-      <body className="min-h-full flex flex-col bg-background text-foreground">
+      <body className="min-h-full flex flex-col bg-base text-text-primary">
+        <a href="#main-content" className="skip-link">Skip to main content</a>
         <ShellProvider>
           <PortalProvider>
             <PortalLayout>
