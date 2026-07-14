@@ -11,6 +11,7 @@ import {
   LineChart,
   ArrowRight,
 } from 'lucide-react';
+import { Button } from '@/components/ui/button';
 import { KPICard, StatusBadge, PaymentCard, SimpleChart } from './components/DesignComponents';
 import { generateMockPayments } from './utils/dataUtils';
 
@@ -87,8 +88,8 @@ export default function PaymentDashboard({ state, onSelectPayment }) {
     <div className="space-y-8 pb-12">
       {/* HEADER */}
       <div>
-        <h2 className="text-2xl font-bold text-stone-900">Payment Dashboard</h2>
-        <p className="text-sm text-stone-600 mt-1">
+        <h2 className="text-[22px] font-bold text-text-primary">Payment Dashboard</h2>
+        <p className="text-xs font-semibold text-text-tertiary mt-1">
           Complete visibility into your payment lifecycle and cash flow
         </p>
       </div>
@@ -131,61 +132,61 @@ export default function PaymentDashboard({ state, onSelectPayment }) {
 
       {/* SECONDARY METRICS */}
       <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-        <div className="p-6 rounded-xl border border-stone-200 bg-white">
+        <div className="card p-6">
           <div className="flex items-center justify-between mb-4">
-            <p className="text-sm font-semibold text-stone-600">Avg Payment Days</p>
-            <TrendingUp className="size-4 text-blue-500" />
+            <p className="label mb-0">Avg Payment Days</p>
+            <TrendingUp className="size-4 text-text-tertiary" />
           </div>
-          <p className="text-3xl font-bold text-stone-900">{kpis.avgPaymentDays}</p>
-          <p className="text-xs text-stone-500 mt-2">from invoice to payment</p>
+          <p className="text-3xl font-bold tabular-nums text-text-primary">{kpis.avgPaymentDays}</p>
+          <p className="text-xs text-text-tertiary mt-2">from invoice to payment</p>
         </div>
 
-        <div className="p-6 rounded-xl border border-stone-200 bg-white">
+        <div className="card p-6">
           <div className="flex items-center justify-between mb-4">
-            <p className="text-sm font-semibold text-stone-600">Total TDS Deducted</p>
-            <LineChart className="size-4 text-purple-500" />
+            <p className="label mb-0">Total TDS Deducted</p>
+            <LineChart className="size-4 text-text-tertiary" />
           </div>
-          <p className="text-3xl font-bold text-stone-900">₹ {(kpis.totalTDS / 100000).toFixed(2)}</p>
-          <p className="text-xs text-stone-500 mt-2">across all cleared payments</p>
+          <p className="text-3xl font-bold tabular-nums text-text-primary">₹ {(kpis.totalTDS / 100000).toFixed(2)}</p>
+          <p className="text-xs text-text-tertiary mt-2">across all cleared payments</p>
         </div>
 
-        <div className="p-6 rounded-xl border border-stone-200 bg-white">
+        <div className="card p-6">
           <div className="flex items-center justify-between mb-4">
-            <p className="text-sm font-semibold text-stone-600">Total Paid Amount</p>
-            <BarChart3 className="size-4 text-green-500" />
+            <p className="label mb-0">Total Paid Amount</p>
+            <BarChart3 className="size-4 text-text-tertiary" />
           </div>
-          <p className="text-3xl font-bold text-stone-900">₹ {(kpis.paidAmount / 100000).toFixed(1)}</p>
-          <p className="text-xs text-stone-500 mt-2">cleared and settled</p>
+          <p className="text-3xl font-bold tabular-nums text-text-primary">₹ {(kpis.paidAmount / 100000).toFixed(1)}</p>
+          <p className="text-xs text-text-tertiary mt-2">cleared and settled</p>
         </div>
       </div>
 
       {/* CHARTS SECTION */}
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
         {/* MONTHLY TREND */}
-        <div className="lg:col-span-2 p-6 rounded-xl border border-stone-200 bg-white">
+        <div className="lg:col-span-2 card p-6">
           <div className="mb-6">
-            <h3 className="text-sm font-bold text-stone-900">Monthly Payment Trend</h3>
-            <p className="text-xs text-stone-500 mt-1">Payment amounts processed over time</p>
+            <h3 className="text-[13px] font-bold text-text-primary">Monthly Payment Trend</h3>
+            <p className="text-xs text-text-tertiary mt-1">Payment amounts processed over time</p>
           </div>
           <SimpleChart data={monthlyTrend} height={200} />
         </div>
 
         {/* STATUS DISTRIBUTION */}
-        <div className="p-6 rounded-xl border border-stone-200 bg-white">
+        <div className="card p-6">
           <div className="mb-6">
-            <h3 className="text-sm font-bold text-stone-900">Payment Status</h3>
-            <p className="text-xs text-stone-500 mt-1">Distribution across statuses</p>
+            <h3 className="text-[13px] font-bold text-text-primary">Payment Status</h3>
+            <p className="text-xs text-text-tertiary mt-1">Distribution across statuses</p>
           </div>
           <div className="space-y-3">
             {statusDistribution.map((item) => (
               <div key={item.status} className="space-y-1">
                 <div className="flex items-center justify-between text-xs">
-                  <span className="text-stone-600">{item.status}</span>
-                  <span className="font-bold text-stone-900">{item.count}</span>
+                  <span className="text-text-secondary">{item.status}</span>
+                  <span className="font-bold tabular-nums text-text-primary">{item.count}</span>
                 </div>
-                <div className="w-full h-2 bg-stone-200 rounded-full overflow-hidden">
+                <div className="w-full h-2 bg-surface2 rounded-full overflow-hidden">
                   <div
-                    className={`h-full ${item.color}`}
+                    className={`h-full ${item.color} transition-colors duration-150`}
                     style={{ width: `${(item.count / payments.length) * 100}%` }}
                   />
                 </div>
@@ -196,16 +197,16 @@ export default function PaymentDashboard({ state, onSelectPayment }) {
       </div>
 
       {/* RECENT PAYMENTS */}
-      <div className="p-6 rounded-xl border border-stone-200 bg-white">
+      <div className="card p-6">
         <div className="flex items-center justify-between mb-6">
           <div>
-            <h3 className="text-sm font-bold text-stone-900">Recent Payments</h3>
-            <p className="text-xs text-stone-500 mt-1">Latest 5 payment transactions</p>
+            <h3 className="text-[13px] font-bold text-text-primary">Recent Payments</h3>
+            <p className="text-xs text-text-tertiary mt-1">Latest 5 payment transactions</p>
           </div>
-          <button className="flex items-center gap-2 px-3 py-1.5 text-xs font-semibold text-green-600 dark:text-green-400 hover:bg-green-50 dark:hover:bg-green-900/20 rounded-lg transition-colors">
+          <Button variant="ghost" size="sm">
             View All
             <ArrowRight className="size-3" />
-          </button>
+          </Button>
         </div>
 
         <div className="space-y-3">
@@ -213,34 +214,34 @@ export default function PaymentDashboard({ state, onSelectPayment }) {
             <div
               key={payment.id}
               onClick={() => onSelectPayment(payment)}
-              className="group p-4 rounded-lg border border-stone-200 hover:border-green-300 hover:bg-green-50/50 transition-all cursor-pointer bg-white"
+              className="group card p-4 hover:bg-surface2 transition-colors duration-150 cursor-pointer"
             >
               <div className="flex items-center justify-between">
                 <div className="flex-1">
                   <div className="flex items-center gap-3 mb-2">
-                    <p className="font-bold text-stone-900 text-sm">{payment.paymentNumber}</p>
+                    <p className="font-bold text-text-primary text-[13px]">{payment.paymentNumber}</p>
                     <StatusBadge status={payment.status} />
                   </div>
-                  <div className="grid grid-cols-2 md:grid-cols-4 gap-4 text-xs text-stone-600">
+                  <div className="grid grid-cols-2 md:grid-cols-4 gap-4 text-xs text-text-secondary">
                     <div>
-                      <p className="text-stone-500">Invoice</p>
-                      <p className="font-mono font-semibold text-stone-900">{payment.invoiceNumber}</p>
+                      <p className="text-text-tertiary">Invoice</p>
+                      <p className="font-mono font-semibold text-text-primary">{payment.invoiceNumber}</p>
                     </div>
                     <div>
-                      <p className="text-stone-500">UTR</p>
-                      <p className="font-mono font-semibold text-stone-900">{payment.utrNumber}</p>
+                      <p className="text-text-tertiary">UTR</p>
+                      <p className="font-mono font-semibold text-text-primary">{payment.utrNumber}</p>
                     </div>
                     <div>
-                      <p className="text-stone-500">Net Amount</p>
-                      <p className="font-mono font-semibold text-stone-900">₹ {payment.netAmount.toLocaleString()}</p>
+                      <p className="text-text-tertiary">Net Amount</p>
+                      <p className="font-mono font-semibold text-text-primary tabular-nums">₹ {payment.netAmount.toLocaleString()}</p>
                     </div>
                     <div>
-                      <p className="text-stone-500">Date</p>
-                      <p className="font-semibold text-stone-900">{new Date(payment.paymentDate).toLocaleDateString('en-IN', { month: 'short', day: 'numeric' })}</p>
+                      <p className="text-text-tertiary">Date</p>
+                      <p className="font-semibold text-text-primary tabular-nums">{new Date(payment.paymentDate).toLocaleDateString('en-IN', { month: 'short', day: 'numeric' })}</p>
                     </div>
                   </div>
                 </div>
-                <ArrowRight className="size-4 text-stone-400 group-hover:text-green-500 transition-colors" />
+                <ArrowRight className="size-4 text-text-tertiary group-hover:text-text-primary transition-colors duration-150" />
               </div>
             </div>
           ))}

@@ -79,33 +79,33 @@ export default function MSMEPaymentMonitor({ state }) {
     {
       key: 'invoiceNumber',
       label: 'Invoice Number',
-      render: (val) => <span className="font-mono font-bold text-xs">{val}</span>,
+      render: (val) => <span className="font-mono font-bold text-xs tabular-nums">{val}</span>,
     },
     {
       key: 'dueDate',
       label: 'Due Date',
-      render: (val) => formatDate(val),
+      render: (val) => <span className="tabular-nums">{formatDate(val)}</span>,
     },
     {
       key: 'outstandingAmount',
       label: 'Outstanding Amount',
-      render: (val) => <span className="font-mono font-bold">{formatCurrency(val)}</span>,
+      render: (val) => <span className="font-mono font-bold tabular-nums">{formatCurrency(val)}</span>,
     },
     {
       key: 'delayDays',
       label: 'Delay Days',
-      render: (val) => <span className="font-bold">{val} days</span>,
+      render: (val) => <span className="font-bold tabular-nums">{val} days</span>,
     },
     {
       key: 'riskLevel',
       label: 'Risk Level',
       render: (val) => {
-        const colors = {
-          Green: 'bg-green-100 dark:bg-green-900/30 text-green-700 dark:text-green-300',
-          Amber: 'bg-yellow-100 dark:bg-yellow-900/30 text-yellow-700 dark:text-yellow-300',
-          Red: 'bg-red-100 dark:bg-red-900/30 text-red-700 dark:text-red-300',
+        const variants = {
+          Green: 'active',
+          Amber: 'warn',
+          Red: 'suspended',
         };
-        return <span className={`px-2.5 py-0.5 rounded-full text-xs font-bold ${colors[val]}`}>{val}</span>;
+        return <span className={`status-badge status-badge-${variants[val] || 'pending'}`}>{val}</span>;
       },
     },
     {
@@ -128,8 +128,8 @@ export default function MSMEPaymentMonitor({ state }) {
     <div className="space-y-6 pb-12">
       {/* HEADER */}
       <div>
-        <h2 className="text-2xl font-bold text-stone-900 dark:text-white">MSME Payment Compliance Monitor</h2>
-        <p className="text-sm text-stone-600 dark:text-stone-400 mt-1">
+        <h2 className="text-[22px] font-bold text-text-primary">MSME Payment Compliance Monitor</h2>
+        <p className="text-xs font-semibold text-text-tertiary mt-1">
           Track compliance with MSME payment regulations and identify delayed payments
         </p>
       </div>
@@ -181,32 +181,32 @@ export default function MSMEPaymentMonitor({ state }) {
       </div>
 
       {/* AGING BUCKETS */}
-      <div className="p-6 rounded-xl border border-stone-200 dark:border-stone-800 bg-white dark:bg-stone-900/50">
-        <h3 className="text-lg font-bold text-stone-900 dark:text-white mb-6">Payment Aging Analysis</h3>
+      <div className="card p-6">
+        <h3 className="text-[15px] font-bold text-text-primary mb-6">Payment Aging Analysis</h3>
         <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
           {bucketCounts.map((bucket) => {
             const colorMap = {
-              green: 'bg-gradient-to-br from-green-500 to-green-600',
-              yellow: 'bg-gradient-to-br from-yellow-500 to-yellow-600',
-              orange: 'bg-gradient-to-br from-orange-500 to-orange-600',
-              red: 'bg-gradient-to-br from-red-500 to-red-600',
+              green: 'bg-green-500',
+              yellow: 'bg-amber-500',
+              orange: 'bg-orange-500',
+              red: 'bg-red-500',
             };
 
             return (
               <button
                 key={bucket.id}
                 onClick={() => setSelectedBucket(bucket.label)}
-                className={`p-4 rounded-lg border-2 transition-all cursor-pointer ${
+                className={`p-4 rounded-lg border-2 transition-colors duration-150 cursor-pointer ${
                   selectedBucket === bucket.label
-                    ? 'border-stone-900 dark:border-white bg-stone-50 dark:bg-stone-900'
-                    : 'border-stone-200 dark:border-stone-800 hover:border-stone-400'
+                    ? 'border-text-primary bg-surface2'
+                    : 'border-border hover:border-border-em'
                 }`}
               >
-                <div className={`${colorMap[bucket.color]} p-3 rounded-lg mb-3`}>
-                  <p className="text-white text-2xl font-bold text-center">{bucket.count}</p>
+                <div className={`${colorMap[bucket.color]} p-3 rounded-md mb-3`}>
+                  <p className="text-white text-2xl font-bold tabular-nums text-center">{bucket.count}</p>
                 </div>
-                <p className="text-sm font-bold text-stone-900 dark:text-white">{bucket.label}</p>
-                <p className="text-xs text-stone-500 dark:text-stone-400 mt-1">invoices</p>
+                <p className="text-sm font-bold text-text-primary">{bucket.label}</p>
+                <p className="text-xs text-text-tertiary mt-1">invoices</p>
               </button>
             );
           })}
@@ -214,15 +214,15 @@ export default function MSMEPaymentMonitor({ state }) {
       </div>
 
       {/* OUTSTANDING SUMMARY */}
-      <div className="p-6 rounded-xl border border-stone-200 dark:border-stone-800 bg-white dark:bg-stone-900/50">
+      <div className="card p-6">
         <div className="flex items-center justify-between">
           <div>
-            <p className="text-xs text-stone-500 dark:text-stone-400 uppercase font-bold">Total Outstanding Amount</p>
-            <p className="text-3xl font-bold text-stone-900 dark:text-white font-mono mt-2">{formatCurrency(metrics.totalOutstanding)}</p>
+            <p className="label mb-0">Total Outstanding Amount</p>
+            <p className="text-3xl font-bold text-text-primary font-mono mt-2 tabular-nums">{formatCurrency(metrics.totalOutstanding)}</p>
           </div>
           <div className="text-right">
-            <p className="text-xs text-stone-500 dark:text-stone-400 uppercase font-bold">Compliance Status</p>
-            <p className={`text-2xl font-bold mt-2 ${metrics.complianceScore > 80 ? 'text-green-600 dark:text-green-400' : metrics.complianceScore > 60 ? 'text-yellow-600 dark:text-yellow-400' : 'text-red-600 dark:text-red-400'}`}>
+            <p className="label mb-0">Compliance Status</p>
+            <p className={`text-2xl font-bold mt-2 ${metrics.complianceScore > 80 ? 'text-emerald-text' : metrics.complianceScore > 60 ? 'text-amber-600' : 'text-red-500'}`}>
               {metrics.complianceScore > 80 ? 'Compliant' : metrics.complianceScore > 60 ? 'At Risk' : 'Non-Compliant'}
             </p>
           </div>
@@ -232,20 +232,20 @@ export default function MSMEPaymentMonitor({ state }) {
       {/* SEARCH AND FILTERS */}
       <div className="flex flex-col md:flex-row items-start md:items-center justify-between gap-4">
         <div className="relative flex-1 max-w-md">
-          <Search className="absolute left-3 top-1/2 -translate-y-1/2 size-4 text-stone-400 dark:text-stone-600" />
+          <Search className="absolute left-3 top-1/2 -translate-y-1/2 size-4 text-text-tertiary" />
           <input
             type="text"
             placeholder="Search invoice number..."
             value={searchTerm}
             onChange={(e) => setSearchTerm(e.target.value)}
-            className="w-full pl-10 pr-4 py-2 rounded-lg border border-stone-200 dark:border-stone-800 bg-white dark:bg-stone-900 text-stone-900 dark:text-white text-sm outline-none focus:border-red-500"
+            className="w-full !pl-10"
           />
         </div>
 
         {selectedBucket !== 'All' && (
           <button
             onClick={() => setSelectedBucket('All')}
-            className="text-sm font-semibold text-red-600 dark:text-red-400 hover:text-red-700 transition-colors"
+            className="text-sm font-semibold text-red-500 hover:text-red-600 transition-colors duration-150 cursor-pointer"
           >
             Clear Filter
           </button>
@@ -254,7 +254,7 @@ export default function MSMEPaymentMonitor({ state }) {
 
       {/* INVOICES TABLE */}
       <div>
-        <h3 className="text-lg font-bold text-stone-900 dark:text-white mb-4">
+        <h3 className="text-[15px] font-bold text-text-primary mb-4">
           {selectedBucket === 'All' ? 'All Invoices' : `Invoices (${selectedBucket})`}
         </h3>
         {filteredPayments.length > 0 ? (

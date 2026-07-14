@@ -52,22 +52,22 @@ export default function PaymentAdviceCenter({ state }) {
     {
       key: 'type',
       label: 'Type',
-      render: (val) => <span className="text-xs font-mono bg-stone-100 dark:bg-stone-800 px-2 py-1 rounded">{val}</span>,
+      render: (val) => <span className="chip bg-surface2 text-text-secondary">{val}</span>,
     },
     {
       key: 'generatedDate',
       label: 'Generated Date',
-      render: (val) => formatDate(val),
+      render: (val) => <span className="tabular-nums">{formatDate(val)}</span>,
     },
     {
       key: 'amount',
       label: 'Amount',
-      render: (val) => <span className="font-mono font-semibold">₹ {val.toLocaleString()}</span>,
+      render: (val) => <span className="font-mono font-semibold tabular-nums">₹ {val.toLocaleString()}</span>,
     },
     {
       key: 'reference',
       label: 'Reference',
-      render: (val) => <span className="text-xs font-mono">{val}</span>,
+      render: (val) => <span className="text-xs font-mono tabular-nums">{val}</span>,
     },
   ];
 
@@ -90,8 +90,8 @@ export default function PaymentAdviceCenter({ state }) {
     <div className="space-y-6 pb-12">
       {/* HEADER */}
       <div>
-        <h2 className="text-2xl font-bold text-stone-900 dark:text-white">Payment Advice Center</h2>
-        <p className="text-sm text-stone-600 dark:text-stone-400 mt-1">
+        <h2 className="text-[22px] font-bold text-text-primary">Payment Advice Center</h2>
+        <p className="text-xs font-semibold text-text-tertiary mt-1">
           Download and manage all your payment advice documents
         </p>
       </div>
@@ -103,11 +103,11 @@ export default function PaymentAdviceCenter({ state }) {
           return (
             <div
               key={category}
-              className="p-4 rounded-lg border border-stone-200 dark:border-stone-800 hover:border-blue-300 dark:hover:border-blue-700 hover:bg-blue-50 dark:hover:bg-blue-900/10 transition-all cursor-pointer"
+              className="card p-4 hover:bg-surface2 transition-colors duration-150 cursor-pointer"
               onClick={() => setSelectedDocType(category)}
             >
-              <p className="text-xs text-stone-500 dark:text-stone-400 font-bold uppercase">{category}</p>
-              <p className="text-2xl font-bold text-stone-900 dark:text-white mt-2">{count}</p>
+              <p className="label mb-0">{category}</p>
+              <p className="text-2xl font-bold tabular-nums text-text-primary mt-2">{count}</p>
             </div>
           );
         })}
@@ -116,13 +116,13 @@ export default function PaymentAdviceCenter({ state }) {
       {/* SEARCH AND FILTERS */}
       <div className="flex flex-col md:flex-row items-start md:items-center justify-between gap-4">
         <div className="relative flex-1 max-w-md">
-          <Search className="absolute left-3 top-1/2 -translate-y-1/2 size-4 text-stone-400 dark:text-stone-600" />
+          <Search className="absolute left-3 top-1/2 -translate-y-1/2 size-4 text-text-tertiary" />
           <input
             type="text"
             placeholder="Search documents..."
             value={searchTerm}
             onChange={(e) => setSearchTerm(e.target.value)}
-            className="w-full pl-10 pr-4 py-2 rounded-lg border border-stone-200 dark:border-stone-800 bg-white dark:bg-stone-900 text-stone-900 dark:text-white text-sm outline-none focus:border-blue-500"
+            className="w-full !pl-10"
           />
         </div>
 
@@ -130,7 +130,7 @@ export default function PaymentAdviceCenter({ state }) {
           <select
             value={selectedDocType}
             onChange={(e) => setSelectedDocType(e.target.value)}
-            className="px-3 py-2 rounded-lg border border-stone-200 dark:border-stone-800 bg-white dark:bg-stone-900 text-stone-900 dark:text-white text-sm font-medium outline-none"
+            className="!w-auto"
           >
             {docTypes.map((type) => (
               <option key={type} value={type}>
@@ -139,18 +139,18 @@ export default function PaymentAdviceCenter({ state }) {
             ))}
           </select>
 
-          <div className="flex gap-1 border border-stone-200 dark:border-stone-800 rounded-lg p-1">
+          <div className="flex gap-1 border border-border rounded-md p-1">
             <button
               onClick={() => setViewMode('grid')}
-              className={`p-2 rounded transition-colors ${viewMode === 'grid' ? 'bg-blue-100 dark:bg-blue-900' : 'hover:bg-stone-100 dark:hover:bg-stone-800'}`}
+              className={`p-2 rounded-md transition-colors duration-150 cursor-pointer ${viewMode === 'grid' ? 'bg-surface2 text-text-primary' : 'hover:bg-surface2 text-text-secondary'}`}
             >
-              <Grid className="size-4 text-stone-600 dark:text-stone-400" />
+              <Grid className="size-4" />
             </button>
             <button
               onClick={() => setViewMode('list')}
-              className={`p-2 rounded transition-colors ${viewMode === 'list' ? 'bg-blue-100 dark:bg-blue-900' : 'hover:bg-stone-100 dark:hover:bg-stone-800'}`}
+              className={`p-2 rounded-md transition-colors duration-150 cursor-pointer ${viewMode === 'list' ? 'bg-surface2 text-text-primary' : 'hover:bg-surface2 text-text-secondary'}`}
             >
-              <ListIcon className="size-4 text-stone-600 dark:text-stone-400" />
+              <ListIcon className="size-4" />
             </button>
           </div>
         </div>
