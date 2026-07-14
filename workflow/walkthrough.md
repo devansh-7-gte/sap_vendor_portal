@@ -223,7 +223,7 @@ We have fully connected the frontend dashboard features to call backend REST end
 - **Button Styling**:
   * Styled active P2P workflow buttons (Create ASN, Acknowledge PO, Post Invoice) to render with white backgrounds and transition to brand orange (`bg-orange-500`) on hover.
 
-### 3. RFQ Monitor and Bidding Visibility Fixes
+### 3. Real-Time Bidding and RFQ Monitor Fixes
 - **[rfq.controller.js](file:///a:/sap_vendor_portal/backend/controllers/rfq.controller.js)**:
   * Enabled bypassing the vendor ID filter if `all=true` is requested in `getRFQs` so procurement buyers can evaluate all bids.
   * Updated `submitBid` to dynamically invite uninvited bidding vendors rather than throwing a `403 Forbidden` error.
@@ -269,3 +269,22 @@ We resolved the infinite redirection loop that occurred when visiting `/sign-in`
   * **[shell-context.js](file:///a:/sap_vendor_portal/src/lib/shell-context.js)**
 - **[portal-context.js](file:///a:/sap_vendor_portal/src/lib/portal-context.js)**:
   * Prevented the Socket.io WebSocket initialization from running when there is no active JWT session token.
+
+---
+
+## 📁 Schema & DB Index Stability — Duplicate Key Error Fix (July 2026)
+
+We fixed the `E11000 duplicate key error` that was preventing registration of new vendors because of an orphaned unique index on a deprecated field.
+
+### 1. MongoDB Index Dropping
+- Dropped the unique index `clerkId_1` on the `vendors` collection since the database has moved to `vendorId` as the unique key, and new registrations leave `clerkId` as null (causing unique validation conflicts).
+
+### 2. Backend Schema Alignment
+- **[Vendor.js](file:///a:/sap_vendor_portal/backend/models/Vendor.js)**:
+  * Added `clerkId` as an optional string field (without the unique constraint) to ensure schema compatibility when interacting with historical database entries.
+
+### 3. Controller Query Fallbacks
+- Refactored the controller files to query vendors using a fallback query matching either the new `vendorId` or the legacy `clerkId` field:
+  * **[po.controller.js](file:///a:/sap_vendor_portal/backend/controllers/po.controller.js)**
+  * **[reports.controller.js](file:///a:/sap_vendor_portal/backend/controllers/reports.controller.js)**
+  * **[rfq.controller.js](file:///a:/sap_vendor_portal/backend/controllers/rfq.controller.js)**
