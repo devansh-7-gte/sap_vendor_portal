@@ -6,8 +6,11 @@ import {
   Filter, Calendar, Building2, ShieldCheck, Receipt, Download, Search, ChevronLeft
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
-import SkeletonLoader from '@/components/shared/SkeletonLoader';
 import ErrorBoundary from '@/components/ErrorBoundary';
+import TableSkeleton from '@/components/ui/TableSkeleton';
+import StatusBadge from '@/components/ui/StatusBadge';
+import EmptyState from '@/components/ui/EmptyState';
+import { paymentStatusVariant } from '@/lib/statusColors';
 
 const formatDate = (dateStr) => {
   if (!dateStr) return '';
@@ -27,7 +30,7 @@ const formatDate = (dateStr) => {
 function SectionHeader({ title, icon: Icon }) {
   return (
     <div className="col-span-full mb-1 mt-4 first:mt-0 select-none">
-      <h3 className="text-xs font-bold text-stone-900 tracking-wider uppercase border-b-2 border-primary/30 pb-1.5 flex items-center gap-2">
+      <h3 className="text-xs font-bold text-text-primary tracking-wider uppercase border-b-2 border-primary/30 pb-1.5 flex items-center gap-2">
         {Icon && <Icon className="size-4 text-primary shrink-0" />}
         <span>{title}</span>
       </h3>
@@ -38,17 +41,17 @@ function SectionHeader({ title, icon: Icon }) {
 function SapReadOnlyField({ label, value, isFile, isMonospace = true }) {
   return (
     <div className="flex items-center text-xs select-none min-h-[28px] focus-within:outline-none">
-      <span className="w-40 shrink-0 font-bold text-stone-800 text-right text-[9.5px] uppercase tracking-wide pr-2 select-none">
+      <span className="w-40 shrink-0 font-bold text-text-secondary text-right text-[9.5px] uppercase tracking-wide pr-2 select-none">
         {label}
       </span>
-      <div 
-        className={`inline-flex items-center gap-1.5 bg-stone-100 text-stone-900 border border-stone-300 rounded-[3px] px-2.5 text-xs h-6 font-semibold cursor-default box-border w-fit max-w-[280px] overflow-hidden text-ellipsis whitespace-nowrap focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-primary focus-visible:ring-offset-1 ${
+      <div
+        className={`inline-flex items-center gap-1.5 bg-surface2 text-text-primary border border-border rounded-[3px] px-2.5 text-xs h-6 font-semibold cursor-default box-border w-fit max-w-[280px] overflow-hidden text-ellipsis whitespace-nowrap focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-primary focus-visible:ring-offset-1 tabular-nums ${
           isMonospace ? 'font-mono' : 'font-sans'
         }`}
         title={value || ''}
         tabIndex={0}
       >
-        {isFile && <FileText className="size-3.5 text-stone-500 shrink-0" />}
+        {isFile && <FileText className="size-3.5 text-text-tertiary shrink-0" />}
         <span>{value || '—'}</span>
       </div>
     </div>
@@ -297,8 +300,8 @@ export default function PaymentTrackingView({ state }) {
   if (isLoading) {
     return (
       <ErrorBoundary>
-        <div className="p-4 space-y-4">
-          <SkeletonLoader type="table" rows={6} cols={5} />
+        <div className="p-4 space-y-4 card">
+          <TableSkeleton rows={6} cols={5} />
         </div>
       </ErrorBoundary>
     );
@@ -309,59 +312,61 @@ export default function PaymentTrackingView({ state }) {
       <div className="space-y-6 max-w-full mx-auto animate-fade-in pb-16 relative">
 
       {/* PAGE HEADER */}
-      <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 border-b border-stone-200 pb-4 select-none">
+      <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 border-b border-border pb-4 select-none">
         <div className="space-y-1">
-          <h2 className="text-xl font-bold tracking-tight text-stone-900 flex items-center gap-2">
+          <h2 className="text-[22px] font-bold text-text-primary flex items-center gap-2">
             <Landmark className="size-5 text-primary shrink-0" /> Payment Tracking
           </h2>
-          <p className="text-stone-500 text-xs font-semibold">
+          <p className="text-text-tertiary text-xs font-semibold">
             Track bank settlements (F110 runs), clear invoice ledgers, and download TDS certificates
           </p>
         </div>
         <div className="flex flex-wrap items-center gap-2.5">
-          <div 
+          <div
             tabIndex={0}
-            className="flex items-center gap-2 bg-white border border-stone-300 hover:border-stone-400 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2 rounded-md py-1.5 px-3 text-xs text-stone-700 font-semibold h-9 shadow-sm transition-all cursor-pointer"
+            className="flex items-center gap-2 bg-surface border border-border hover:border-border-em focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2 rounded-md py-1.5 px-3 text-xs text-text-secondary font-semibold h-9 transition-all duration-150 cursor-pointer tabular-nums"
           >
-            <Calendar className="size-4 text-stone-400 shrink-0" />
+            <Calendar className="size-4 text-text-tertiary shrink-0" />
             <span>01 Apr 2026 - 30 Jun 2026</span>
           </div>
-          <button 
+          <Button
             type="button"
-            className="flex items-center gap-2 bg-white border border-stone-300 hover:border-stone-400 hover:bg-stone-50 text-stone-700 font-semibold px-3 h-9 rounded-md transition-all text-xs cursor-pointer shadow-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2"
+            variant="outline"
+            className="h-9"
             onClick={() => alert('Opening Filters pane')}
           >
-            <Filter className="size-4 text-stone-400 shrink-0" />
+            <Filter className="size-4 text-text-tertiary shrink-0" />
             <span>Filters</span>
-          </button>
-          <button 
+          </Button>
+          <Button
             type="button"
-            className="flex items-center gap-2 bg-white border border-stone-300 hover:border-stone-400 hover:bg-stone-50 text-stone-700 font-semibold px-3 h-9 rounded-md transition-all text-xs cursor-pointer shadow-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2"
+            variant="outline"
+            className="h-9"
             onClick={() => alert('Exporting payment ledger report')}
           >
-            <Download className="size-4 text-stone-400 shrink-0" />
+            <Download className="size-4 text-text-tertiary shrink-0" />
             <span>Export</span>
-          </button>
+          </Button>
         </div>
       </div>
 
       <div className="space-y-4">
         {/* TAB NAVIGATION BAR */}
-        <div className="flex border-b border-border select-none bg-white p-1 rounded-sm shadow-xs w-fit">
+        <div className="flex border-b border-border select-none bg-surface p-1 rounded-sm shadow-xs w-fit">
           <button
             onClick={() => setDetailTab('status')}
-            className={`pb-2 px-5 text-xs font-bold border-b-2 transition-all cursor-pointer flex items-center gap-2 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2 rounded-t-[3px] ${detailTab === 'status'
+            className={`pb-2 px-5 text-xs font-bold border-b-2 transition-colors duration-150 cursor-pointer flex items-center gap-2 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2 rounded-t-[3px] ${detailTab === 'status'
               ? 'border-primary text-primary font-extrabold'
-              : 'border-transparent text-stone-400 hover:text-stone-700 hover:border-stone-200'
+              : 'border-transparent text-text-tertiary hover:text-text-primary hover:border-border'
               }`}
           >
             <CheckCircle2 className="size-4 shrink-0" /> Payment Ledger Status
           </button>
           <button
             onClick={() => setDetailTab('tds')}
-            className={`pb-2 px-5 text-xs font-bold border-b-2 transition-all cursor-pointer flex items-center gap-2 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2 rounded-t-[3px] ${detailTab === 'tds'
+            className={`pb-2 px-5 text-xs font-bold border-b-2 transition-colors duration-150 cursor-pointer flex items-center gap-2 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2 rounded-t-[3px] ${detailTab === 'tds'
               ? 'border-primary text-primary font-extrabold'
-              : 'border-transparent text-stone-400 hover:text-stone-700 hover:border-stone-200'
+              : 'border-transparent text-text-tertiary hover:text-text-primary hover:border-border'
               }`}
           >
             <FileText className="size-4 shrink-0" /> TDS Tax Certificates
@@ -374,40 +379,40 @@ export default function PaymentTrackingView({ state }) {
           {detailTab === 'status' && (
             <div className="space-y-4 animate-fade-in">
               {/* Search & Inline Filters Controls */}
-              <div className="bg-white border border-stone-200 rounded-lg p-3 flex flex-wrap items-center gap-3 shadow-xs">
+              <div className="card p-3 flex flex-wrap items-center gap-3">
                 <div className="flex-1 min-w-[240px] relative">
                   <input
                     type="text"
                     placeholder="       Search by Invoice No, SAP Document, UTR, or Date..."
                     value={searchQuery}
                     onChange={(e) => setSearchQuery(e.target.value)}
-                    className="w-full bg-white border border-stone-300 focus:border-stone-500 rounded-lg pl-8 pr-3 py-1.5 text-xs outline-none h-9 font-sans"
+                    className="!pl-8 h-9"
                   />
-                  <Search className="size-4 text-stone-400 absolute left-2.5 top-2.5" />
+                  <Search className="size-4 text-text-tertiary absolute left-2.5 top-2.5" />
                 </div>
-                
+
                 <div className="flex items-center gap-2">
-                  <span className="text-[10px] text-stone-500 font-bold uppercase tracking-wider">From</span>
+                  <span className="label mb-0 whitespace-nowrap">From</span>
                   <input
                     type="date"
                     value={fromDateFilter}
                     onChange={(e) => setFromDateFilter(e.target.value)}
-                    className="bg-white border border-stone-300 focus:border-stone-500 rounded-lg px-2.5 py-1 text-xs outline-none h-9 font-mono"
+                    className="h-9 font-mono"
                   />
                 </div>
 
                 <div className="flex items-center gap-2">
-                  <span className="text-[10px] text-stone-500 font-bold uppercase tracking-wider">To</span>
+                  <span className="label mb-0 whitespace-nowrap">To</span>
                   <input
                     type="date"
                     value={toDateFilter}
                     onChange={(e) => setToDateFilter(e.target.value)}
-                    className="bg-white border border-stone-300 focus:border-stone-500 rounded-lg px-2.5 py-1 text-xs outline-none h-9 font-mono"
+                    className="h-9 font-mono"
                   />
                   {(fromDateFilter || toDateFilter) && (
-                    <button 
+                    <button
                       onClick={() => { setFromDateFilter(''); setToDateFilter(''); }}
-                      className="text-xs text-red-500 font-semibold hover:underline cursor-pointer pl-1"
+                      className="text-xs text-destructive font-semibold hover:underline cursor-pointer pl-1 transition-colors duration-150"
                     >
                       Clear
                     </button>
@@ -415,11 +420,11 @@ export default function PaymentTrackingView({ state }) {
                 </div>
 
                 <div className="flex items-center gap-2">
-                  <span className="text-[10px] text-stone-500 font-bold uppercase tracking-wider">Method</span>
+                  <span className="label mb-0 whitespace-nowrap">Method</span>
                   <select
                     value={paymentMethodFilter}
                     onChange={(e) => setPaymentMethodFilter(e.target.value)}
-                    className="bg-white border border-stone-300 focus:border-stone-500 rounded-lg px-2.5 py-1 text-xs outline-none h-9 font-sans"
+                    className="h-9"
                   >
                     <option value="all">All Methods</option>
                     <option value="NEFT">NEFT Transfer</option>
@@ -429,23 +434,23 @@ export default function PaymentTrackingView({ state }) {
               </div>
 
               {/* Payments Table — scrollable, all rows visible */}
-              <div className="w-full overflow-x-auto overflow-y-auto max-h-[520px] border border-stone-200 rounded-lg bg-white shadow-xs custom-scrollbar">
+              <div className="card w-full overflow-x-auto overflow-y-auto max-h-[520px] custom-scrollbar">
                 <table className="w-full text-xs text-left border-collapse min-w-[1100px]">
                   <thead className="sticky top-0 z-10">
-                    <tr className="bg-stone-50 border-b border-stone-200 text-black font-bold uppercase text-[10px] tracking-wider font-sans">
-                      <th className="py-2.5 px-3 border-r border-stone-200 w-36">Invoice Number</th>
-                      <th className="py-2.5 px-3 border-r border-stone-200 w-36">SAP Document No.</th>
-                      <th className="py-2.5 px-3 border-r border-stone-200 w-28">Clearing Date</th>
-                      <th className="py-2.5 px-3 border-r border-stone-200 w-32 text-right">Gross Amount</th>
-                      <th className="py-2.5 px-3 border-r border-stone-200 w-32 text-right">TDS Deducted</th>
-                      <th className="py-2.5 px-3 border-r border-stone-200 w-32 text-right">Net Disbursed</th>
-                      <th className="py-2.5 px-3 border-r border-stone-200 min-w-[150px]">UTR / Reference</th>
-                      <th className="py-2.5 px-3 border-r border-stone-200 w-24">Method</th>
-                      <th className="py-2.5 px-3 border-r border-stone-200 w-24">Status</th>
-                      <th className="py-2.5 px-3 text-center w-36">Actions</th>
+                    <tr>
+                      <th className="w-36">Invoice Number</th>
+                      <th className="w-36">SAP Document No.</th>
+                      <th className="w-28">Clearing Date</th>
+                      <th className="w-32 text-right">Gross Amount</th>
+                      <th className="w-32 text-right">TDS Deducted</th>
+                      <th className="w-32 text-right">Net Disbursed</th>
+                      <th className="min-w-[150px]">UTR / Reference</th>
+                      <th className="w-24">Method</th>
+                      <th className="w-24">Status</th>
+                      <th className="text-center w-36">Actions</th>
                     </tr>
                   </thead>
-                  <tbody className="divide-y divide-stone-200 text-stone-700">
+                  <tbody>
                     {filteredPayments.map((payment, idx) => {
                       const invData = getInvoiceForPayment(payment);
                       const payAmt = payment.amount !== undefined ? payment.amount : (payment.netAmount || 0);
@@ -453,55 +458,54 @@ export default function PaymentTrackingView({ state }) {
                       const grossAmt = payment.grossAmount !== undefined ? payment.grossAmount : payAmt + tdsAmt;
 
                       return (
-                        <tr key={payment.id || payment._id || idx} className="hover:bg-stone-50/50 transition-colors">
-                          <td className="py-2 px-3 border-r border-stone-200">
-                            <span className="text-blue-600 font-bold hover:underline cursor-pointer select-all whitespace-nowrap">
+                        <tr key={payment.id || payment._id || idx}>
+                          <td className="whitespace-nowrap">
+                            <span className="text-primary font-bold hover:underline cursor-pointer select-all whitespace-nowrap">
                               {invData?.invoiceNumber || payment.invoiceId}
                             </span>
                           </td>
-                          <td className="py-2 px-3 border-r border-stone-200 font-mono font-semibold text-stone-800 whitespace-nowrap">
+                          <td className="font-mono font-semibold text-text-primary whitespace-nowrap">
                             {invData?.sapMiroDoc || '—'}
                           </td>
-                          <td className="py-2 px-3 border-r border-stone-200 font-medium font-mono text-stone-700 whitespace-nowrap">
+                          <td className="font-medium font-mono text-text-secondary whitespace-nowrap tabular-nums">
                             {formatDate(payment.paymentDate)}
                           </td>
-                          <td className="py-2 px-3 border-r border-stone-200 font-bold text-stone-900 text-right font-mono whitespace-nowrap">
+                          <td className="font-bold text-text-primary text-right font-mono whitespace-nowrap tabular-nums">
                             ₹ {grossAmt.toLocaleString('en-IN')}.00
                           </td>
-                          <td className="py-2 px-3 border-r border-stone-200 font-medium text-red-650 text-right font-mono whitespace-nowrap">
+                          <td className="font-medium text-destructive text-right font-mono whitespace-nowrap tabular-nums">
                             - ₹ {tdsAmt.toLocaleString('en-IN')}.00
                           </td>
-                          <td className="py-2 px-3 border-r border-stone-200 font-extrabold text-emerald-700 text-right font-mono whitespace-nowrap">
+                          <td className="font-extrabold text-emerald-text text-right font-mono whitespace-nowrap tabular-nums">
                             ₹ {payAmt.toLocaleString('en-IN')}.00
                           </td>
-                          <td className="py-2 px-3 border-r border-stone-200 font-mono font-bold text-stone-800 select-all break-all">
+                          <td className="font-mono font-bold text-text-primary select-all break-all">
                             {payment.utrCode}
                           </td>
-                          <td className="py-2 px-3 border-r border-stone-200 font-semibold text-stone-600 text-xs whitespace-nowrap">
+                          <td className="font-semibold text-text-secondary text-xs whitespace-nowrap">
                             {payment.paymentMethod || 'NEFT'}
                           </td>
-                          <td className="py-2 px-3 border-r border-stone-200 whitespace-nowrap">
-                            <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-bold border border-emerald-250 bg-emerald-50 text-emerald-700">
-                              <CheckCircle2 className="size-3 shrink-0" />
-                              Cleared
-                            </span>
+                          <td className="whitespace-nowrap">
+                            <StatusBadge label="Cleared" variant={paymentStatusVariant('Cleared')} />
                           </td>
-                          <td className="py-2 px-3 text-center whitespace-nowrap">
+                          <td className="text-center whitespace-nowrap">
                             <div className="flex items-center justify-center gap-1.5">
-                              <button
+                              <Button
+                                variant="outline"
+                                size="xs"
                                 onClick={() => alert(`Raising inquiry regarding settlement transaction UTR: ${payment.utrCode}`)}
-                                className="px-2 py-1 bg-stone-100 hover:bg-stone-200 text-stone-700 rounded border border-stone-200 text-[10px] font-bold transition-all cursor-pointer"
                                 title="Raise query / dispute"
                               >
                                 Query
-                              </button>
-                              <button
+                              </Button>
+                              <Button
+                                variant="default"
+                                size="xs"
                                 onClick={handleDownloadStatement}
-                                className="px-2 py-1 bg-primary hover:bg-primary/95 text-white rounded text-[10px] font-bold transition-all shadow-xs cursor-pointer"
                                 title="Download Advice Slip"
                               >
                                 Advice
-                              </button>
+                              </Button>
                             </div>
                           </td>
                         </tr>
@@ -509,8 +513,8 @@ export default function PaymentTrackingView({ state }) {
                     })}
                     {filteredPayments.length === 0 && (
                       <tr>
-                        <td colSpan={10} className="py-8 text-center text-stone-400 font-semibold select-none">
-                          No cleared invoice matching the filters found.
+                        <td colSpan={10} className="!border-b-0">
+                          <EmptyState title="No matching payments" description="No cleared invoice matching the filters found." />
                         </td>
                       </tr>
                     )}
@@ -525,13 +529,13 @@ export default function PaymentTrackingView({ state }) {
           {detailTab === 'tds' && (
             <div className="space-y-4 animate-fade-in">
               {/* Search & Inline Filters Controls */}
-              <div className="bg-white border border-stone-200 rounded-lg p-3 flex flex-wrap items-center gap-3 shadow-xs">
+              <div className="card p-3 flex flex-wrap items-center gap-3">
                 <div className="flex items-center gap-2">
-                  <span className="text-[10px] text-stone-500 font-bold uppercase tracking-wider">Fiscal Year</span>
+                  <span className="label mb-0 whitespace-nowrap">Fiscal Year</span>
                   <select
                     value={tdsYearFilter}
                     onChange={(e) => setTdsYearFilter(e.target.value)}
-                    className="bg-white border border-stone-300 focus:border-stone-500 rounded-lg px-2.5 py-1 text-xs outline-none h-9 font-sans"
+                    className="h-9"
                   >
                     <option value="all">All Years</option>
                     <option value="2025-2026">2025-2026</option>
@@ -540,11 +544,11 @@ export default function PaymentTrackingView({ state }) {
                 </div>
 
                 <div className="flex items-center gap-2">
-                  <span className="text-[10px] text-stone-500 font-bold uppercase tracking-wider">Quarter</span>
+                  <span className="label mb-0 whitespace-nowrap">Quarter</span>
                   <select
                     value={tdsQuarterFilter}
                     onChange={(e) => setTdsQuarterFilter(e.target.value)}
-                    className="bg-white border border-stone-300 focus:border-stone-500 rounded-lg px-2.5 py-1 text-xs outline-none h-9 font-sans"
+                    className="h-9"
                   >
                     <option value="all">All Quarters</option>
                     <option value="Q1">Q1 (Apr - Jun)</option>
@@ -556,65 +560,63 @@ export default function PaymentTrackingView({ state }) {
               </div>
 
               {/* TDS Registry Table — scrollable, all rows visible */}
-              <div className="w-full overflow-x-auto overflow-y-auto max-h-[520px] custom-scrollbar border border-stone-200 rounded-lg bg-white shadow-xs">
+              <div className="card w-full overflow-x-auto overflow-y-auto max-h-[520px] custom-scrollbar">
                 <table className="w-full text-xs text-left border-collapse min-w-[1100px]">
                   <thead className="sticky top-0 z-10">
-                    <tr className="bg-stone-50 border-b border-stone-200 text-black font-bold uppercase text-[10px] tracking-wider font-sans">
-                      <th className="py-2.5 px-4 border-r border-stone-200 whitespace-nowrap">Fiscal Year</th>
-                      <th className="py-2.5 px-4 border-r border-stone-200 whitespace-nowrap">Quarter</th>
-                      <th className="py-2.5 px-4 border-r border-stone-200 whitespace-nowrap">Section</th>
-                      <th className="py-2.5 px-4 border-r border-stone-200 whitespace-nowrap">Deductor TAN</th>
-                      <th className="py-2.5 px-4 border-r border-stone-200 whitespace-nowrap">Deductee PAN</th>
-                      <th className="py-2.5 px-4 border-r border-stone-200 text-right whitespace-nowrap">Tax Withheld</th>
-                      <th className="py-2.5 px-4 border-r border-stone-200 whitespace-nowrap">Filing Date</th>
-                      <th className="py-2.5 px-4 border-r border-stone-200 text-center whitespace-nowrap">Status</th>
-                      <th className="py-2.5 px-4 text-center whitespace-nowrap">Actions</th>
+                    <tr>
+                      <th className="whitespace-nowrap">Fiscal Year</th>
+                      <th className="whitespace-nowrap">Quarter</th>
+                      <th className="whitespace-nowrap">Section</th>
+                      <th className="whitespace-nowrap">Deductor TAN</th>
+                      <th className="whitespace-nowrap">Deductee PAN</th>
+                      <th className="text-right whitespace-nowrap">Tax Withheld</th>
+                      <th className="whitespace-nowrap">Filing Date</th>
+                      <th className="text-center whitespace-nowrap">Status</th>
+                      <th className="text-center whitespace-nowrap">Actions</th>
                     </tr>
                   </thead>
-                  <tbody className="divide-y divide-stone-200 text-stone-700 font-mono text-xs">
+                  <tbody className="font-mono text-xs">
                     {allTds.map((cert) => (
-                      <tr key={cert.id} className="hover:bg-stone-50/50 transition-colors">
-                        <td className="py-2.5 px-4 border-r border-stone-200 font-semibold font-sans text-stone-800 whitespace-nowrap">
+                      <tr key={cert.id}>
+                        <td className="font-semibold font-sans text-text-primary whitespace-nowrap">
                           {cert.fiscalYear}
                         </td>
-                        <td className="py-2.5 px-4 border-r border-stone-200 font-bold font-sans text-stone-900 whitespace-nowrap">
+                        <td className="font-bold font-sans text-text-primary whitespace-nowrap">
                           {cert.quarter}
                         </td>
-                        <td className="py-2.5 px-4 border-r border-stone-200 font-semibold text-stone-600 whitespace-nowrap">
+                        <td className="font-semibold text-text-secondary whitespace-nowrap">
                           {cert.section}
                         </td>
-                        <td className="py-2.5 px-4 border-r border-stone-200 font-medium text-stone-800 select-all whitespace-nowrap">
+                        <td className="font-medium text-text-primary select-all whitespace-nowrap">
                           {cert.deductorTan}
                         </td>
-                        <td className="py-2.5 px-4 border-r border-stone-200 font-medium text-stone-800 select-all whitespace-nowrap">
+                        <td className="font-medium text-text-primary select-all whitespace-nowrap">
                           {cert.deducteePan}
                         </td>
-                        <td className="py-2.5 px-4 border-r border-stone-200 font-extrabold text-emerald-700 text-right whitespace-nowrap">
+                        <td className="font-extrabold text-emerald-text text-right whitespace-nowrap tabular-nums">
                           ₹ {cert.taxWithheld.toLocaleString('en-IN')}.00
                         </td>
-                        <td className="py-2.5 px-4 border-r border-stone-200 whitespace-nowrap">
+                        <td className="whitespace-nowrap tabular-nums">
                           {formatDate(cert.filingDate)}
                         </td>
-                        <td className="py-2.5 px-4 border-r border-stone-200 text-center font-sans whitespace-nowrap">
-                          <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[9px] font-bold border border-emerald-250 bg-emerald-50 text-emerald-700 whitespace-nowrap">
-                            <ShieldCheck className="size-3 shrink-0" />
-                            Filed & Signed
-                          </span>
+                        <td className="text-center font-sans whitespace-nowrap">
+                          <StatusBadge label="Filed & Signed" variant={paymentStatusVariant(cert.status)} />
                         </td>
-                        <td className="py-2.5 px-4 text-center font-sans whitespace-nowrap">
-                          <button
+                        <td className="text-center font-sans whitespace-nowrap">
+                          <Button
+                            variant="default"
+                            size="xs"
                             onClick={() => alert(`Downloading signed Form 16A quarterly TDS certificate for PAN: ${cert.deducteePan} (${cert.quarter} FY ${cert.fiscalYear})`)}
-                            className="px-2.5 py-1 bg-primary hover:bg-primary/95 text-white rounded text-[10px] font-bold transition-all shadow-xs cursor-pointer whitespace-nowrap"
                           >
                             Download Form 16A
-                          </button>
+                          </Button>
                         </td>
                       </tr>
                     ))}
                     {filteredTds.length === 0 && (
                       <tr>
-                        <td colSpan={9} className="py-8 text-center text-stone-400 font-semibold font-sans select-none whitespace-nowrap">
-                          No filed TDS certificates found matching the criteria.
+                        <td colSpan={9} className="!border-b-0">
+                          <EmptyState title="No TDS certificates found" description="No filed TDS certificates found matching the criteria." />
                         </td>
                       </tr>
                     )}

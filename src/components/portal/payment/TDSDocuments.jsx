@@ -105,8 +105,8 @@ export default function TDSDocuments({ state }) {
     <div className="space-y-6 pb-12">
       {/* HEADER */}
       <div>
-        <h2 className="text-2xl font-bold text-stone-900 dark:text-white">TDS & Tax Documents</h2>
-        <p className="text-sm text-stone-600 dark:text-stone-400 mt-1">
+        <h2 className="text-[22px] font-bold text-text-primary">TDS & Tax Documents</h2>
+        <p className="text-sm text-text-tertiary mt-1">
           Download and manage your TDS certificates and tax documents
         </p>
       </div>
@@ -146,20 +146,20 @@ export default function TDSDocuments({ state }) {
       {/* SEARCH AND FILTERS */}
       <div className="flex flex-col md:flex-row items-start md:items-center justify-between gap-4">
         <div className="relative flex-1 max-w-md">
-          <Search className="absolute left-3 top-1/2 -translate-y-1/2 size-4 text-stone-400 dark:text-stone-600" />
+          <Search className="absolute left-3 top-1/2 -translate-y-1/2 size-4 text-text-tertiary" />
           <input
             type="text"
             placeholder="Search certificate number..."
             value={searchTerm}
             onChange={(e) => setSearchTerm(e.target.value)}
-            className="w-full pl-10 pr-4 py-2 rounded-lg border border-stone-200 dark:border-stone-800 bg-white dark:bg-stone-900 text-stone-900 dark:text-white text-sm outline-none focus:border-purple-500"
+            className="!pl-10"
           />
         </div>
 
         <select
           value={selectedYear}
           onChange={(e) => setSelectedYear(e.target.value)}
-          className="px-3 py-2 rounded-lg border border-stone-200 dark:border-stone-800 bg-white dark:bg-stone-900 text-stone-900 dark:text-white text-sm font-medium outline-none"
+          className="text-sm font-medium"
         >
           {years.map((year) => (
             <option key={year} value={year}>
@@ -171,8 +171,8 @@ export default function TDSDocuments({ state }) {
 
       {/* TAX SUMMARY SECTION */}
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-        <div className="p-6 rounded-xl border border-stone-200 dark:border-stone-800 bg-white dark:bg-stone-900/50">
-          <h3 className="text-lg font-bold text-stone-900 dark:text-white mb-4">Quarter Wise Breakdown</h3>
+        <div className="card p-6">
+          <h3 className="text-lg font-bold text-text-primary mb-4">Quarter Wise Breakdown</h3>
           <div className="space-y-3">
             {['Q1', 'Q2', 'Q3', 'Q4'].map((quarter) => {
               const quarterCerts = certificates.filter(c => c.quarter.includes(quarter));
@@ -182,11 +182,11 @@ export default function TDSDocuments({ state }) {
               return (
                 <div key={quarter}>
                   <div className="flex items-center justify-between mb-1">
-                    <span className="text-sm font-semibold text-stone-900 dark:text-white">{quarter}</span>
-                    <span className="text-sm font-mono font-bold text-stone-900 dark:text-white">{formatCurrency(totalAmount)}</span>
+                    <span className="text-sm font-semibold text-text-primary">{quarter}</span>
+                    <span className="text-sm font-mono font-bold text-text-primary tabular-nums">{formatCurrency(totalAmount)}</span>
                   </div>
-                  <div className="w-full h-2 bg-stone-200 dark:bg-stone-800 rounded-full overflow-hidden">
-                    <div className="h-full bg-gradient-to-r from-purple-500 to-purple-600" style={{ width: `${percentage || 0}%` }} />
+                  <div className="w-full h-2 bg-surface2 rounded-full overflow-hidden border border-border">
+                    <div className="h-full bg-primary" style={{ width: `${percentage || 0}%` }} />
                   </div>
                 </div>
               );
@@ -194,17 +194,17 @@ export default function TDSDocuments({ state }) {
           </div>
         </div>
 
-        <div className="p-6 rounded-xl border border-stone-200 dark:border-stone-800 bg-white dark:bg-stone-900/50">
-          <h3 className="text-lg font-bold text-stone-900 dark:text-white mb-4">Annual Summary</h3>
+        <div className="card p-6">
+          <h3 className="text-lg font-bold text-text-primary mb-4">Annual Summary</h3>
           <div className="space-y-3">
             {[...new Set(certificates.map(c => c.financialYear))].sort().reverse().slice(0, 4).map((year) => {
               const yearCerts = certificates.filter(c => c.financialYear === year);
               const totalAmount = yearCerts.reduce((sum, c) => sum + c.tdsAmount, 0);
 
               return (
-                <div key={year} className="flex items-center justify-between p-3 rounded-lg bg-stone-50 dark:bg-stone-900/50">
-                  <span className="font-semibold text-stone-900 dark:text-white">FY {year}</span>
-                  <span className="font-mono font-bold text-stone-900 dark:text-white">{formatCurrency(totalAmount)}</span>
+                <div key={year} className="flex items-center justify-between p-3 rounded-lg bg-surface2/50 border border-border">
+                  <span className="font-semibold text-text-primary">FY {year}</span>
+                  <span className="font-mono font-bold text-text-primary tabular-nums">{formatCurrency(totalAmount)}</span>
                 </div>
               );
             })}
@@ -214,7 +214,7 @@ export default function TDSDocuments({ state }) {
 
       {/* CERTIFICATES TABLE */}
       <div>
-        <h3 className="text-lg font-bold text-stone-900 dark:text-white mb-4">Form 16A Certificates</h3>
+        <h3 className="text-lg font-bold text-text-primary mb-4">Form 16A Certificates</h3>
         {filteredCertificates.length > 0 ? (
           <DataTable columns={columns} data={filteredCertificates} actions={actions} />
         ) : (

@@ -1,5 +1,8 @@
 import React, { useState } from 'react';
 import { Search } from 'lucide-react';
+import StatusBadge from '@/components/ui/StatusBadge';
+import EmptyState from '@/components/ui/EmptyState';
+import { paymentStatusVariant } from '@/lib/statusColors';
 
 export default function PaymentsView({ state }) {
   const clearedPayments = state.payments;
@@ -41,12 +44,12 @@ export default function PaymentsView({ state }) {
       {/* HEADER STATS */}
       <div className="flex flex-wrap items-center justify-between gap-4">
         <div>
-          <h2 className="text-xl font-bold tracking-tight text-gray-900">Payment Tracking</h2>
-          <p className="text-gray-500 text-xs mt-0.5">Track cleared weekly payment batches and inspect the FBL1N Account Ledger.</p>
+          <h2 className="text-[22px] font-bold text-text-primary">Payment Tracking</h2>
+          <p className="text-text-tertiary text-xs mt-0.5">Track cleared weekly payment batches and inspect the FBL1N Account Ledger.</p>
         </div>
-        <div className="p-4 rounded-xl border border-gray-200 bg-white shadow-sm text-right">
-          <p className="text-[10px] text-gray-405 uppercase font-bold tracking-wider">Account Ledger balance</p>
-          <p className={`text-base font-bold font-mono ${totalOutstanding >= 0 ? 'text-emerald-650' : 'text-red-500'}`}>
+        <div className="metric-panel !p-4 text-right">
+          <p className="label mb-0">Account Ledger balance</p>
+          <p className={`text-base font-bold font-mono tabular-nums ${totalOutstanding >= 0 ? 'text-emerald-text' : 'text-destructive'}`}>
             {totalOutstanding >= 0 ? '₹0.00' : `-₹${Math.abs(totalOutstanding).toLocaleString()}`}
           </p>
         </div>
@@ -54,34 +57,34 @@ export default function PaymentsView({ state }) {
 
       {/* COMPLETED TRANSFERS */}
       <div className="space-y-3">
-        <h3 className="text-[10px] font-bold text-gray-400 uppercase tracking-wider">Cleared Payments (F110 bank runs)</h3>
+        <h3 className="label mb-0">Cleared Payments (F110 bank runs)</h3>
         {clearedPayments.length === 0 ? (
-          <div className="p-6 rounded-xl border border-gray-200 bg-white text-center text-xs text-gray-550 shadow-sm">
-            No bank clearings syncing. Clear weekly batches by posting MIRO invoices.
+          <div className="card">
+            <EmptyState title="No bank clearings syncing" description="Clear weekly batches by posting MIRO invoices." />
           </div>
         ) : (
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             {clearedPayments.map(pay => (
-              <div key={pay.id} className="p-4.5 border border-gray-200 bg-white rounded-xl shadow-sm space-y-3">
-                <div className="flex justify-between items-start border-b border-gray-100 pb-2">
+              <div key={pay.id} className="card p-4.5 space-y-3">
+                <div className="flex justify-between items-start border-b border-border pb-2">
                   <div>
-                    <p className="text-[9px] text-gray-450 font-mono">PO REFERENCE: {pay.poId}</p>
-                    <p className="text-xs font-bold text-gray-900 mt-1">Clearing Date: {pay.paymentDate}</p>
+                    <p className="text-[9px] text-text-tertiary font-mono">PO REFERENCE: {pay.poId}</p>
+                    <p className="text-xs font-bold text-text-primary mt-1 tabular-nums">Clearing Date: {pay.paymentDate}</p>
                   </div>
-                  <p className="text-sm font-bold font-mono text-emerald-650">₹{pay.amount.toLocaleString()}</p>
+                  <p className="text-sm font-bold font-mono text-emerald-text tabular-nums">₹{pay.amount.toLocaleString()}</p>
                 </div>
-                <div className="space-y-1.5 text-xs text-gray-700">
+                <div className="space-y-1.5 text-xs text-text-secondary">
                   <p className="flex justify-between">
-                    <span className="text-gray-405">Settlement Method</span>
-                    <span className="font-semibold text-gray-900">{pay.paymentMethod}</span>
+                    <span className="text-text-tertiary">Settlement Method</span>
+                    <span className="font-semibold text-text-primary">{pay.paymentMethod}</span>
                   </p>
                   <p className="flex justify-between">
-                    <span className="text-gray-405">Unique UTR Reference</span>
-                    <span className="font-mono font-bold text-gray-900">{pay.utrCode}</span>
+                    <span className="text-text-tertiary">Unique UTR Reference</span>
+                    <span className="font-mono font-bold text-text-primary">{pay.utrCode}</span>
                   </p>
                   <p className="flex justify-between">
-                    <span className="text-gray-405">FI Clearing Document</span>
-                    <span className="font-mono text-[#1b6b5a] font-bold">{state.invoices.find(i => i.id === pay.invoiceId)?.paymentDoc}</span>
+                    <span className="text-text-tertiary">FI Clearing Document</span>
+                    <span className="font-mono text-emerald-text font-bold">{state.invoices.find(i => i.id === pay.invoiceId)?.paymentDoc}</span>
                   </p>
                 </div>
               </div>
@@ -93,56 +96,53 @@ export default function PaymentsView({ state }) {
       {/* ACCOUNT LEDGER */}
       <div className="space-y-3">
         <div className="flex flex-wrap items-center justify-between gap-4">
-          <h3 className="text-[10px] font-bold text-gray-400 uppercase tracking-wider flex items-center gap-1.5">
+          <h3 className="label mb-0 flex items-center gap-1.5">
             Vendor Line Item Ledger (SAP FBL1N mappings)
           </h3>
           <div className="relative w-64">
-            <Search className="size-3.5 absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" />
+            <Search className="size-3.5 absolute left-3 top-1/2 -translate-y-1/2 text-text-tertiary" />
             <input
               type="text" placeholder="Search doc reference..." value={searchTerm}
               onChange={e => setSearchTerm(e.target.value)}
-              className="w-full bg-white border border-gray-300 rounded-lg py-1 pl-8 pr-3 text-xs outline-none focus:border-emerald-500 text-gray-900 font-mono"
+              className="!pl-8 font-mono"
             />
           </div>
         </div>
 
-        <div className="overflow-hidden border border-gray-200 rounded-xl bg-white shadow-sm">
+        <div className="card overflow-x-auto">
           <table className="w-full text-left text-xs border-collapse">
             <thead>
-              <tr className="bg-gray-50 border-b border-gray-200 font-bold text-[9px] text-gray-550 uppercase tracking-wider">
-                <th className="py-2.5 px-6">Posting Date</th>
-                <th className="py-2.5 px-6">Doc Reference</th>
-                <th className="py-2.5 px-6">Document Type</th>
-                <th className="py-2.5 px-6">Clearing Doc</th>
-                <th className="py-2.5 px-6 text-right">Net Value</th>
-                <th className="py-2.5 px-6 text-center">Status</th>
+              <tr>
+                <th>Posting Date</th>
+                <th>Doc Reference</th>
+                <th>Document Type</th>
+                <th>Clearing Doc</th>
+                <th className="text-right">Net Value</th>
+                <th className="text-center">Status</th>
               </tr>
             </thead>
-            <tbody className="divide-y divide-gray-150 font-mono text-gray-700">
+            <tbody className="font-mono">
               {filteredLedger.length === 0 ? (
                 <tr>
-                  <td colSpan={6} className="py-4 text-center text-gray-450 font-sans">
-                    No transactions registered in this ledger timeline.
+                  <td colSpan={6} className="!border-b-0">
+                    <EmptyState title="No transactions registered" description="No transactions registered in this ledger timeline." />
                   </td>
                 </tr>
               ) : (
                 filteredLedger.map((item, i) => (
-                  <tr key={i} className="hover:bg-gray-50/40 transition-colors">
-                    <td className="py-3 px-6 text-gray-500">{item.postDate}</td>
-                    <td className="py-3 px-6 font-bold text-gray-900">{item.docNum}</td>
-                    <td className="py-3 px-6 text-gray-550">{item.docType}</td>
-                    <td className="py-3 px-6 text-gray-500">{item.clearingDoc}</td>
-                    <td className={`py-3 px-6 text-right font-bold ${item.amount < 0 ? 'text-red-500' : 'text-emerald-650'}`}>
+                  <tr key={i}>
+                    <td className="tabular-nums">{item.postDate}</td>
+                    <td className="font-bold text-text-primary">{item.docNum}</td>
+                    <td>{item.docType}</td>
+                    <td>{item.clearingDoc}</td>
+                    <td className={`text-right font-bold tabular-nums ${item.amount < 0 ? 'text-destructive' : 'text-emerald-text'}`}>
                       {item.amount < 0 ? `-₹${Math.abs(item.amount).toLocaleString()}` : `₹${item.amount.toLocaleString()}`}
                     </td>
-                    <td className="py-3 px-6 text-center">
-                      <span className={`px-2 py-0.5 rounded-full text-[9px] font-bold ${
-                        item.status === 'Paid' || item.status === 'Cleared'
-                          ? 'bg-emerald-50 text-emerald-700'
-                          : 'bg-red-50 text-red-750'
-                      }`}>
-                        {item.status === 'Paid' || item.status === 'Cleared' ? 'CLEARED' : 'OPEN'}
-                      </span>
+                    <td className="text-center">
+                      <StatusBadge
+                        label={item.status === 'Paid' || item.status === 'Cleared' ? 'CLEARED' : 'OPEN'}
+                        variant={paymentStatusVariant(item.status === 'Paid' || item.status === 'Cleared' ? 'Cleared' : 'Pending')}
+                      />
                     </td>
                   </tr>
                 ))
