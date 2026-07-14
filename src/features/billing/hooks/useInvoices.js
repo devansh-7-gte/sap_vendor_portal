@@ -22,6 +22,7 @@ export function useInvoices(profile, setInvoiceSubmittedForGrn, addPayment) {
   };
 
   const refreshInvoices = async () => {
+    if (typeof window !== 'undefined' && !localStorage.getItem('jwt_token')) return;
     try {
       const data = await invoiceService.getInvoices();
       if (data && data.invoices) {

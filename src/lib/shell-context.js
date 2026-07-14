@@ -34,6 +34,7 @@ export function ShellProvider({ children }) {
   });
 
   const refreshSapLogs = async () => {
+    if (typeof window !== 'undefined' && !localStorage.getItem('jwt_token')) return;
     try {
       const logs = await apiClient.get('/logs');
       if (logs) {
