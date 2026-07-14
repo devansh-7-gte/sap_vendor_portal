@@ -60,21 +60,21 @@ export default function SignInPage() {
   };
 
   return (
-    <div className="w-full max-w-[420px] p-8 rounded-xl border border-stone-800 bg-stone-900/60 backdrop-blur-xl shadow-2xl animate-fade-in">
+    <div className="w-full max-w-[420px] p-8 card animate-fadeUp">
       {/* Brand Header */}
       <div className="flex flex-col items-center mb-8">
-        <div className="size-12 rounded-lg bg-blue-600 flex items-center justify-center text-white mb-3 shadow-lg border border-blue-500/25">
+        <div className="size-12 rounded-md flex items-center justify-center text-white mb-3 shrink-0" style={{ backgroundColor: 'rgb(var(--color-emerald-default-rgb))' }}>
           <Building2 className="size-6" />
         </div>
-        <h2 className="text-xl font-bold text-stone-100 tracking-wide">VendorConnect Portal</h2>
-        <p className="text-[10px] text-stone-400 font-mono tracking-wider uppercase mt-1">
+        <h2 className="text-xl font-bold text-text-primary tracking-wide">VendorConnect Portal</h2>
+        <p className="text-[10px] text-text-tertiary font-mono tracking-wider uppercase mt-1">
           SAP INTEGRATED PARTNER GATEWAY
         </p>
       </div>
 
       {/* Form Error Message */}
       {error && (
-        <div className="p-3 mb-5 rounded bg-red-950/40 border border-red-800/50 flex items-start gap-2.5 text-xs text-red-400">
+        <div className="p-3 mb-5 rounded-md bg-[#FFF1F2] border border-[#FECDD3] flex items-start gap-2.5 text-xs text-[#EF4444]">
           <AlertCircle className="size-4 shrink-0 mt-0.5" />
           <span>{error}</span>
         </div>
@@ -83,7 +83,7 @@ export default function SignInPage() {
       {/* Login Form */}
       <form onSubmit={handleLogin} className="space-y-4">
         <div>
-          <label className="block text-[10px] font-mono tracking-wider text-stone-400 uppercase mb-1.5 font-semibold">
+          <label className="label">
             Vendor ID or Registered Email
           </label>
           <div className="relative">
@@ -94,15 +94,15 @@ export default function SignInPage() {
               placeholder="e.g. VND-40012 or partner@domain.com"
               value={vendorIdOrEmail}
               onChange={(e) => setVendorIdOrEmail(e.target.value)}
-              className="w-full h-10 px-3 pl-9 rounded border border-stone-800 bg-stone-950 text-stone-200 text-xs placeholder:text-stone-600 focus:outline-none focus:border-blue-600 focus:ring-1 focus:ring-blue-600/50 transition-all disabled:opacity-55"
+              className="pl-9 disabled:opacity-55"
             />
-            <Building2 className="absolute left-3 top-3 size-4 text-stone-600" />
+            <Building2 className="absolute left-3 top-1/2 -translate-y-1/2 size-4 text-text-tertiary" />
           </div>
         </div>
 
         <div>
           <div className="flex justify-between items-center mb-1.5">
-            <label className="block text-[10px] font-mono tracking-wider text-stone-400 uppercase font-semibold">
+            <label className="label mb-0">
               Password
             </label>
           </div>
@@ -114,16 +114,16 @@ export default function SignInPage() {
               placeholder="••••••••"
               value={password}
               onChange={(e) => setPassword(e.target.value)}
-              className="w-full h-10 px-3 pl-9 rounded border border-stone-800 bg-stone-950 text-stone-200 text-xs placeholder:text-stone-600 focus:outline-none focus:border-blue-600 focus:ring-1 focus:ring-blue-600/50 transition-all disabled:opacity-55"
+              className="pl-9 disabled:opacity-55"
             />
-            <KeyRound className="absolute left-3 top-3 size-4 text-stone-600" />
+            <KeyRound className="absolute left-3 top-1/2 -translate-y-1/2 size-4 text-text-tertiary" />
           </div>
         </div>
 
         <button
           type="submit"
           disabled={loading}
-          className="w-full h-10 bg-blue-600 hover:bg-blue-700 active:bg-blue-800 text-white text-xs font-semibold rounded flex items-center justify-center gap-1.5 transition-colors cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed shadow-md shadow-blue-900/20"
+          className="btn btn-v w-full h-10 justify-center disabled:opacity-50 disabled:cursor-not-allowed"
         >
           {loading ? (
             <>
@@ -140,12 +140,12 @@ export default function SignInPage() {
       </form>
 
       {/* Footer onboarding links */}
-      <div className="mt-8 pt-6 border-t border-stone-800/80 text-center">
-        <p className="text-[11px] text-stone-500">
+      <div className="mt-8 pt-6 border-t border-border text-center">
+        <p className="text-[11px] text-text-tertiary">
           New vendor partner?{' '}
           <Link
             href="/sign-up"
-            className="text-blue-500 hover:text-blue-400 hover:underline transition-colors font-medium ml-1"
+            className="text-emerald-text hover:underline transition-colors duration-150 font-medium ml-1"
           >
             Register Profile
           </Link>
