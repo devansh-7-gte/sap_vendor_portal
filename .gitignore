@@ -41,5 +41,4 @@ yarn-error.log*
 next-env.d.ts
 
 # backend (excluded from this frontend-only repo)
-backend/
 

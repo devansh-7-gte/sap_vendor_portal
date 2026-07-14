@@ -1,0 +1,30 @@
+{
+    "keep": {
+        "days": true,
+        "amount": 14
+    },
+    "auditLog": "A:\\sap_vendor_portal\\backend\\logs\\.6f7efc7b826a640de328e4170183c9b1094e3235-audit.json",
+    "files": [
+        {
+            "date": 1783333972354,
+            "name": "A:\\sap_vendor_portal\\backend\\logs\\combined-2026-07-06.log",
+            "hash": "a8117af4d7ff273ea39d1c30a1aebf65a10fd64b103ab99e128268ac8f0f6c28"
+        },
+        {
+            "date": 1783490278369,
+            "name": "A:\\sap_vendor_portal\\backend\\logs\\combined-2026-07-08.log",
+            "hash": "24bf9487c3f5c1c7576e875fd75c085b2b500edbb7ffdda9635321c54aeba0d1"
+        },
+        {
+            "date": 1783665183180,
+            "name": "A:\\sap_vendor_portal\\backend\\logs\\combined-2026-07-10.log",
+            "hash": "3b090cd1fbfd0959a4610ef63418107b1482ac9e5af6125f70b46711222e8abd"
+        },
+        {
+            "date": 1784013141175,
+            "name": "A:\\sap_vendor_portal\\backend\\logs\\combined-2026-07-14.log",
+            "hash": "6f5d35799461542949b68e91771fbeb30e8644fef1cdba92e4498e724ac8941f"
+        }
+    ],
+    "hashType": "sha256"
+}
