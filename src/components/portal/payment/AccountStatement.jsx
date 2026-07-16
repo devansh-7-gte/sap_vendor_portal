@@ -87,7 +87,7 @@ export default function AccountStatement({ state }) {
     {
       key: 'debit',
       label: 'Debit',
-      render: (val) => <span className="font-mono font-bold text-red-600 dark:text-red-400">{val > 0 ? formatCurrency(val) : '-'}</span>,
+      render: (val) => <span className="font-mono font-bold text-rose-400">{val > 0 ? formatCurrency(val) : '-'}</span>,
     },
     {
       key: 'credit',
@@ -128,7 +128,7 @@ export default function AccountStatement({ state }) {
       {/* SUMMARY CARDS */}
       <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
         <KPICard label="Opening Balance" value={<span className="tabular-nums">{formatCurrency(summary.openingBalance)}</span>} />
-        <KPICard label="Credits" value={<span className="tabular-nums text-emerald-text">{formatCurrency(summary.credits)}</span>} />
+        <KPICard label="Credits" value={<span className="tabular-nums text-emerald-400">{formatCurrency(summary.credits)}</span>} />
         <KPICard label="Debits" value={<span className="tabular-nums text-destructive">{formatCurrency(summary.debits)}</span>} />
         <KPICard label="Closing Balance" value={<span className="tabular-nums">{formatCurrency(summary.closingBalance)}</span>} />
       </div>
@@ -170,7 +170,7 @@ export default function AccountStatement({ state }) {
             <option value="90">Last 90 Days</option>
           </select>
 
-          <button className="px-3 h-8 rounded-md border border-border bg-surface text-text-primary hover:bg-surface2 transition-colors duration-150 flex items-center gap-2 text-xs font-medium cursor-pointer">
+          <button className="px-3 h-8 rounded-none border border-border bg-surface text-text-primary hover:bg-surface2 transition-colors duration-150 flex items-center gap-2 text-xs font-medium cursor-pointer">
             <Download className="size-4" />
             Export
           </button>
@@ -181,16 +181,16 @@ export default function AccountStatement({ state }) {
       <div className="card p-4">
         <div className="flex flex-wrap gap-3 items-center">
           <span className="text-sm font-semibold text-text-secondary">Export as:</span>
-          <button className="px-3 py-1.5 text-xs font-semibold rounded-md border border-border hover:bg-surface2 transition-colors duration-150">
+          <button className="px-3 py-1.5 text-xs font-semibold rounded-none border border-border hover:bg-surface2 transition-colors duration-150">
             PDF
           </button>
-          <button className="px-3 py-1.5 text-xs font-semibold rounded-md border border-border hover:bg-surface2 transition-colors duration-150">
+          <button className="px-3 py-1.5 text-xs font-semibold rounded-none border border-border hover:bg-surface2 transition-colors duration-150">
             Excel
           </button>
-          <button className="px-3 py-1.5 text-xs font-semibold rounded-md border border-border hover:bg-surface2 transition-colors duration-150">
+          <button className="px-3 py-1.5 text-xs font-semibold rounded-none border border-border hover:bg-surface2 transition-colors duration-150">
             CSV
           </button>
-          <button className="px-3 py-1.5 text-xs font-semibold rounded-md border border-border hover:bg-surface2 transition-colors duration-150">
+          <button className="px-3 py-1.5 text-xs font-semibold rounded-none border border-border hover:bg-surface2 transition-colors duration-150">
             Print
           </button>
         </div>

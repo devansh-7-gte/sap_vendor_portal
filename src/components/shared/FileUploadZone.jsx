@@ -171,8 +171,8 @@ export default function FileUploadZone({
 
       {/* ERROR MESSAGE CARD */}
       {error && (
-        <div className="bg-[#FFF1F2] border border-[#FECDD3] p-2 rounded-md text-[#EF4444] flex items-start gap-2 animate-fade-in">
-          <AlertCircle className="size-3.5 text-[#EF4444] shrink-0 mt-0.5" />
+        <div className="bg-rose-900/20 border border-rose-900/50 p-2 rounded-none text-rose-400 flex items-start gap-2 animate-fade-in">
+          <AlertCircle className="size-3.5 text-rose-400 shrink-0 mt-0.5" />
           <span className="text-[10px] font-semibold leading-normal pr-4">{error}</span>
           <button onClick={() => setError(null)} className="ml-auto text-[10px] hover:underline cursor-pointer select-none">Dismiss</button>
         </div>
@@ -182,7 +182,7 @@ export default function FileUploadZone({
         /* UPLOADED FILE PREVIEW CARD */
         <div className="card p-2.5 flex items-center justify-between animate-fade-in">
           <div className="flex items-center gap-2.5 min-w-0 pr-4">
-            <div className="size-7 rounded-md bg-surface2 border border-border flex items-center justify-center text-text-tertiary shrink-0">
+            <div className="size-7 rounded-none bg-surface2 border border-border flex items-center justify-center text-text-tertiary shrink-0">
               <File className="size-4" />
             </div>
             <div className="min-w-0">
@@ -194,7 +194,7 @@ export default function FileUploadZone({
           <button
             onClick={handleRemove}
             disabled={uploading}
-            className="p-1.5 text-text-tertiary hover:text-red-500 hover:bg-surface2 transition-colors duration-150 rounded-md cursor-pointer shrink-0 disabled:opacity-50"
+            className="p-1.5 text-text-tertiary hover:text-rose-400 hover:bg-surface2 transition-colors duration-150 rounded-none cursor-pointer shrink-0 disabled:opacity-50"
             title="Remove File"
           >
             {uploading ? <Loader2 className="size-4 animate-spin text-text-tertiary" /> : <Trash2 className="size-4" />}
@@ -208,7 +208,7 @@ export default function FileUploadZone({
           onDragLeave={handleDrag}
           onDrop={handleDrop}
           onClick={() => fileInputRef.current?.click()}
-          className={`border border-dashed rounded-md p-5 flex flex-col items-center justify-center text-center cursor-pointer transition-colors duration-150 min-h-[100px] bg-base hover:bg-surface2 border-border-em select-none ${
+          className={`border border-dashed rounded-none p-5 flex flex-col items-center justify-center text-center cursor-pointer transition-colors duration-150 min-h-[100px] bg-base hover:bg-surface2 border-border-em select-none ${
             isDragActive ? 'border-[rgb(var(--color-emerald-default-rgb))] bg-surface2' : ''
           } ${uploading ? 'pointer-events-none opacity-80' : ''}`}
         >
@@ -226,7 +226,7 @@ export default function FileUploadZone({
               <Loader2 className="size-6 animate-spin" style={{ color: 'rgb(var(--color-emerald-default-rgb))' }} />
               <div className="space-y-0.5">
                 <p className="text-xs font-bold text-text-secondary">Uploading attachment...</p>
-                <div className="w-24 bg-surface2 h-1 rounded-full overflow-hidden border border-border">
+                <div className="w-24 bg-surface2 h-1 rounded-none overflow-hidden border border-border">
                   <div className="h-full transition-all duration-300" style={{ width: `${progress}%`, backgroundColor: 'rgb(var(--color-emerald-default-rgb))' }}></div>
                 </div>
               </div>

@@ -49,7 +49,7 @@ export default function PaymentsView({ state }) {
         </div>
         <div className="metric-panel !p-4 text-right">
           <p className="label mb-0">Account Ledger balance</p>
-          <p className={`text-base font-bold font-mono tabular-nums ${totalOutstanding >= 0 ? 'text-emerald-text' : 'text-destructive'}`}>
+          <p className={`text-base font-bold font-mono tabular-nums ${totalOutstanding >= 0 ? 'text-emerald-400' : 'text-destructive'}`}>
             {totalOutstanding >= 0 ? '₹0.00' : `-₹${Math.abs(totalOutstanding).toLocaleString()}`}
           </p>
         </div>
@@ -71,7 +71,7 @@ export default function PaymentsView({ state }) {
                     <p className="text-[9px] text-text-tertiary font-mono">PO REFERENCE: {pay.poId}</p>
                     <p className="text-xs font-bold text-text-primary mt-1 tabular-nums">Clearing Date: {pay.paymentDate}</p>
                   </div>
-                  <p className="text-sm font-bold font-mono text-emerald-text tabular-nums">₹{pay.amount.toLocaleString()}</p>
+                  <p className="text-sm font-bold font-mono text-emerald-400 tabular-nums">₹{pay.amount.toLocaleString()}</p>
                 </div>
                 <div className="space-y-1.5 text-xs text-text-secondary">
                   <p className="flex justify-between">
@@ -84,7 +84,7 @@ export default function PaymentsView({ state }) {
                   </p>
                   <p className="flex justify-between">
                     <span className="text-text-tertiary">FI Clearing Document</span>
-                    <span className="font-mono text-emerald-text font-bold">{state.invoices.find(i => i.id === pay.invoiceId)?.paymentDoc}</span>
+                    <span className="font-mono text-emerald-400 font-bold">{state.invoices.find(i => i.id === pay.invoiceId)?.paymentDoc}</span>
                   </p>
                 </div>
               </div>
@@ -110,7 +110,7 @@ export default function PaymentsView({ state }) {
         </div>
 
         <div className="card overflow-x-auto">
-          <table className="w-full text-left text-xs border-collapse">
+          <table className="w-full text-left border-collapse table-sticky">
             <thead>
               <tr>
                 <th>Posting Date</th>
@@ -135,7 +135,7 @@ export default function PaymentsView({ state }) {
                     <td className="font-bold text-text-primary">{item.docNum}</td>
                     <td>{item.docType}</td>
                     <td>{item.clearingDoc}</td>
-                    <td className={`text-right font-bold tabular-nums ${item.amount < 0 ? 'text-destructive' : 'text-emerald-text'}`}>
+                    <td className={`text-right font-bold tabular-nums ${item.amount < 0 ? 'text-destructive' : 'text-emerald-400'}`}>
                       {item.amount < 0 ? `-₹${Math.abs(item.amount).toLocaleString()}` : `₹${item.amount.toLocaleString()}`}
                     </td>
                     <td className="text-center">

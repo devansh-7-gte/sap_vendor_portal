@@ -70,9 +70,9 @@ export default function MSMEPaymentMonitor({ state }) {
   });
 
   const getRiskColor = (riskLevel) => {
-    if (riskLevel === 'Green') return 'from-green-500 to-green-600';
+    if (riskLevel === 'Green') return 'from-emerald-500 to-emerald-600';
     if (riskLevel === 'Amber') return 'from-yellow-500 to-yellow-600';
-    return 'from-red-500 to-red-600';
+    return 'from-rose-500 to-rose-600';
   };
 
   const columns = [
@@ -162,7 +162,7 @@ export default function MSMEPaymentMonitor({ state }) {
           value={metrics.overdue}
           unit="invoices"
           icon={AlertCircle}
-          bgGradient="from-red-500 to-red-600"
+          bgGradient="from-rose-500 to-rose-600"
         />
         <KPICard
           title="Average Delay"
@@ -176,7 +176,7 @@ export default function MSMEPaymentMonitor({ state }) {
           value={Math.round(metrics.complianceScore)}
           unit="/100"
           icon={AlertCircle}
-          bgGradient={metrics.complianceScore > 80 ? 'from-green-500 to-green-600' : metrics.complianceScore > 60 ? 'from-yellow-500 to-yellow-600' : 'from-red-500 to-red-600'}
+          bgGradient={metrics.complianceScore > 80 ? 'from-emerald-500 to-emerald-600' : metrics.complianceScore > 60 ? 'from-yellow-500 to-yellow-600' : 'from-rose-500 to-rose-600'}
         />
       </div>
 
@@ -186,23 +186,23 @@ export default function MSMEPaymentMonitor({ state }) {
         <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
           {bucketCounts.map((bucket) => {
             const colorMap = {
-              green: 'bg-green-500',
+              green: 'bg-emerald-500',
               yellow: 'bg-amber-500',
               orange: 'bg-orange-500',
-              red: 'bg-red-500',
+              red: 'bg-rose-500',
             };
 
             return (
               <button
                 key={bucket.id}
                 onClick={() => setSelectedBucket(bucket.label)}
-                className={`p-4 rounded-lg border-2 transition-colors duration-150 cursor-pointer ${
+                className={`p-4 rounded-none border-2 transition-colors duration-150 cursor-pointer ${
                   selectedBucket === bucket.label
                     ? 'border-text-primary bg-surface2'
                     : 'border-border hover:border-border-em'
                 }`}
               >
-                <div className={`${colorMap[bucket.color]} p-3 rounded-md mb-3`}>
+                <div className={`${colorMap[bucket.color]} p-3 rounded-none mb-3`}>
                   <p className="text-white text-2xl font-bold tabular-nums text-center">{bucket.count}</p>
                 </div>
                 <p className="text-sm font-bold text-text-primary">{bucket.label}</p>
@@ -222,7 +222,7 @@ export default function MSMEPaymentMonitor({ state }) {
           </div>
           <div className="text-right">
             <p className="label mb-0">Compliance Status</p>
-            <p className={`text-2xl font-bold mt-2 ${metrics.complianceScore > 80 ? 'text-emerald-text' : metrics.complianceScore > 60 ? 'text-amber-600' : 'text-red-500'}`}>
+            <p className={`text-2xl font-bold mt-2 ${metrics.complianceScore > 80 ? 'text-emerald-400' : metrics.complianceScore > 60 ? 'text-amber-400' : 'text-rose-400'}`}>
               {metrics.complianceScore > 80 ? 'Compliant' : metrics.complianceScore > 60 ? 'At Risk' : 'Non-Compliant'}
             </p>
           </div>
@@ -245,7 +245,7 @@ export default function MSMEPaymentMonitor({ state }) {
         {selectedBucket !== 'All' && (
           <button
             onClick={() => setSelectedBucket('All')}
-            className="text-sm font-semibold text-red-500 hover:text-red-600 transition-colors duration-150 cursor-pointer"
+            className="text-sm font-semibold text-rose-400 hover:text-rose-300 transition-colors duration-150 cursor-pointer"
           >
             Clear Filter
           </button>

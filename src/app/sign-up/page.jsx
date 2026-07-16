@@ -50,8 +50,8 @@ export default function SignUpPage() {
     setLoading(true);
 
     try {
-      const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000';
-      const response = await fetch(`${apiUrl}/api/auth/register`, {
+      const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000/api';
+      const response = await fetch(`${apiUrl}/auth/register`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
@@ -88,7 +88,7 @@ export default function SignUpPage() {
     <div className="w-full max-w-[460px] p-8 card animate-fadeUp my-8">
       {/* Brand Header */}
       <div className="flex flex-col items-center mb-6">
-        <div className="size-12 rounded-md flex items-center justify-center text-white mb-3 shrink-0" style={{ backgroundColor: 'rgb(var(--color-emerald-default-rgb))' }}>
+        <div className="size-12 rounded-none flex items-center justify-center text-white mb-3 shrink-0" style={{ backgroundColor: 'rgb(var(--color-emerald-default-rgb))' }}>
           <Building2 className="size-6" />
         </div>
         <h2 className="text-xl font-bold text-text-primary tracking-wide font-sans">Register Vendor Partner</h2>
@@ -99,7 +99,7 @@ export default function SignUpPage() {
 
       {/* Error Output */}
       {error && (
-        <div className="p-3 mb-4 rounded-md bg-[#FFF1F2] border border-[#FECDD3] flex items-start gap-2.5 text-xs text-[#EF4444]">
+        <div className="p-3 mb-4 rounded-none bg-rose-900/20 border border-rose-900/50 flex items-start gap-2.5 text-xs text-rose-400">
           <AlertCircle className="size-4 shrink-0 mt-0.5" />
           <span>{error}</span>
         </div>
@@ -117,7 +117,7 @@ export default function SignUpPage() {
               <button
                 type="button"
                 onClick={generateNewId}
-                className="text-[9px] font-semibold text-emerald-text hover:opacity-80 flex items-center gap-0.5 cursor-pointer transition-opacity duration-150"
+                className="text-[9px] font-semibold text-emerald-400 hover:opacity-80 flex items-center gap-0.5 cursor-pointer transition-opacity duration-150"
               >
                 <Sparkles className="size-2.5" />
                 <span>Re-generate</span>
@@ -248,7 +248,7 @@ export default function SignUpPage() {
           Already registered?{' '}
           <Link
             href="/sign-in"
-            className="text-emerald-text hover:underline transition-colors duration-150 font-medium ml-1"
+            className="text-emerald-400 hover:underline transition-colors duration-150 font-medium ml-1"
           >
             Sign In here
           </Link>

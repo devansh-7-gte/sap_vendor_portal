@@ -126,8 +126,8 @@ export default function InvoiceProcessingView({
                       {/* ITEMS COMPARATIVE TABLE */}
                       <div className="space-y-1.5">
                         <span className="text-[9px] font-bold text-text-tertiary uppercase tracking-wider block font-mono">Line Item Receipt Quantities</span>
-                        <div className="border border-border rounded-lg overflow-x-auto">
-                          <table className="w-full text-left">
+                        <div className="border border-border rounded-none overflow-x-auto">
+                          <table className="w-full text-left table-sticky">
                             <thead>
                               <tr>
                                 <th className="w-12 text-center">Line</th>
@@ -150,11 +150,11 @@ export default function InvoiceProcessingView({
                                   <td className="text-right font-mono font-semibold tabular-nums">
                                     {item.receivedQuantity.toLocaleString()}
                                   </td>
-                                  <td className="text-right font-mono text-emerald-600 font-bold tabular-nums">
+                                  <td className="text-right font-mono text-emerald-400 font-bold tabular-nums">
                                     {item.acceptedQuantity.toLocaleString()}
                                   </td>
                                   <td className={`text-right font-mono font-bold tabular-nums ${
-                                    item.rejectedQuantity > 0 ? 'text-red-600' : 'text-text-tertiary'
+                                    item.rejectedQuantity > 0 ? 'text-rose-400' : 'text-text-tertiary'
                                   }`}>
                                     {item.rejectedQuantity > 0 ? item.rejectedQuantity.toLocaleString() : '-'}
                                   </td>
@@ -166,7 +166,7 @@ export default function InvoiceProcessingView({
                       </div>
 
                       {/* BILLING ENTRY INPUTS */}
-                      <div className="flex flex-col border border-border rounded-lg divide-y divide-border overflow-hidden">
+                      <div className="flex flex-col border border-border rounded-none divide-y divide-border overflow-hidden">
                         <div className="flex flex-col lg:flex-row divide-y lg:divide-y-0 lg:divide-x divide-border">
                           <div className="w-[320px] shrink-0">
                             <EnterpriseFieldCard
@@ -252,7 +252,7 @@ export default function InvoiceProcessingView({
           </div>
         ) : (
           <div className="card overflow-x-auto">
-            <table className="w-full text-left">
+            <table className="w-full text-left table-sticky">
               <thead>
                 <tr>
                   <th>Invoice Ref</th>

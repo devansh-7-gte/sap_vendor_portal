@@ -23,7 +23,7 @@ export default function BapiConsole({ state, consoleOpen, setConsoleOpen, consol
           <span className="text-[11px] font-mono font-bold tracking-wider uppercase text-text-primary">
             SAP BAPI &amp; IDoc Payload Console
           </span>
-          <span className="size-2 rounded-full bg-emerald-500 animate-pulse ml-1"></span>
+          <span className="size-2 rounded-full bg-emerald-400 animate-pulse ml-1"></span>
         </div>
         <div className="flex items-center gap-2">
           <span className="text-[10px] text-text-tertiary font-mono">
@@ -54,7 +54,7 @@ export default function BapiConsole({ state, consoleOpen, setConsoleOpen, consol
                   </span>
 
                   {/* Interface Type Badge */}
-                  <span className="px-2 py-0.5 rounded text-[9px] font-bold border bg-surface2 text-text-primary border-border-em">
+                  <span className="px-2 py-0.5 rounded-none text-[9px] font-bold border bg-surface2 text-text-primary border-border-em">
                     {log.type}
                   </span>
 
@@ -67,17 +67,17 @@ export default function BapiConsole({ state, consoleOpen, setConsoleOpen, consol
                   <span className="text-text-primary font-bold">{log.name}</span>
 
                   {/* Execution Status Badge */}
-                  <span className={`ml-auto px-2 py-0.5 rounded text-[9px] font-bold border ${
-                    log.status === 'SUCCESS' ? 'bg-emerald-500/10 text-emerald-text border-emerald-500/30' :
+                  <span className={`ml-auto px-2 py-0.5 rounded-none text-[9px] font-bold border ${
+                    log.status === 'SUCCESS' ? 'bg-emerald-900/20 text-emerald-400 border-emerald-900/50' :
                     log.status === 'PENDING' ? 'bg-surface2 text-text-secondary border-border-em' :
-                    'bg-red-500/10 text-red-500 border-red-500/30'
+                    'bg-rose-900/20 text-rose-400 border-rose-900/50'
                   }`}>
                     {log.status}
                   </span>
                 </div>
 
                 {/* LOG DATA CODE BLOCK */}
-                <pre className="pl-4 text-text-primary bg-surface p-3 rounded-lg border border-border whitespace-pre-wrap select-all font-mono text-[11px] max-h-48 overflow-y-auto custom-scrollbar">
+                <pre className="pl-4 text-text-primary bg-surface p-3 rounded-none border border-border whitespace-pre-wrap select-all font-mono text-[11px] max-h-48 overflow-y-auto custom-scrollbar">
                   {log.payload}
                 </pre>
               </div>

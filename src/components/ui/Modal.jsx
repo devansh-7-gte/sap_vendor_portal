@@ -30,8 +30,8 @@ export default function Modal({ open, onClose, title, children, footer, classNam
         onClick={(e) => e.stopPropagation()}
       >
         {title && (
-          <div className="flex items-center justify-between px-5 py-4 border-b border-border">
-            <h2 className="text-[15px] font-bold text-text-primary">{title}</h2>
+          <div className="flex items-center justify-between px-4 py-3 border-b border-border bg-surface2">
+            <h2 className="text-[16px] font-semibold text-text-primary">{title}</h2>
             <button
               onClick={onClose}
               aria-label="Close"
@@ -41,8 +41,8 @@ export default function Modal({ open, onClose, title, children, footer, classNam
             </button>
           </div>
         )}
-        <div className="p-5">{children}</div>
-        {footer && <div className="flex items-center justify-end gap-2 px-5 py-4 border-t border-border">{footer}</div>}
+        <div className="p-4">{children}</div>
+        {footer && <div className="flex items-center justify-end gap-2 px-4 py-3 border-t border-border bg-surface2">{footer}</div>}
       </div>
     </div>
   );

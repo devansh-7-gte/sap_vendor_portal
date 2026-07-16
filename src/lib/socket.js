@@ -10,7 +10,7 @@ export const initSocket = (token, vendorId) => {
     socket.disconnect();
   }
 
-  const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000';
+  const apiUrl = (process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000').replace(/\/api\/?$/, '');
   
   console.log(`[Socket.io] Connecting to ${apiUrl}...`);
   

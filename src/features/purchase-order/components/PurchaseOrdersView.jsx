@@ -757,8 +757,8 @@ export default function PurchaseOrdersView({
               </div>
             ) : (
               <div className="card overflow-hidden">
-                <div className="overflow-x-auto custom-scrollbar">
-                  <table className="w-full text-left text-xs border-collapse">
+                <div className="overflow-x-auto custom-scrollbar border border-border">
+                  <table className="w-full text-left border-collapse table-sticky">
                     <thead>
                       <tr>
                         <th className="cursor-pointer" onClick={() => handleSort('id')}>
@@ -1169,7 +1169,7 @@ export default function PurchaseOrdersView({
                       <div className="size-1.5 rounded-full bg-blue-500"></div>
                       <span className="text-[10px] font-extrabold text-text-secondary uppercase tracking-widest">Purchase Order Header Data</span>
                     </div>
-                    <div className="grid grid-cols-2 md:grid-cols-3 gap-4 p-5">
+                    <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-4 p-5">
                       <SapReadOnlyField
                         label="PO Number"
                         value={activePo.id}
@@ -1267,7 +1267,7 @@ export default function PurchaseOrdersView({
                       <div className="w-full space-y-4">
                         {/* Responsive Table Container */}
                         <div className="w-full overflow-x-auto card">
-                          <table className="w-full text-xs text-left border-collapse min-w-[900px]">
+                          <table className="w-full text-left border-collapse min-w-[900px]">
                             <thead>
                               <tr>
                                 <th className="w-16">Line</th>
@@ -1499,7 +1499,7 @@ export default function PurchaseOrdersView({
                           <div className="w-full space-y-4">
                             {/* Responsive Table Container */}
                             <div className="w-full overflow-x-auto card">
-                              <table className="w-full text-xs text-left border-collapse min-w-[900px]">
+                              <table className="w-full text-left border-collapse min-w-[900px]">
                                 <thead>
                                   <tr>
                                     <th className="w-16">Line</th>
@@ -1771,7 +1771,7 @@ export default function PurchaseOrdersView({
                             <div className="w-full space-y-4">
                               {/* Responsive Table Container */}
                               <div className="w-full overflow-x-auto card">
-                                <table className="w-full text-xs text-left border-collapse min-w-[900px] whitespace-nowrap">
+                                <table className="w-full text-left border-collapse min-w-[900px] whitespace-nowrap">
                                   <thead>
                                     <tr>
                                       <th className="w-16">Line</th>
@@ -1952,7 +1952,7 @@ export default function PurchaseOrdersView({
                     <h3 className="text-xs font-bold text-text-primary uppercase border-b border-border pb-2">Billed Line Allocation</h3>
 
                     <div className="border border-border rounded-lg overflow-hidden">
-                      <table className="w-full text-left text-xs border-collapse">
+                      <table className="w-full text-left border-collapse">
                         <thead>
                           <tr>
                             <th>Line</th>

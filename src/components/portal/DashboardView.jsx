@@ -209,11 +209,10 @@ export default function DashboardView({ state, setActiveTab }) {
           <button
             onClick={toggleConnection}
             title="Click to toggle SAP ERP Connection state"
-            className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-md border text-[11px] font-semibold transition-all duration-150 cursor-pointer h-7 ${
-              apiError
-                ? 'bg-[#FFF1F2] border-[#FECDD3] text-[#EF4444] animate-pulse hover:bg-red-100'
-                : 'bg-[#F0FDF4] border-[#BBF7D0] text-[#16A34A] hover:bg-green-100'
-            }`}
+            className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-none border text-[11px] font-semibold transition-all duration-150 cursor-pointer h-7 ${apiError
+              ? 'bg-rose-900/20 border-rose-900/50 text-rose-400 animate-pulse hover:bg-rose-900/30'
+              : 'bg-emerald-900/20 border-emerald-900/50 text-emerald-400 hover:bg-emerald-900/30'
+              }`}
           >
             {apiError ? <WifiOff className="size-3" /> : <Wifi className="size-3" />}
             <span>SAP: {apiError ? 'Offline' : 'Online'}</span>
@@ -239,25 +238,25 @@ export default function DashboardView({ state, setActiveTab }) {
       </div>
 
       {/* 2. WELCOME BANNER (Compact Horizontal Actions) */}
-      <div className="bg-primary text-primary-foreground rounded-xl p-3 shadow-[0_1px_4px_rgba(10,15,46,0.08)] border border-primary/30 flex flex-col lg:flex-row lg:items-center lg:justify-between gap-3">
+      <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-3 py-2">
         <div>
-          <p className="text-[9px] uppercase tracking-wider text-primary-foreground/80 font-bold">WELCOME BACK</p>
-          <h3 className="text-xs font-bold text-primary-foreground mt-0.5">
+          <p className="text-[8px] uppercase tracking-wider text-text-tertiary font-bold">WELCOME BACK</p>
+          <h3 className="text-xl font-bold text-text-primary mt-0.5">
             {state.profile.companyName || 'Bharat Steel & Alloys Pvt. Ltd.'}
           </h3>
-          <div className="flex flex-wrap items-center gap-x-2 gap-y-1 mt-1 text-[10px] text-primary-foreground/90">
-            <span>Vendor Code: <strong className="font-mono text-primary-foreground">{state.profile.sapVendorCode || 'SAP-100042'}</strong></span>
-            <span className="text-primary-foreground/30">|</span>
-            <span>GSTIN: <strong className="font-mono text-primary-foreground">{state.profile.gstin || '27AABCB1234F1Z5'}</strong></span>
-            <span className="px-1.5 py-0.5 rounded-sm bg-primary-foreground/10 text-primary-foreground border border-primary-foreground/20 text-[9px] font-bold flex items-center gap-1 font-sans">
-              <span className={`size-1 rounded-full ${apiError ? 'bg-red-500' : 'bg-accent animate-pulse'}`}></span>
+          <div className="flex flex-wrap items-center gap-x-2 gap-y-1 mt-1 text-[10px] text-text-secondary">
+            <span>Vendor Code: <strong className="font-mono text-text-primary">{state.profile.sapVendorCode || 'SAP-100042'}</strong></span>
+            <span className="text-text-tertiary">|</span>
+            <span>GSTIN: <strong className="font-mono text-text-primary">{state.profile.gstin || '27AABCB1234F1Z5'}</strong></span>
+            <span className="px-1.5 py-0.5 rounded-sm bg-surface2 text-text-primary border border-border text-[9px] font-bold flex items-center gap-1 font-sans">
+              <span className={`size-1 rounded-full ${apiError ? 'bg-red-500' : 'bg-emerald-500 animate-pulse'}`}></span>
               {apiError ? 'SAP Offline' : 'Active'}
             </span>
           </div>
         </div>
 
-        {/* QUICK ICON SHORTCUTS (Reduced sizes and tight alignment) */}
-        <div className="flex flex-wrap items-center gap-1 border-t border-primary-foreground/15 pt-2 lg:border-t-0 lg:pt-0">
+        {/* QUICK ICON SHORTCUTS */}
+        <div className="flex flex-wrap items-center gap-1 border-t border-border pt-4 lg:border-t-0 lg:pt-0">
           {[
             { label: 'Submit Invoice', tab: 'invoices', icon: Receipt },
             { label: 'Create ASN', tab: 'pos', icon: ShoppingBag },
@@ -271,10 +270,10 @@ export default function DashboardView({ state, setActiveTab }) {
               <button
                 key={idx}
                 onClick={() => setActiveTab(action.tab)}
-                className="flex flex-col items-center justify-center w-16 py-1 rounded hover:bg-primary-foreground/10 transition-colors text-center cursor-pointer text-primary-foreground/90 hover:text-primary-foreground"
+                className="flex flex-col items-center justify-center w-16 py-1 hover:bg-surface2 transition-colors text-center cursor-pointer text-text-secondary hover:text-text-primary"
               >
-                <IconComp className="size-3 mb-0.5 text-primary-foreground/80" />
-                <span className="text-[8px] font-bold leading-tight uppercase tracking-tight whitespace-nowrap">{action.label}</span>
+                <IconComp className="size-3.5 mb-1 text-text-tertiary" />
+                <span className="text-[9px] font-bold leading-tight whitespace-nowrap">{action.label}</span>
               </button>
             );
           })}
@@ -320,9 +319,9 @@ export default function DashboardView({ state, setActiveTab }) {
         )}
       </div>
 
-      {/* 4. ALERTS & NOTIFICATIONS (2x2 Grid Panel) */}
-      <div className="card overflow-hidden">
-        <div className="px-3.5 py-2.5 border-b border-border flex items-center justify-between">
+      {/* 4. ALERTS & NOTIFICATIONS (Unboxed) */}
+      <div className="py-4">
+        <div className="pb-3 flex items-center justify-between">
           <h4 className="label mb-0">Alerts &amp; Notifications</h4>
           <button
             onClick={() => setActiveTab('chats')}
@@ -398,8 +397,8 @@ export default function DashboardView({ state, setActiveTab }) {
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
 
         {/* RECENT PURCHASE ORDERS */}
-        <div className="card overflow-hidden flex flex-col">
-          <div className="px-3.5 py-2.5 border-b border-border flex items-center justify-between">
+        <div className="flex flex-col">
+          <div className="pb-3 flex items-center justify-between">
             <h4 className="label mb-0">
               Purchase Orders Monitor
             </h4>
@@ -457,8 +456,8 @@ export default function DashboardView({ state, setActiveTab }) {
         </div>
 
         {/* RECENT INVOICES */}
-        <div className="card overflow-hidden flex flex-col">
-          <div className="px-3.5 py-2.5 border-b border-border flex items-center justify-between">
+        <div className="flex flex-col">
+          <div className="pb-3 flex items-center justify-between">
             <h4 className="label mb-0">
               Logistics Invoices Ledger
             </h4>
@@ -520,9 +519,9 @@ export default function DashboardView({ state, setActiveTab }) {
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-4">
 
         {/* MY PERFORMANCE SCORING BARS */}
-        <div className="lg:col-span-5 card p-3.5 flex flex-col justify-between min-h-[300px]">
+        <div className="lg:col-span-5 flex flex-col justify-between min-h-[300px]">
           <div>
-            <h4 className="label mb-0 border-b border-border pb-2">
+            <h4 className="label mb-0 pb-2">
               Service Delivery KPIs (OTIF)
             </h4>
 
@@ -575,9 +574,9 @@ export default function DashboardView({ state, setActiveTab }) {
         </div>
 
         {/* RECENT PAYMENTS RECEIVED */}
-        <div className="lg:col-span-7 card overflow-hidden flex flex-col justify-between min-h-[300px]">
+        <div className="lg:col-span-7 flex flex-col justify-between min-h-[300px]">
           <div>
-            <div className="px-3.5 py-2.5 border-b border-border flex items-center justify-between">
+            <div className="pb-3 flex items-center justify-between">
               <h4 className="label mb-0">
                 Treasury Disbursements (Recent)
               </h4>
@@ -613,7 +612,7 @@ export default function DashboardView({ state, setActiveTab }) {
                   return (
                     <div key={idx} className="p-2.5 flex items-center justify-between hover:bg-surface2 transition-colors duration-150">
                       <div className="flex items-center gap-2.5 min-w-0">
-                        <div className="size-6 rounded bg-[#F0FDF4] border border-[#BBF7D0] flex items-center justify-center text-[#16A34A] shrink-0">
+                        <div className="size-6 rounded-none bg-emerald-900/20 border border-emerald-900/50 flex items-center justify-center text-emerald-400 shrink-0">
                           <CreditCard className="size-3.5" />
                         </div>
                         <div className="min-w-0">
@@ -632,7 +631,7 @@ export default function DashboardView({ state, setActiveTab }) {
                           <p>TDS: <span className="font-mono text-destructive tabular-nums">-₹{tdsVal.toLocaleString('en-IN')}</span></p>
                         </div>
                         <div>
-                          <p className="font-mono font-bold text-[#16A34A] text-[11px] tabular-nums">₹{netVal.toLocaleString('en-IN')}</p>
+                          <p className="font-mono font-bold text-emerald-400 text-[11px] tabular-nums">₹{netVal.toLocaleString('en-IN')}</p>
                           <p className="text-[10px] text-text-tertiary font-mono mt-0.5 tabular-nums">{payDate}</p>
                         </div>
                       </div>

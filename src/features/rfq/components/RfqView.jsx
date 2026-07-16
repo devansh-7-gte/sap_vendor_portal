@@ -707,7 +707,7 @@ export default function RfqView({
                     <div>
                       <SectionHeader title="RAW Details" icon={FileText} />
                       <div className="card overflow-x-auto">
-                        <table className="w-full text-left text-xs border-collapse">
+                        <table className="w-full text-left border-collapse table-sticky">
                           <thead>
                             <tr>
                               <th className="w-12">Line</th>
@@ -744,11 +744,11 @@ export default function RfqView({
                            const ratingVal = Number(v.rating || 0);
                            let ratingColorClass = "bg-surface2 text-text-secondary border-border-em";
                            if (ratingVal >= 90) {
-                             ratingColorClass = "bg-emerald-50 text-emerald-700 border-emerald-200";
+                             ratingColorClass = "bg-emerald-900/20 text-emerald-400 border-emerald-900/50";
                            } else if (ratingVal >= 80) {
-                             ratingColorClass = "bg-amber-50 text-amber-700 border-amber-200";
+                             ratingColorClass = "bg-amber-500/20 text-amber-400 border-amber-500/30";
                            } else if (ratingVal > 0) {
-                             ratingColorClass = "bg-rose-50 text-rose-700 border-rose-200";
+                             ratingColorClass = "bg-rose-900/20 text-rose-400 border-rose-900/50";
                            }
 
                            return (
@@ -955,7 +955,7 @@ export default function RfqView({
                   </div>
 
                   <div className="overflow-x-auto">
-                    <table className="w-full text-left text-xs border-collapse min-w-[700px]">
+                    <table className="w-full text-left border-collapse min-w-[700px]">
                       <thead>
                         <tr>
                           <th>Evaluation Metric</th>
@@ -2034,7 +2034,7 @@ export default function RfqView({
                   <EmptyState description={'No items added to this RFQ yet. Enter details above and click "Add Line Item".'} className="border border-dashed border-border-em rounded-md bg-surface2/30 py-6" />
                 ) : (
                   <div className="card overflow-hidden">
-                    <table className="w-full text-left text-xs border-collapse">
+                    <table className="w-full text-left border-collapse">
                       <thead>
                         <tr>
                           <th className="w-12">Line</th>
@@ -2183,7 +2183,7 @@ export default function RfqView({
                   Line Item Details
                 </h4>
                 <div className="card overflow-hidden">
-                  <table className="w-full text-left text-xs">
+                  <table className="w-full text-left">
                     <thead>
                       <tr>
                         <th className="w-12">Line</th>

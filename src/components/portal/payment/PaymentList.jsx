@@ -177,7 +177,7 @@ export default function PaymentList({ state, onSelectPayment }) {
             <option value="amount-desc">Highest Amount</option>
             <option value="amount-asc">Lowest Amount</option>
           </select>
-          <button className="px-3 h-8 rounded-md border border-border bg-surface text-text-primary hover:bg-surface2 transition-colors duration-150 flex items-center gap-2 text-xs font-medium cursor-pointer">
+          <button className="px-3 h-8 rounded-none border border-border bg-surface text-text-primary hover:bg-surface2 transition-colors duration-150 flex items-center gap-2 text-xs font-medium cursor-pointer">
             <Download className="size-4" />
             Export
           </button>
@@ -211,7 +211,7 @@ export default function PaymentList({ state, onSelectPayment }) {
           {Object.values(activeFilters).some(v => v !== 'All') && (
             <button
               onClick={() => setActiveFilters({ status: 'All', dateRange: 'All', amount: 'All' })}
-              className="text-xs font-semibold text-destructive hover:text-red-700 transition-colors duration-150"
+              className="text-xs font-semibold text-destructive hover:text-rose-400 transition-colors duration-150"
             >
               Clear All
             </button>

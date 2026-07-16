@@ -139,16 +139,16 @@ export default function PaymentAdviceCenter({ state }) {
             ))}
           </select>
 
-          <div className="flex gap-1 border border-border rounded-md p-1">
+          <div className="flex gap-1 border border-border rounded-none p-1">
             <button
               onClick={() => setViewMode('grid')}
-              className={`p-2 rounded-md transition-colors duration-150 cursor-pointer ${viewMode === 'grid' ? 'bg-surface2 text-text-primary' : 'hover:bg-surface2 text-text-secondary'}`}
+              className={`p-2 rounded-none transition-colors duration-150 cursor-pointer ${viewMode === 'grid' ? 'bg-surface2 text-text-primary' : 'hover:bg-surface2 text-text-secondary'}`}
             >
               <Grid className="size-4" />
             </button>
             <button
               onClick={() => setViewMode('list')}
-              className={`p-2 rounded-md transition-colors duration-150 cursor-pointer ${viewMode === 'list' ? 'bg-surface2 text-text-primary' : 'hover:bg-surface2 text-text-secondary'}`}
+              className={`p-2 rounded-none transition-colors duration-150 cursor-pointer ${viewMode === 'list' ? 'bg-surface2 text-text-primary' : 'hover:bg-surface2 text-text-secondary'}`}
             >
               <ListIcon className="size-4" />
             </button>

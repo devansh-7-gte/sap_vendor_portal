@@ -13,13 +13,17 @@ import {
   BarChart3,
   Building2,
   Database,
-  LogOut
+  LogOut,
+  Menu
 } from 'lucide-react';
 import { usePortal } from '@/lib/portal-context';
 
 export default function Sidebar({ activeTab, setActiveTab, state, onReset }) {
-  const { sidebarCollapsed, logout } = usePortal();
+  const { sidebarCollapsed, setSidebarCollapsed, logout } = usePortal();
   const [mounted, setMounted] = React.useState(false);
+  const [isHovered, setIsHovered] = React.useState(false);
+
+  const isCollapsed = sidebarCollapsed && !isHovered;
 
   React.useEffect(() => {
     setMounted(true);
@@ -53,21 +57,21 @@ export default function Sidebar({ activeTab, setActiveTab, state, onReset }) {
       <button
         key={item.id}
         onClick={() => setActiveTab(item.id)}
-        title={sidebarCollapsed ? item.name : undefined}
+        title={isCollapsed ? item.name : undefined}
         className={`sidebar-link relative ${isActive ? 'active' : ''} ${
-          sidebarCollapsed ? 'justify-center px-0 py-2' : ''
+          isCollapsed ? 'justify-center px-0 py-2' : ''
         }`}
       >
         <Icon className="size-4 shrink-0" />
-        {!sidebarCollapsed && <span className="truncate">{item.name}</span>}
+        {!isCollapsed && <span className="truncate">{item.name}</span>}
 
         {/* Dynamic Badge counts */}
         {mounted && item.id === 'pos' && state.pos.filter(p => p.status === 'Open').length > 0 && (
-          <span className={sidebarCollapsed
+          <span className={isCollapsed
             ? "absolute top-1 right-3.5 size-4 rounded-full text-white text-[8px] flex items-center justify-center font-bold"
             : "ml-auto size-4.5 rounded-full text-[9px] flex items-center justify-center font-bold"
           }
-          style={sidebarCollapsed
+          style={isCollapsed
             ? { backgroundColor: 'rgb(var(--color-emerald-default-rgb))' }
             : { backgroundColor: 'var(--color-emerald-dim)', color: 'rgb(var(--color-emerald-text-rgb))' }
           }>
@@ -75,11 +79,11 @@ export default function Sidebar({ activeTab, setActiveTab, state, onReset }) {
           </span>
         )}
         {mounted && item.id === 'rfqs' && state.rfqs.filter(r => r.status === 'Bidding Open').length > 0 && (
-          <span className={sidebarCollapsed
+          <span className={isCollapsed
             ? "absolute top-1 right-3.5 size-4 rounded-full text-white text-[8px] flex items-center justify-center font-bold"
             : "ml-auto size-4.5 rounded-full text-[9px] flex items-center justify-center font-bold"
           }
-          style={sidebarCollapsed
+          style={isCollapsed
             ? { backgroundColor: 'rgb(var(--color-emerald-default-rgb))' }
             : { backgroundColor: 'var(--color-emerald-dim)', color: 'rgb(var(--color-emerald-text-rgb))' }
           }>
@@ -91,13 +95,17 @@ export default function Sidebar({ activeTab, setActiveTab, state, onReset }) {
   };
 
   return (
-    <aside className={`bg-surface border-r border-border flex flex-col shrink-0 select-none h-full transition-all duration-200 ease-in-out ${
-      sidebarCollapsed ? 'w-[60px]' : 'w-[220px]'
-    }`}>
+    <aside 
+      className={`bg-surface border-r border-border flex flex-col shrink-0 select-none h-full transition-all duration-200 ease-in-out relative z-40 ${
+        isCollapsed ? 'w-[72px]' : 'w-[250px]'
+      }`}
+      onMouseEnter={() => sidebarCollapsed && setIsHovered(true)}
+      onMouseLeave={() => setIsHovered(false)}
+    >
       {/* NAVIGATION SECTION */}
-      <div className={`px-2 pt-2.5 ${sidebarCollapsed ? 'flex flex-col items-center' : ''}`}>
-        {!sidebarCollapsed ? (
-          <p className="text-[10px] tracking-[0.12em] text-text-tertiary font-bold uppercase mb-1.5 px-2">
+      <div className={`pr-3 pt-6 ${isCollapsed ? 'flex flex-col items-center px-2' : ''}`}>
+        {!isCollapsed ? (
+          <p className="text-[11px] tracking-[0.06em] text-text-tertiary font-bold uppercase mb-2 px-4">
             Navigation
           </p>
         ) : (
@@ -109,9 +117,9 @@ export default function Sidebar({ activeTab, setActiveTab, state, onReset }) {
       </div>
 
       {/* MODULES SECTION */}
-      <div className={`flex-1 px-2.5 pt-3 overflow-y-auto custom-scrollbar ${sidebarCollapsed ? 'flex flex-col items-center' : ''}`}>
-        {!sidebarCollapsed ? (
-          <p className="text-[10px] tracking-[0.12em] text-text-tertiary font-bold uppercase mb-1.5 px-2">
+      <div className={`flex-1 pr-3 pt-6 overflow-y-auto custom-scrollbar ${isCollapsed ? 'flex flex-col items-center px-2' : ''}`}>
+        {!isCollapsed ? (
+          <p className="text-[11px] tracking-[0.06em] text-text-tertiary font-bold uppercase mb-2 px-4">
             Modules
           </p>
         ) : (
@@ -123,12 +131,12 @@ export default function Sidebar({ activeTab, setActiveTab, state, onReset }) {
       </div>
 
       {/* VENDOR PROFILE BOX */}
-      <div className={`p-3 pb-6 border-t border-border bg-surface flex flex-col gap-2 ${sidebarCollapsed ? 'items-center' : ''}`}>
+      <div className={`p-3 pb-6 border-t border-border bg-surface flex flex-col gap-2 ${isCollapsed ? 'items-center' : ''}`}>
         <div className="flex items-center gap-2 w-full justify-center">
           <div className="size-7 rounded-full bg-surface2 flex items-center justify-center text-text-primary border border-border shrink-0">
             <Building2 className="size-3.5" />
           </div>
-          {!sidebarCollapsed && (
+          {!isCollapsed && (
             <div className="overflow-hidden min-w-0 flex-1">
               <h4 className="text-[11px] font-bold text-text-primary truncate" title={(mounted && state.profile.companyName) || 'Guest Vendor'}>
                 {(mounted && state.profile.companyName) || 'Guest Vendor'}
@@ -141,7 +149,7 @@ export default function Sidebar({ activeTab, setActiveTab, state, onReset }) {
         </div>
 
         {/* Database Clean Reset Trigger */}
-        {sidebarCollapsed ? (
+        {isCollapsed ? (
           <div className="flex flex-col gap-1 mt-1">
             <button
               onClick={onReset}

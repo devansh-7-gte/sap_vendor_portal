@@ -4,6 +4,7 @@ import React from 'react';
 import Header from './Header';
 import Sidebar from './Sidebar';
 import BapiConsole from './BapiConsole';
+import CommandPalette from '../ui/CommandPalette';
 import { usePortal } from '@/lib/portal-context';
 
 import { usePathname } from 'next/navigation';
@@ -44,6 +45,7 @@ export default function PortalLayout({ children }) {
   return (
     <div className="flex flex-col h-screen overflow-hidden bg-base text-text-primary font-sans">
       <Header />
+      <CommandPalette />
 
       <div className="flex-1 flex overflow-hidden relative">
         <Sidebar

@@ -58,7 +58,7 @@ export default function SkeletonLoader({ type = 'list', rows = 5, cols = 4, coun
     <div className="space-y-3 w-full card p-4 select-none">
       {Array.from({ length: rows }).map((_, idx) => (
         <div key={`list-${idx}`} className="flex items-center space-x-4">
-          <div className={`size-8 rounded-full ${pulseClass}`} />
+          <div className={`size-8 rounded-none ${pulseClass}`} />
           <div className="space-y-2 flex-1">
             <div className={`h-4 w-2/5 ${pulseClass}`} />
             <div className={`h-3 w-4/5 ${pulseClass}`} />

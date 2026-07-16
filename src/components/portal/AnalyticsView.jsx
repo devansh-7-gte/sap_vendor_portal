@@ -26,7 +26,7 @@ export default function AnalyticsView({ state }) {
         </div>
         <div className="metric-panel">
           <span className="label mb-0">Ledger Outstanding Balance</span>
-          <span className="text-xl font-mono font-bold text-amber-600 mt-1 block tabular-nums">₹{pendingInvoicesVal.toLocaleString()}</span>
+          <span className="text-xl font-mono font-bold text-amber-500 mt-1 block tabular-nums">₹{pendingInvoicesVal.toLocaleString()}</span>
           <span className="text-[10px] text-text-tertiary mt-1 block">Invoices currently posted for matching</span>
         </div>
       </div>
@@ -38,19 +38,19 @@ export default function AnalyticsView({ state }) {
           {/* Bar 1 */}
           <div className="flex-1 flex flex-col items-center gap-2 h-full justify-end group">
             <span className="text-text-secondary opacity-0 group-hover:opacity-100 transition-opacity tabular-nums">₹75K</span>
-            <div className="w-full bg-emerald-500/10 group-hover:bg-emerald-500/30 border border-emerald-500/20 rounded-t h-[30%] transition-all duration-150"></div>
+            <div className="w-full bg-emerald-900/30 group-hover:bg-emerald-900/50 border border-emerald-900/50 rounded-none h-[30%] transition-all duration-150"></div>
             <span className="font-sans">Jan-Feb</span>
           </div>
           {/* Bar 2 */}
           <div className="flex-1 flex flex-col items-center gap-2 h-full justify-end group">
             <span className="text-text-secondary opacity-0 group-hover:opacity-100 transition-opacity tabular-nums">₹145K</span>
-            <div className="w-full bg-emerald-500/10 group-hover:bg-emerald-500/30 border border-emerald-500/20 rounded-t h-[55%] transition-all duration-150"></div>
+            <div className="w-full bg-emerald-900/30 group-hover:bg-emerald-900/50 border border-emerald-900/50 rounded-none h-[55%] transition-all duration-150"></div>
             <span className="font-sans">Mar-Apr</span>
           </div>
           {/* Bar 3 */}
           <div className="flex-1 flex flex-col items-center gap-2 h-full justify-end group">
             <span className="text-text-secondary opacity-0 group-hover:opacity-100 transition-opacity tabular-nums">₹210K</span>
-            <div className="w-full bg-emerald-500/25 group-hover:bg-emerald-500/50 border border-emerald-500/30 rounded-t h-[80%] transition-all duration-150 animate-grow"></div>
+            <div className="w-full bg-emerald-900/50 group-hover:bg-emerald-900/70 border border-emerald-900/80 rounded-none h-[80%] transition-all duration-150 animate-grow"></div>
             <span className="font-sans">May-Jun</span>
           </div>
         </div>

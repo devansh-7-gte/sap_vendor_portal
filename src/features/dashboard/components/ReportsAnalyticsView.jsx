@@ -324,7 +324,7 @@ export default function ReportsAnalyticsView({ state }) {
                   </h4>
                 </div>
                 <div className="w-full overflow-x-auto overflow-y-auto max-h-[320px] custom-scrollbar card">
-                  <table className="w-full text-xs text-left border-collapse min-w-[800px]">
+                  <table className="w-full text-left border-collapse min-w-[800px]">
                     <thead className="sticky top-0 z-10">
                       <tr className="bg-surface2 border-b border-border text-text-primary font-bold uppercase text-[10px] tracking-wider font-sans">
                         <th className="py-2.5 px-3 border-r border-border w-16">No</th>
@@ -434,7 +434,7 @@ export default function ReportsAnalyticsView({ state }) {
                   </h4>
                 </div>
                 <div className="w-full overflow-x-auto overflow-y-auto max-h-[320px] custom-scrollbar card">
-                  <table className="w-full text-xs text-left border-collapse min-w-[900px] whitespace-nowrap">
+                  <table className="w-full text-left border-collapse min-w-[900px] whitespace-nowrap">
                     <thead className="sticky top-0 z-10">
                       <tr className="bg-surface2 border-b border-border text-text-primary font-bold uppercase text-[10px] tracking-wider font-sans">
                         <th className="py-2.5 px-3 border-r border-border w-32">Invoice Ref</th>
@@ -553,7 +553,7 @@ export default function ReportsAnalyticsView({ state }) {
                   </h4>
                 </div>
                 <div className="w-full overflow-x-auto overflow-y-auto max-h-[320px] custom-scrollbar card">
-                  <table className="w-full text-xs text-left border-collapse min-w-[850px] whitespace-nowrap">
+                  <table className="w-full text-left border-collapse min-w-[850px] whitespace-nowrap">
                     <thead className="sticky top-0 z-10">
                       <tr className="bg-surface2 border-b border-border text-text-primary font-bold uppercase text-[10px] tracking-wider font-sans">
                         <th className="py-2.5 px-3 border-r border-border w-24 text-center">Posting Date</th>
@@ -764,7 +764,7 @@ export default function ReportsAnalyticsView({ state }) {
                   </h4>
                 </div>
                 <div className="w-full overflow-x-auto overflow-y-auto max-h-[320px] custom-scrollbar card">
-                  <table className="w-full text-xs text-left border-collapse min-w-[850px]">
+                  <table className="w-full text-left border-collapse min-w-[850px]">
                     <thead className="sticky top-0 z-10">
                       <tr className="bg-surface2 border-b border-border text-text-primary font-bold uppercase text-[10px] tracking-wider font-sans">
                         <th className="py-2.5 px-3 border-r border-border min-w-[200px]">Report Name</th>

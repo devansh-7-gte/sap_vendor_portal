@@ -82,19 +82,16 @@ function SAPFieldMapping() {
   return null;
 }
 
-// 4. Enterprise Metadata Field Card
-function EnterpriseFieldCard({ label, required, error, labelWidth, children }) {
+function EnterpriseFieldCard({ label, required, error, children }) {
   return (
-    <div className={`h-full py-1.5 px-3 bg-surface transition-colors duration-150 flex flex-col sm:flex-row sm:items-center gap-1 select-none ${
-      error ? 'bg-red-50/10' : 'hover:bg-surface2/30 focus-within:bg-surface2/50'
-    }`}>
-      <label className={`text-xs font-bold text-text-secondary ${labelWidth || 'sm:w-48'} shrink-0 whitespace-nowrap select-none block`} title={label}>
-        {label} {required && <span className="text-red-500 font-bold select-none ml-0.5">*</span>}
+    <div className={`flex flex-col gap-1.5 select-none w-full`}>
+      <label className={`text-[11px] font-bold text-text-secondary uppercase tracking-wider block`} title={label}>
+        {label} {required && <span className="text-rose-500 font-bold ml-0.5">*</span>}
       </label>
-      <div className="flex-1 w-full min-w-0 flex flex-col justify-center">
+      <div className="w-full flex flex-col">
         {children}
         {error && (
-          <span className="text-[10px] font-bold text-red-600 mt-1 select-none">{error}</span>
+          <span className="text-[10px] font-bold text-rose-500 mt-1">{error}</span>
         )}
       </div>
     </div>
@@ -132,7 +129,7 @@ function SearchableSelect({ value, onChange, options, placeholder, error }) {
           setIsOpen(!isOpen);
           setSearch('');
         }}
-        className="w-full flex items-center justify-between bg-base border border-border rounded-md py-1.5 px-3 text-xs outline-none text-text-primary text-left h-9 transition-[border-color] duration-150"
+        className="w-full flex items-center justify-between bg-base border border-border rounded-none py-1.5 px-3 text-xs outline-none text-text-primary text-left h-9 transition-[border-color] duration-150"
         aria-haspopup="listbox"
         aria-expanded={isOpen}
       >
@@ -142,7 +139,7 @@ function SearchableSelect({ value, onChange, options, placeholder, error }) {
         <ChevronRight className={`size-3 text-text-tertiary transition-transform shrink-0 ${isOpen ? 'rotate-90' : ''}`} />
       </button>
       {isOpen && (
-        <div className="absolute z-50 w-full mt-1 bg-surface border border-border rounded-md shadow-[0_1px_4px_rgba(10,15,46,0.08)] max-h-56 overflow-y-auto custom-scrollbar animate-slide-down">
+        <div className="absolute z-50 w-full mt-1 bg-surface border border-border rounded-none shadow-[0_1px_4px_rgba(10,15,46,0.08)] max-h-56 overflow-y-auto custom-scrollbar animate-slide-down">
           <div className="p-1.5 border-b border-border sticky top-0 bg-surface flex items-center gap-1.5">
             <Search className="size-3.5 text-text-tertiary shrink-0" />
             <input
@@ -243,7 +240,7 @@ function CustomDatePicker({ value, onChange, placeholder }) {
           key={day}
           type="button"
           onClick={() => handleSelectDay(day)}
-          className={`h-6 w-full rounded-md text-[11px] font-medium flex items-center justify-center transition-colors duration-150 ${isSelected
+          className={`h-6 w-full rounded-none text-[11px] font-medium flex items-center justify-center transition-colors duration-150 ${isSelected
             ? 'text-white font-bold'
             : 'text-text-secondary hover:bg-surface2 hover:text-text-primary'
             }`}
@@ -266,7 +263,7 @@ function CustomDatePicker({ value, onChange, placeholder }) {
       <button
         type="button"
         onClick={() => setIsOpen(!isOpen)}
-        className="w-full flex items-center justify-between bg-base border border-border rounded-md py-1.5 px-3 text-xs outline-none text-text-primary text-left h-9 transition-[border-color] duration-150"
+        className="w-full flex items-center justify-between bg-base border border-border rounded-none py-1.5 px-3 text-xs outline-none text-text-primary text-left h-9 transition-[border-color] duration-150"
       >
         <span className={value ? 'text-text-primary font-medium' : 'text-text-tertiary'}>
           {value ? value : placeholder}
@@ -275,12 +272,12 @@ function CustomDatePicker({ value, onChange, placeholder }) {
       </button>
 
       {isOpen && (
-        <div className="absolute z-50 left-0 mt-1 bg-surface border border-border rounded-xl shadow-[0_1px_4px_rgba(10,15,46,0.08)] p-3 w-64 animate-slide-down">
+        <div className="absolute z-50 left-0 mt-1 bg-surface border border-border rounded-none shadow-[0_1px_4px_rgba(10,15,46,0.08)] p-3 w-64 animate-slide-down">
           <div className="flex items-center justify-between mb-2">
             <button
               type="button"
               onClick={() => setCurrentDate(new Date(currentDate.getFullYear(), currentDate.getMonth() - 1, 1))}
-              className="p-1 hover:bg-surface2 rounded-md text-text-secondary transition-colors duration-150"
+              className="p-1 hover:bg-surface2 rounded-none text-text-secondary transition-colors duration-150"
             >
               <ChevronLeft className="size-3.5" />
             </button>
@@ -307,7 +304,7 @@ function CustomDatePicker({ value, onChange, placeholder }) {
             <button
               type="button"
               onClick={() => setCurrentDate(new Date(currentDate.getFullYear(), currentDate.getMonth() + 1, 1))}
-              className="p-1 hover:bg-surface2 rounded-md text-text-secondary transition-colors duration-150"
+              className="p-1 hover:bg-surface2 rounded-none text-text-secondary transition-colors duration-150"
             >
               <ChevronRight className="size-3.5" />
             </button>
@@ -346,44 +343,52 @@ function DocumentUploadZone({ fieldName, value, onChange, label, error }) {
   );
 }
 
-// 8. Wizard Progress Indicator (Tabs)
+// 8. Wizard Progress Indicator (Stepper)
 function ProgressIndicator({ steps, currentStep, onStepClick, errors }) {
   return (
-    <div className="sticky top-0 z-30 bg-surface/95 backdrop-blur-md border-b border-border py-3 select-none">
-      <div className="max-w-5xl mx-auto px-4 md:px-6 flex items-center justify-between gap-2 md:gap-4 overflow-x-auto custom-scrollbar">
+    <div className="sticky top-0 z-30 bg-surface/95 backdrop-blur-md border-b border-border py-4 select-none">
+      <div className="max-w-4xl mx-auto px-4 md:px-6 flex items-center justify-between">
         {steps.map((step, idx) => {
           const stepNum = idx + 1;
           const isActive = currentStep === stepNum;
           const isCompleted = currentStep > stepNum;
           const stepHasErrors = errors[stepNum] && Object.keys(errors[stepNum]).length > 0;
+          const isLast = idx === steps.length - 1;
 
           return (
-            <div
-              key={stepNum}
-              onClick={() => onStepClick && onStepClick(stepNum)}
-              className={`flex items-center gap-2 pb-1.5 border-b-2 transition-colors duration-150 whitespace-nowrap cursor-pointer hover:border-primary ${isActive
-                ? 'border-primary text-text-primary font-bold'
-                : isCompleted
-                  ? 'border-emerald-500 text-emerald-text font-semibold'
-                  : stepHasErrors
-                    ? 'border-red-400 text-red-700 font-semibold'
-                    : 'border-transparent text-text-tertiary font-medium'
-                }`}
-            >
-              <span className={`size-5 rounded-full text-[10px] flex items-center justify-center font-bold ${isActive
-                ? 'bg-surface2 text-text-primary'
-                : isCompleted
-                  ? 'text-white'
-                  : stepHasErrors
-                    ? 'bg-red-100 text-red-700 border border-red-200'
-                    : 'bg-surface2 text-text-tertiary border border-border'
-                }`}
-                style={isCompleted ? { backgroundColor: 'rgb(var(--color-emerald-default-rgb))' } : undefined}
+            <React.Fragment key={stepNum}>
+              <div 
+                onClick={() => onStepClick && onStepClick(stepNum)}
+                className="flex items-center gap-2.5 cursor-pointer group shrink-0"
               >
-                {isCompleted ? <Check className="size-3 stroke-[3]" /> : stepNum}
-              </span>
-              <span className="text-xs">{step.name}</span>
-            </div>
+                <div className={`size-7 rounded-full text-[12px] flex items-center justify-center font-bold transition-colors ${
+                  isActive 
+                    ? 'text-white shadow-sm' 
+                    : isCompleted
+                      ? 'bg-emerald-50 text-emerald-600 border border-emerald-200'
+                      : stepHasErrors
+                        ? 'bg-rose-50 text-rose-600 border border-rose-200'
+                        : 'bg-surface2 text-text-tertiary border border-border group-hover:border-text-tertiary'
+                }`}
+                style={isActive ? { backgroundColor: 'rgb(var(--color-emerald-default-rgb))' } : undefined}
+                >
+                  {isCompleted ? <Check className="size-4 stroke-[3]" /> : stepNum}
+                </div>
+                <span className={`text-[13px] hidden md:block transition-colors ${
+                  isActive ? 'text-text-primary font-bold' 
+                  : isCompleted ? 'text-emerald-700 font-medium'
+                  : stepHasErrors ? 'text-rose-600 font-medium'
+                  : 'text-text-tertiary font-medium'
+                }`}>
+                  {step.name}
+                </span>
+              </div>
+              {!isLast && (
+                <div className={`flex-1 h-[2px] mx-4 transition-colors ${
+                  isCompleted ? 'bg-emerald-400' : 'bg-border-subtle'
+                }`} />
+              )}
+            </React.Fragment>
           );
         })}
       </div>
@@ -671,7 +676,7 @@ export default function RegistrationView({
     <div className="space-y-6 max-w-full pb-12 animate-fade-in relative">
       {/* 1. TOAST NOTIFICATION FOR SAVE DRAFT */}
       {showSaveToast && (
-        <div className="fixed top-4 right-4 z-50 flex items-center gap-2 bg-surface2 border border-border-em text-text-primary text-xs px-4 py-2.5 rounded-xl shadow-[0_1px_4px_rgba(10,15,46,0.08)] animate-slide-down">
+        <div className="fixed top-4 right-4 z-50 flex items-center gap-2 bg-surface2 border border-border-em text-text-primary text-xs px-4 py-2.5 rounded-none shadow-[0_1px_4px_rgba(10,15,46,0.08)] animate-slide-down">
           <CheckCircle2 className="size-4 text-emerald-500 shrink-0" />
           <span className="font-semibold select-none">Draft onboarding configurations saved successfully</span>
         </div>
@@ -709,13 +714,13 @@ export default function RegistrationView({
       {isDraft && (
         <form onSubmit={handleFinalSubmit} className="space-y-6">
           {state.profile.status === 'Rejected' && (
-            <div className="p-4.5 rounded-xl border border-red-200 bg-red-50/50 text-red-700 flex items-start gap-3 shadow-sm select-none">
-              <AlertTriangle className="size-5 shrink-0 mt-0.5 text-red-650" />
+            <div className="p-4.5 rounded-none border border-rose-900/50 bg-rose-900/20 text-rose-400 flex items-start gap-3 shadow-sm select-none">
+              <AlertTriangle className="size-5 shrink-0 mt-0.5 text-rose-400" />
               <div>
                 <h4 className="font-bold text-sm">ERP Verification Rejected</h4>
-                <p className="text-xs mt-1 text-red-700/80">
+                <p className="text-xs mt-1 text-rose-400/80">
                   The uploaded compliance documents or banking parameters failed approval checks. Reason:
-                  <span className="font-semibold block mt-0.5 text-red-800 italic">
+                  <span className="font-semibold block mt-0.5 text-rose-300 italic">
                     &quot;{state.profile.rejectionReason || 'GSTN registration / Bank settlement key discrepancies detected.'}&quot;
                   </span>
                 </p>
@@ -725,79 +730,56 @@ export default function RegistrationView({
 
           {/* STEP 1: COMPANY INFORMATION */}
           {currentStep === 1 && (
-            <div className="space-y-3">
-              <SectionHeader title="COMPANY IDENTITY" icon={Building2} />
-              <div className="flex flex-col border border-border rounded-lg divide-y divide-border bg-surface overflow-hidden">
-                <div className="bg-surface">
-                  <EnterpriseFieldCard label="Legal Entity Name" required labelWidth="sm:w-28" error={validationErrors[1]?.companyName}>
-                    <input type="text" value={companyForm.companyName} onChange={e => handleFieldChange('companyName', e.target.value)} placeholder="e.g. Bharat Steel Alloys Pvt. Ltd." className="w-full max-w-md" />
+            <div className="space-y-6">
+              <div>
+                <SectionHeader title="COMPANY IDENTITY" icon={Building2} />
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-x-6 gap-y-8 pt-4 pb-8">
+                  <div className="lg:col-span-3">
+                    <EnterpriseFieldCard label="Legal Entity Name" required error={validationErrors[1]?.companyName}>
+                      <input type="text" value={companyForm.companyName} onChange={e => handleFieldChange('companyName', e.target.value)} placeholder="e.g. Bharat Steel Alloys Pvt. Ltd." />
+                    </EnterpriseFieldCard>
+                  </div>
+                  <EnterpriseFieldCard label="Trade / Brand Name" error={validationErrors[1]?.tradeName}>
+                    <input type="text" value={companyForm.tradeName} onChange={e => handleFieldChange('tradeName', e.target.value)} placeholder="e.g. Bharat Steel" />
                   </EnterpriseFieldCard>
-                </div>
-                <div className="flex flex-col lg:flex-row divide-y lg:divide-y-0 lg:divide-x divide-border bg-surface">
-                  <div className="w-[320px] shrink-0">
-                    <EnterpriseFieldCard label="Trade / Brand Name" labelWidth="sm:w-28" error={validationErrors[1]?.tradeName}>
-                      <input type="text" value={companyForm.tradeName} onChange={e => handleFieldChange('tradeName', e.target.value)} placeholder="e.g. Bharat Steel" className="w-[160px]" />
-                    </EnterpriseFieldCard>
-                  </div>
-                  <div className="w-[330px] shrink-0">
-                    <EnterpriseFieldCard label="Business Type" required labelWidth="sm:w-24" error={validationErrors[1]?.businessType}>
-                      <select value={companyForm.businessType} onChange={e => handleFieldChange('businessType', e.target.value)} className="w-[190px]">
-                        <option value="" disabled className="text-text-tertiary">Select Business Type</option>
-                        <option value="MFGR">Manufacturer (MFGR)</option>
-                        <option value="TRDR">Trader / Distributor (TRDR)</option>
-                        <option value="SRVC">Service Provider (SRVC)</option>
-                        <option value="MSME">Micro Enterprise (MSME)</option>
-                      </select>
-                    </EnterpriseFieldCard>
-                  </div>
-                </div>
-                <div className="bg-surface">
-                  <EnterpriseFieldCard label="Incorporation Date" labelWidth="sm:w-28" error={validationErrors[1]?.incorporationDate}>
-                    <input
-                      type="date"
-                      value={companyForm.incorporationDate || ''}
-                      onChange={e => handleFieldChange('incorporationDate', e.target.value)}
-                      className="w-[150px]"
-                    />
+                  <EnterpriseFieldCard label="Business Type" required error={validationErrors[1]?.businessType}>
+                    <select value={companyForm.businessType} onChange={e => handleFieldChange('businessType', e.target.value)}>
+                      <option value="" disabled className="text-text-tertiary">Select Business Type</option>
+                      <option value="MFGR">Manufacturer (MFGR)</option>
+                      <option value="TRDR">Trader / Distributor (TRDR)</option>
+                      <option value="SRVC">Service Provider (SRVC)</option>
+                      <option value="MSME">Micro Enterprise (MSME)</option>
+                    </select>
+                  </EnterpriseFieldCard>
+                  <EnterpriseFieldCard label="Incorporation Date" error={validationErrors[1]?.incorporationDate}>
+                    <input type="date" value={companyForm.incorporationDate || ''} onChange={e => handleFieldChange('incorporationDate', e.target.value)} />
                   </EnterpriseFieldCard>
                 </div>
               </div>
 
-              <SectionHeader title="REGISTERED ADDRESS" icon={Truck} />
-              <div className="flex flex-col border border-border rounded-lg divide-y divide-border bg-surface">
-                <div className="bg-surface rounded-t-lg overflow-hidden">
-                  <EnterpriseFieldCard label="Street / Area" required labelWidth="sm:w-20" error={validationErrors[1]?.address}>
-                    <input type="text" value={companyForm.address} onChange={e => handleFieldChange('address', e.target.value)} placeholder="e.g. 102, Mittal Chambers, Nariman Point" className="w-full max-w-lg" />
+              <div>
+                <SectionHeader title="REGISTERED ADDRESS" icon={Truck} />
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-x-6 gap-y-8 pt-4 pb-8">
+                  <div className="lg:col-span-3">
+                    <EnterpriseFieldCard label="Street / Area" required error={validationErrors[1]?.address}>
+                      <input type="text" value={companyForm.address} onChange={e => handleFieldChange('address', e.target.value)} placeholder="e.g. 102, Mittal Chambers, Nariman Point" />
+                    </EnterpriseFieldCard>
+                  </div>
+                  <EnterpriseFieldCard label="City" required error={validationErrors[1]?.city}>
+                    <input type="text" value={companyForm.city} onChange={e => handleFieldChange('city', e.target.value)} placeholder="e.g. Mumbai" />
                   </EnterpriseFieldCard>
-                </div>
-                <div className="flex flex-col lg:flex-row divide-y lg:divide-y-0 lg:divide-x divide-border bg-surface">
-                  <div className="w-[250px] shrink-0">
-                    <EnterpriseFieldCard label="City" required labelWidth="sm:w-12" error={validationErrors[1]?.city}>
-                      <input type="text" value={companyForm.city} onChange={e => handleFieldChange('city', e.target.value)} placeholder="e.g. Mumbai" className="w-[150px]" />
-                    </EnterpriseFieldCard>
-                  </div>
-                  <div className="w-[310px] shrink-0">
-                    <EnterpriseFieldCard label="State" required labelWidth="sm:w-14" error={validationErrors[1]?.state}>
-                      <SearchableSelect value={companyForm.state} onChange={val => handleFieldChange('state', val)} options={INDIAN_STATES} placeholder="Select State" />
-                    </EnterpriseFieldCard>
-                  </div>
-                </div>
-                <div className="flex flex-col lg:flex-row divide-y lg:divide-y-0 lg:divide-x divide-border bg-surface rounded-b-lg overflow-hidden">
-                  <div className="w-[210px] shrink-0">
-                    <EnterpriseFieldCard label="PIN Code" required labelWidth="sm:w-16" error={validationErrors[1]?.postalCode}>
-                      <input type="text" maxLength={6} value={companyForm.postalCode} onChange={e => handleFieldChange('postalCode', e.target.value.replace(/\D/g, ''))} placeholder="e.g. 400021" className="w-[100px] font-mono" />
-                    </EnterpriseFieldCard>
-                  </div>
-                  <div className="w-[320px] shrink-0">
-                    <EnterpriseFieldCard label="Contact Email" required labelWidth="sm:w-24" error={validationErrors[1]?.email}>
-                      <input type="email" value={companyForm.email} onChange={e => handleFieldChange('email', e.target.value)} placeholder="e.g. billing@company.com" className="w-[190px]" />
-                    </EnterpriseFieldCard>
-                  </div>
-                  <div className="w-[320px] shrink-0">
-                    <EnterpriseFieldCard label="Mobile / Phone" required labelWidth="sm:w-28" error={validationErrors[1]?.phone}>
-                      <input type="text" value={companyForm.phone} onChange={e => handleFieldChange('phone', e.target.value)} placeholder="e.g. +91 22 2345 6789" className="w-[150px]" />
-                    </EnterpriseFieldCard>
-                  </div>
+                  <EnterpriseFieldCard label="State" required error={validationErrors[1]?.state}>
+                    <SearchableSelect value={companyForm.state} onChange={val => handleFieldChange('state', val)} options={INDIAN_STATES} placeholder="Select State" />
+                  </EnterpriseFieldCard>
+                  <EnterpriseFieldCard label="PIN Code" required error={validationErrors[1]?.postalCode}>
+                    <input type="text" maxLength={6} value={companyForm.postalCode} onChange={e => handleFieldChange('postalCode', e.target.value.replace(/\D/g, ''))} placeholder="e.g. 400021" className="font-mono" />
+                  </EnterpriseFieldCard>
+                  <EnterpriseFieldCard label="Contact Email" required error={validationErrors[1]?.email}>
+                    <input type="email" value={companyForm.email} onChange={e => handleFieldChange('email', e.target.value)} placeholder="e.g. billing@company.com" />
+                  </EnterpriseFieldCard>
+                  <EnterpriseFieldCard label="Mobile / Phone" required error={validationErrors[1]?.phone}>
+                    <input type="tel" value={companyForm.phone} onChange={e => handleFieldChange('phone', e.target.value)} placeholder="e.g. +91 22 2345 6789" />
+                  </EnterpriseFieldCard>
                 </div>
               </div>
             </div>
@@ -805,34 +787,30 @@ export default function RegistrationView({
 
           {/* STEP 2: TAX & REGULATORY */}
           {currentStep === 2 && (
-            <div className="space-y-1">
-              <SectionHeader title="INDIAN TAX IDS" icon={Building2} />
-              <div className="flex flex-col border border-border rounded-lg divide-y divide-border bg-surface overflow-hidden">
-                <div className="flex flex-col lg:flex-row divide-y lg:divide-y-0 lg:divide-x divide-border bg-surface">
-                  <div className="w-[320px] shrink-0">
-                    <EnterpriseFieldCard
-                      label="PAN Number"
-                      required
-                      labelWidth="sm:w-24"
-                      mappingCode="LFA1-STCD2"
-                      isSapView={isSapView}
-                      error={validationErrors[2]?.pan}
-                    >
-                      <input
-                        type="text"
-                        maxLength={10}
-                        value={companyForm.pan}
-                        onChange={e => handleFieldChange('pan', e.target.value.toUpperCase())}
-                        placeholder="e.g. AABCB1234F"
-                        className="w-[150px] uppercase font-mono"
-                      />
-                    </EnterpriseFieldCard>
-                  </div>
-                  <div className="w-[330px] shrink-0">
+            <div className="space-y-6">
+              <div>
+                <SectionHeader title="INDIAN TAX IDS" icon={Building2} />
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-x-6 gap-y-8 pt-4 pb-8">
+                  <EnterpriseFieldCard
+                    label="PAN Number"
+                    required
+                    mappingCode="LFA1-STCD2"
+                    isSapView={isSapView}
+                    error={validationErrors[2]?.pan}
+                  >
+                    <input
+                      type="text"
+                      maxLength={10}
+                      value={companyForm.pan}
+                      onChange={e => handleFieldChange('pan', e.target.value.toUpperCase())}
+                      placeholder="e.g. AABCB1234F"
+                      className="uppercase font-mono"
+                    />
+                  </EnterpriseFieldCard>
+                  <div className="md:col-span-1 lg:col-span-2">
                     <EnterpriseFieldCard
                       label="GSTIN"
                       required
-                      labelWidth="sm:w-20"
                       mappingCode="LFB1-STCEG"
                       isSapView={isSapView}
                       error={validationErrors[2]?.gstin}
@@ -843,39 +821,31 @@ export default function RegistrationView({
                         value={companyForm.gstin}
                         onChange={e => handleFieldChange('gstin', e.target.value.toUpperCase())}
                         placeholder="e.g. 27AABCB1234F1Z5"
-                        className="w-[180px] uppercase font-mono"
+                        className="uppercase font-mono"
                       />
                     </EnterpriseFieldCard>
                   </div>
-                </div>
-
-                <div className="flex flex-col lg:flex-row divide-y lg:divide-y-0 lg:divide-x divide-border bg-surface">
-                  <div className="w-[380px] shrink-0">
-                    <EnterpriseFieldCard
-                      label="GST Registration Type"
-                      required
-                      labelWidth="sm:w-36"
-                      mappingCode="LFB1-GST_TYPE"
-                      isSapView={isSapView}
-                      error={validationErrors[2]?.gstType}
+                  <EnterpriseFieldCard
+                    label="GST Registration Type"
+                    required
+                    mappingCode="LFB1-GST_TYPE"
+                    isSapView={isSapView}
+                    error={validationErrors[2]?.gstType}
+                  >
+                    <select
+                      value={companyForm.gstType}
+                      onChange={e => handleFieldChange('gstType', e.target.value)}
                     >
-                      <select
-                        value={companyForm.gstType}
-                        onChange={e => handleFieldChange('gstType', e.target.value)}
-                        className="w-[180px]"
-                      >
-                        <option value="" disabled className="text-text-tertiary">Select Type</option>
-                        <option value="01">Regular Taxpayer (01)</option>
-                        <option value="02">Composition Scheme (02)</option>
-                        <option value="03">SEZ Developer (03)</option>
-                        <option value="04">Exempt / Unregistered (04)</option>
-                      </select>
-                    </EnterpriseFieldCard>
-                  </div>
-                  <div className="w-[350px] shrink-0">
+                      <option value="" disabled className="text-text-tertiary">Select Type</option>
+                      <option value="01">Regular Taxpayer (01)</option>
+                      <option value="02">Composition Scheme (02)</option>
+                      <option value="03">SEZ Developer (03)</option>
+                      <option value="04">Exempt / Unregistered (04)</option>
+                    </select>
+                  </EnterpriseFieldCard>
+                  <div className="md:col-span-1 lg:col-span-2">
                     <EnterpriseFieldCard
                       label="CIN Number"
-                      labelWidth="sm:w-24"
                       mappingCode="LFA1-CIN_NO"
                       isSapView={isSapView}
                       error={validationErrors[2]?.cin}
@@ -886,36 +856,29 @@ export default function RegistrationView({
                         value={companyForm.cin}
                         onChange={e => handleFieldChange('cin', e.target.value.toUpperCase())}
                         placeholder="e.g. L01500MH1995PLC094858"
-                        className="w-[210px] uppercase font-mono"
+                        className="uppercase font-mono"
                       />
                     </EnterpriseFieldCard>
                   </div>
-                </div>
-
-                <div className="flex flex-col lg:flex-row divide-y lg:divide-y-0 lg:divide-x divide-border bg-surface">
-                  <div className="w-[390px] shrink-0">
-                    <EnterpriseFieldCard
-                      label="MSME / Udyam Number"
-                      labelWidth="sm:w-40"
-                      mappingCode="LFA1-MSME_NO"
-                      isSapView={isSapView}
-                      error={validationErrors[2]?.msmeNumber}
-                    >
-                      <input
-                        type="text"
-                        maxLength={19}
-                        value={companyForm.msmeNumber}
-                        onChange={e => handleFieldChange('msmeNumber', e.target.value.toUpperCase())}
-                        placeholder="e.g. UDYAM-MH-12-0012345"
-                        className="w-[190px] uppercase font-mono"
-                      />
-                    </EnterpriseFieldCard>
-                  </div>
-                  <div className="w-[350px] shrink-0">
+                  <EnterpriseFieldCard
+                    label="MSME / Udyam Number"
+                    mappingCode="LFA1-MSME_NO"
+                    isSapView={isSapView}
+                    error={validationErrors[2]?.msmeNumber}
+                  >
+                    <input
+                      type="text"
+                      maxLength={19}
+                      value={companyForm.msmeNumber}
+                      onChange={e => handleFieldChange('msmeNumber', e.target.value.toUpperCase())}
+                      placeholder="e.g. UDYAM-MH-12-0012345"
+                      className="uppercase font-mono"
+                    />
+                  </EnterpriseFieldCard>
+                  <div className="md:col-span-1 lg:col-span-2">
                     <EnterpriseFieldCard
                       label="TDS Section"
                       required
-                      labelWidth="sm:w-24"
                       mappingCode="LFBW-WITHT"
                       isSapView={isSapView}
                       error={validationErrors[2]?.tdsSection}
@@ -923,7 +886,6 @@ export default function RegistrationView({
                       <select
                         value={companyForm.tdsSection}
                         onChange={e => handleFieldChange('tdsSection', e.target.value)}
-                        className="w-[220px]"
                       >
                         <option value="" disabled className="text-text-tertiary">Select TDS mapping</option>
                         <option value="194C">194C - Contractor Payments</option>
@@ -941,34 +903,31 @@ export default function RegistrationView({
 
           {/* STEP 3: BANK DETAILS */}
           {currentStep === 3 && (
-            <div className="space-y-3">
-              <SectionHeader title="BANK ACCOUNT" icon={CreditCard} />
-              <div className="flex flex-col border border-border rounded-lg divide-y divide-border bg-surface overflow-hidden">
-                <div className="bg-surface">
-                  <EnterpriseFieldCard
-                    label="Account Holder Name"
-                    required
-                    labelWidth="sm:w-44"
-                    mappingCode="LFBK-KOINH"
-                    isSapView={isSapView}
-                    error={validationErrors[3]?.accountName}
-                  >
-                    <input
-                      type="text"
-                      value={companyForm.accountName}
-                      onChange={e => handleFieldChange('accountName', e.target.value)}
-                      placeholder="e.g. Bharat Steel Alloys Pvt. Ltd."
-                      className="w-full max-w-md"
-                    />
-                  </EnterpriseFieldCard>
-                </div>
+            <div className="space-y-6">
+              <div>
+                <SectionHeader title="BANK ACCOUNT" icon={CreditCard} />
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-x-6 gap-y-8 pt-4 pb-8">
+                  <div className="lg:col-span-3">
+                    <EnterpriseFieldCard
+                      label="Account Holder Name"
+                      required
+                      mappingCode="LFBK-KOINH"
+                      isSapView={isSapView}
+                      error={validationErrors[3]?.accountName}
+                    >
+                      <input
+                        type="text"
+                        value={companyForm.accountName}
+                        onChange={e => handleFieldChange('accountName', e.target.value)}
+                        placeholder="e.g. Bharat Steel Alloys Pvt. Ltd."
+                      />
+                    </EnterpriseFieldCard>
+                  </div>
 
-                <div className="flex flex-col lg:flex-row divide-y lg:divide-y-0 lg:divide-x divide-border bg-surface">
-                  <div className="w-[420px] shrink-0">
+                  <div className="md:col-span-1 lg:col-span-2">
                     <EnterpriseFieldCard
                       label="Bank Account Number"
                       required
-                      labelWidth="sm:w-44"
                       mappingCode="LFBK-BANKN"
                       isSapView={isSapView}
                       error={validationErrors[3]?.accountNumber}
@@ -980,45 +939,38 @@ export default function RegistrationView({
                           value={companyForm.accountNumber}
                           onChange={e => handleFieldChange('accountNumber', e.target.value.replace(/\D/g, ''))}
                           placeholder="Enter Bank Account Number"
-                          className="w-full font-mono"
+                          className="font-mono pr-8"
                         />
                         <button
                           type="button"
                           onClick={() => setPassVisible(!passVisible)}
-                          className="absolute right-2 top-2 hover:bg-surface2 rounded text-text-tertiary hover:text-text-primary transition-colors duration-150"
+                          className="absolute right-2 top-[7px] hover:bg-surface2 rounded text-text-tertiary hover:text-text-primary transition-colors duration-150"
                         >
                           {passVisible ? <EyeOff className="size-4" /> : <Eye className="size-4" />}
                         </button>
                       </div>
                     </EnterpriseFieldCard>
                   </div>
-                  <div className="w-[300px] shrink-0">
-                    <EnterpriseFieldCard
-                      label="IFSC Code"
-                      required
-                      labelWidth="sm:w-24"
-                      mappingCode="LFBK-SWIFT"
-                      isSapView={isSapView}
-                      error={validationErrors[3]?.ifscCode}
-                    >
-                      <input
-                        type="text"
-                        maxLength={11}
-                        value={companyForm.ifscCode}
-                        onChange={e => handleFieldChange('ifscCode', e.target.value.toUpperCase())}
-                        placeholder="e.g. HDFC0000060"
-                        className="w-[150px] uppercase font-mono"
-                      />
-                    </EnterpriseFieldCard>
-                  </div>
-                </div>
+                  <EnterpriseFieldCard
+                    label="IFSC Code"
+                    required
+                    mappingCode="LFBK-SWIFT"
+                    isSapView={isSapView}
+                    error={validationErrors[3]?.ifscCode}
+                  >
+                    <input
+                      type="text"
+                      maxLength={11}
+                      value={companyForm.ifscCode}
+                      onChange={e => handleFieldChange('ifscCode', e.target.value.toUpperCase())}
+                      placeholder="e.g. HDFC0000060"
+                      className="uppercase font-mono"
+                    />
+                  </EnterpriseFieldCard>
 
-                <div className="flex flex-col lg:flex-row divide-y lg:divide-y-0 lg:divide-x divide-border bg-surface">
-                  <div className="w-[380px] shrink-0">
+                  <div className="md:col-span-1 lg:col-span-2">
                     <EnterpriseFieldCard
-                      label="Bank Name"
-                      required
-                      labelWidth="sm:w-28"
+                      label="Bank Name (Auto-fetched)"
                       mappingCode="LFBK-BANKA"
                       isSapView={isSapView}
                       error={validationErrors[3]?.bankName}
@@ -1026,48 +978,38 @@ export default function RegistrationView({
                       <input
                         type="text"
                         value={companyForm.bankName}
-                        onChange={e => handleFieldChange('bankName', e.target.value)}
-                        placeholder="e.g. HDFC Bank Ltd."
-                        className="w-[220px]"
+                        readOnly
+                        placeholder="Auto-populated from IFSC"
+                        className="bg-surface2 text-text-secondary select-none"
                       />
                     </EnterpriseFieldCard>
                   </div>
-                  <div className="w-[350px] shrink-0">
-                    <EnterpriseFieldCard
-                      label="Branch"
-                      required
-                      labelWidth="sm:w-20"
-                      mappingCode="LFBK-BRNCH"
-                      isSapView={isSapView}
-                      error={validationErrors[3]?.bankBranch}
-                    >
-                      <input
-                        type="text"
-                        value={companyForm.bankBranch}
-                        onChange={e => handleFieldChange('bankBranch', e.target.value)}
-                        placeholder="e.g. Nariman Point, Mumbai"
-                        className="w-[220px]"
-                      />
-                    </EnterpriseFieldCard>
-                  </div>
-                </div>
-
-                <div className="bg-surface">
                   <EnterpriseFieldCard
-                    label="Cancelled Cheque Copy"
-                    required
-                    labelWidth="sm:w-44"
-                    mappingCode="LFBK-CHQ_DOC"
+                    label="Account Currency"
+                    mappingCode="LFBK-WAERS"
                     isSapView={isSapView}
-                    error={validationErrors[3]?.cancelledCheque}
                   >
-                    <DocumentUploadZone
-                      fieldName="cancelledCheque"
-                      value={companyForm.cancelledCheque}
-                      onChange={val => handleFieldChange('cancelledCheque', val)}
-                      error={validationErrors[3]?.cancelledCheque}
-                    />
+                    <select disabled className="bg-surface2 text-text-secondary cursor-not-allowed">
+                      <option value="INR">INR - Indian Rupee</option>
+                    </select>
                   </EnterpriseFieldCard>
+
+                  <div className="lg:col-span-3 mt-2">
+                    <EnterpriseFieldCard
+                      label="Cancelled Cheque Copy"
+                      required
+                      mappingCode="LFBK-CHQ_DOC"
+                      isSapView={isSapView}
+                      error={validationErrors[3]?.cancelledCheque}
+                    >
+                      <DocumentUploadZone
+                        fieldName="cancelledCheque"
+                        value={companyForm.cancelledCheque}
+                        onChange={val => handleFieldChange('cancelledCheque', val)}
+                        error={validationErrors[3]?.cancelledCheque}
+                      />
+                    </EnterpriseFieldCard>
+                  </div>
                 </div>
               </div>
             </div>
@@ -1075,98 +1017,77 @@ export default function RegistrationView({
 
           {/* STEP 4: DOCUMENT UPLOADS */}
           {currentStep === 4 && (
-            <div className="space-y-3">
-              <SectionHeader title="MANDATORY DOCUMENTS" icon={FileText} />
-              <div className="flex flex-col border border-border rounded-lg divide-y divide-border bg-surface overflow-hidden">
-                <EnterpriseFieldCard
-                  label="PAN Card Copy"
-                  required
-                  labelWidth="sm:w-44"
-                  mappingCode="DMS-PAN_DOC"
-                  isSapView={isSapView}
-                  error={validationErrors[4]?.panCardCopy}
-                >
-                  <DocumentUploadZone
-                    fieldName="panCardCopy"
-                    value={companyForm.panCardCopy}
-                    onChange={val => handleFieldChange('panCardCopy', val)}
-                    error={validationErrors[4]?.panCardCopy}
-                  />
-                </EnterpriseFieldCard>
-
-                <EnterpriseFieldCard
-                  label="GST Certificate"
-                  required
-                  labelWidth="sm:w-44"
-                  mappingCode="DMS-GST_DOC"
-                  isSapView={isSapView}
-                  error={validationErrors[4]?.gstCertificate}
-                >
-                  <DocumentUploadZone
-                    fieldName="gstCertificate"
-                    value={companyForm.gstCertificate}
-                    onChange={val => handleFieldChange('gstCertificate', val)}
-                    error={validationErrors[4]?.gstCertificate}
-                  />
-                </EnterpriseFieldCard>
-
-                <EnterpriseFieldCard
-                  label="Certificate of Incorporation"
-                  required
-                  labelWidth="sm:w-44"
-                  mappingCode="DMS-COI_DOC"
-                  isSapView={isSapView}
-                  error={validationErrors[4]?.incorporationCertificate}
-                >
-                  <DocumentUploadZone
-                    fieldName="incorporationCertificate"
-                    value={companyForm.incorporationCertificate}
-                    onChange={val => handleFieldChange('incorporationCertificate', val)}
-                    error={validationErrors[4]?.incorporationCertificate}
-                  />
-                </EnterpriseFieldCard>
+            <div className="space-y-4">
+              {/* GLOBAL DROP-ZONE */}
+              <div className="w-full bg-surface2 border-2 border-dashed border-border-em rounded p-4 text-center hover:bg-surface2/70 transition-colors cursor-pointer">
+                <Upload className="size-5 text-text-tertiary mx-auto mb-2" />
+                <p className="text-[13px] font-semibold text-text-primary">Drag and drop files here to auto-categorize and upload</p>
+                <p className="text-[11px] text-text-tertiary mt-1">Supports PDF, DOCX, JPG, PNG up to 5MB</p>
               </div>
 
-              <SectionHeader title="OPTIONAL CERTIFICATES" icon={FileText} />
-              <div className="flex flex-col border border-border rounded-lg divide-y divide-border bg-surface overflow-hidden">
-                <EnterpriseFieldCard
-                  label="MSME Certificate"
-                  labelWidth="sm:w-44"
-                  mappingCode="DMS-MSME_DOC"
-                  isSapView={isSapView}
-                >
-                  <DocumentUploadZone
-                    fieldName="msmeCertificate"
-                    value={companyForm.msmeCertificate}
-                    onChange={val => handleFieldChange('msmeCertificate', val)}
-                  />
-                </EnterpriseFieldCard>
-
-                <EnterpriseFieldCard
-                  label="ISO Certificate Copy"
-                  labelWidth="sm:w-44"
-                  mappingCode="DMS-ISO_DOC"
-                  isSapView={isSapView}
-                >
-                  <DocumentUploadZone
-                    fieldName="isoCertificate"
-                    value={companyForm.isoCertificate}
-                    onChange={val => handleFieldChange('isoCertificate', val)}
-                  />
-                </EnterpriseFieldCard>
-
-                <EnterpriseFieldCard
-                  label="IT Returns (Last 2 Years)"
-                  labelWidth="sm:w-44"
-                  mappingCode="DMS-ITR_DOC"
-                  isSapView={isSapView}
-                >
-                  <DocumentUploadZone
-                    fieldName="itReturns"
-                    value={companyForm.itReturns}
-                    onChange={val => handleFieldChange('itReturns', val)}
-                  />
-                </EnterpriseFieldCard>
+              {/* CATEGORIZED DATA GRID */}
+              <div className="border border-border rounded overflow-hidden bg-surface text-left">
+                {/* Header Row */}
+                <div className="grid grid-cols-[2fr_1.5fr_1fr_1fr_1fr] gap-4 px-4 py-2.5 bg-surface2 border-b border-border text-[11px] font-bold uppercase tracking-wider text-text-tertiary">
+                  <div>Document Name</div>
+                  <div>Requirement</div>
+                  <div>File Size</div>
+                  <div>Status</div>
+                  <div className="text-right">Actions</div>
+                </div>
+                
+                <div className="flex flex-col">
+                  {/* GROUP 1: REQUIRED */}
+                  {[
+                    { id: 'panCardCopy', name: 'PAN Card Copy', req: 'Required for Approval' },
+                    { id: 'gstCertificate', name: 'GST Certificate', req: 'Required for Approval' },
+                    { id: 'incorporationCertificate', name: 'Certificate of Incorporation', req: 'Required for Approval' }
+                  ].map(doc => (
+                    <div key={doc.id} className="grid grid-cols-[2fr_1.5fr_1fr_1fr_1fr] gap-4 px-4 py-3 items-center hover:bg-surface2/50 transition-colors even:bg-surface2/30">
+                      <div className="text-[13px] font-medium text-text-primary">{doc.name}</div>
+                      <div className="text-[12px] text-text-secondary">{doc.req}</div>
+                      <div className="text-[12px] text-text-secondary font-mono">{companyForm[doc.id] ? '1.2 MB' : '--'}</div>
+                      <div>
+                        {companyForm[doc.id] ? (
+                          <span className="status-badge status-badge-active">Uploaded</span>
+                        ) : (
+                          <span className="status-badge status-badge-warn">Pending</span>
+                        )}
+                      </div>
+                      <div className="text-right">
+                        <label className="text-primary hover:underline text-[12px] font-semibold cursor-pointer">
+                          {companyForm[doc.id] ? 'Replace' : 'Upload'}
+                          <input type="file" className="hidden" onChange={(e) => handleFieldChange(doc.id, 'uploaded_file.pdf')} />
+                        </label>
+                      </div>
+                    </div>
+                  ))}
+                  {/* GROUP 2: OPTIONAL */}
+                  {[
+                    { id: 'msmeCertificate', name: 'MSME Certificate', req: 'Supplemental/Optional' },
+                    { id: 'isoCertificate', name: 'ISO Certificate Copy', req: 'Supplemental/Optional' },
+                    { id: 'itReturns', name: 'IT Returns (Last 2 Years)', req: 'Supplemental/Optional' }
+                  ].map(doc => (
+                    <div key={doc.id} className="grid grid-cols-[2fr_1.5fr_1fr_1fr_1fr] gap-4 px-4 py-3 items-center hover:bg-surface2/50 transition-colors even:bg-surface2/30">
+                      <div className="text-[13px] font-medium text-text-primary">{doc.name}</div>
+                      <div className="text-[12px] text-text-secondary">{doc.req}</div>
+                      <div className="text-[12px] text-text-secondary font-mono">{companyForm[doc.id] ? '2.4 MB' : '--'}</div>
+                      <div>
+                        {companyForm[doc.id] ? (
+                          <span className="status-badge status-badge-active">Uploaded</span>
+                        ) : (
+                          <span className="status-badge bg-surface2 text-text-tertiary border-border">Empty</span>
+                        )}
+                      </div>
+                      <div className="text-right">
+                        <label className="text-primary hover:underline text-[12px] font-semibold cursor-pointer">
+                          {companyForm[doc.id] ? 'Replace' : 'Upload'}
+                          <input type="file" className="hidden" onChange={(e) => handleFieldChange(doc.id, 'uploaded_file.pdf')} />
+                        </label>
+                      </div>
+                    </div>
+                  ))}
+                </div>
               </div>
             </div>
           )}
@@ -1208,7 +1129,7 @@ export default function RegistrationView({
       {isApproved && (
         <div className="space-y-6 animate-fade-in select-none">
           <div className="p-6 card flex items-start gap-4">
-            <div className="size-11 rounded-full text-emerald-text flex items-center justify-center shrink-0 border border-border" style={{ backgroundColor: 'var(--color-emerald-dim)' }}>
+            <div className="size-11 rounded-full text-emerald-400 flex items-center justify-center shrink-0 border border-border" style={{ backgroundColor: 'var(--color-emerald-dim)' }}>
               <CheckCircle2 className="size-5.5 stroke-[2.5]" />
             </div>
             <div className="space-y-1">
@@ -1222,7 +1143,7 @@ export default function RegistrationView({
               <div className="flex items-center gap-4 text-[10px] text-text-tertiary mt-2.5 font-semibold font-mono">
                 <span className="tabular-nums">SYNC TIME: {new Date(state.profile.approvedAt || '').toLocaleString()}</span>
                 <span>&bull;</span>
-                <span className="text-emerald-text px-1.5 py-0.5 border border-border rounded text-[9px] font-bold" style={{ backgroundColor: 'var(--color-emerald-dim)' }}>STATUS: ACTIVE</span>
+                <span className="text-emerald-400 px-1.5 py-0.5 border border-border rounded text-[9px] font-bold" style={{ backgroundColor: 'var(--color-emerald-dim)' }}>STATUS: ACTIVE</span>
               </div>
             </div>
           </div>
@@ -1262,9 +1183,9 @@ export default function RegistrationView({
                   <span className="text-text-secondary font-bold shrink-0">{row.label}</span>
                   <span className={`font-semibold text-right truncate max-w-[220px] ${row.isMono || row.isFile ? 'font-mono' : ''
                     } ${row.isGreen ? 'text-text-primary font-bold' : 'text-text-primary'
-                    } ${row.isFile ? 'text-emerald-text bg-surface2 px-2 py-0.5 border border-border rounded text-[10px] flex items-center gap-1 select-none font-semibold' : ''
+                    } ${row.isFile ? 'text-emerald-400 bg-surface2 px-2 py-0.5 border border-border rounded text-[10px] flex items-center gap-1 select-none font-semibold' : ''
                     }`}>
-                    {row.isFile && <FileText className="size-3 text-emerald-text inline shrink-0" />}
+                    {row.isFile && <FileText className="size-3 text-emerald-400 inline shrink-0" />}
                     {row.val}
                   </span>
                 </div>

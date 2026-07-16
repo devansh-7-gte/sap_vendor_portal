@@ -4,15 +4,15 @@
  * SAC design tokens defined in src/app/globals.css.
  */
 export const chartTheme = {
-  primary: '#1C1917',
-  series: ['#1C1917', '#78716C', '#A8A29E', '#16A34A', '#EF4444', '#F59E0B'],
-  grid: '#D6D3D1',
-  axis: '#A8A29E',
-  tooltipBg: '#FFFFFF',
-  tooltipBorder: '#E7E5E4',
-  positive: '#16A34A',
-  negative: '#EF4444',
-  warn: '#F59E0B',
+  primary: '#059669', // Electric green
+  series: ['#059669', '#71717a', '#fafafa', '#d97706', '#e11d48', '#27272a'],
+  grid: '#27272a',
+  axis: '#71717a',
+  tooltipBg: '#131315',
+  tooltipBorder: '#3f3f46',
+  positive: '#059669',
+  negative: '#e11d48',
+  warn: '#d97706',
 };
 
 export default chartTheme;

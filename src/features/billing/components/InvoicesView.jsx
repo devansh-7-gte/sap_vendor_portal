@@ -82,14 +82,14 @@ export default function InvoicesView({
 
                 {/* EXPANDED MATCHING FORM */}
                 {selectedGrnId === grn.id && (
-                  <div className="w-full mt-4 p-5 rounded-lg border border-border bg-base/60 space-y-4 sm:col-span-2 animate-slide-down order-last">
+                  <div className="w-full mt-4 p-4 rounded-none border border-border bg-surface2 space-y-4 sm:col-span-2 animate-slide-down order-last">
                     <h4 className="text-xs font-bold text-text-primary uppercase tracking-wider border-b border-border pb-2 flex items-center gap-2">
                       <Receipt className="size-4 text-emerald-text" /> MIRO Invoice Verification & 3-Way Match Check
                     </h4>
 
                     {/* GRN ITEM LISTING */}
-                    <div className="border border-border rounded-lg overflow-x-auto">
-                      <table className="w-full text-left">
+                    <div className="border border-border rounded-none overflow-x-auto">
+                      <table className="w-full text-left table-sticky">
                         <thead>
                           <tr>
                             <th>Material description</th>
@@ -106,8 +106,8 @@ export default function InvoicesView({
                                 <p className="text-[9px] text-text-tertiary font-mono">{item.materialCode}</p>
                               </td>
                               <td className="text-right font-mono tabular-nums">{item.receivedQuantity}</td>
-                              <td className="text-right font-mono text-emerald-600 font-bold tabular-nums">{item.acceptedQuantity}</td>
-                              <td className="text-right font-mono text-red-600 font-semibold tabular-nums">{item.rejectedQuantity}</td>
+                              <td className="text-right font-mono text-emerald-400 font-bold tabular-nums">{item.acceptedQuantity}</td>
+                              <td className="text-right font-mono text-rose-400 font-semibold tabular-nums">{item.rejectedQuantity}</td>
                             </tr>
                           ))}
                         </tbody>
@@ -171,7 +171,7 @@ export default function InvoicesView({
           </div>
         ) : (
           <div className="card overflow-x-auto">
-            <table className="w-full text-left">
+            <table className="w-full text-left table-sticky">
               <thead>
                 <tr>
                   <th>Invoice ref</th>

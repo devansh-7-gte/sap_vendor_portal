@@ -29,29 +29,29 @@ export default function POsView({
         <div className="space-y-4">
           {activePOs.map(po => (
             <div key={po.id} className="card p-5 space-y-4">
-              <div className="flex flex-wrap items-center justify-between gap-4">
-                <div>
+              <div className="flex flex-col gap-2">
+                <div className="flex flex-wrap items-center justify-between gap-4">
                   <div className="flex items-center gap-2.5">
-                    <span className="text-xs font-bold text-text-primary font-mono">{po.id}</span>
+                    <span className="text-sm font-bold text-text-primary font-mono">{po.id}</span>
                     <StatusBadge label={po.status} variant={poStatusVariant(po.status)} />
                   </div>
-                  <div className="flex items-center gap-4 text-[10px] text-text-tertiary mt-1 tabular-nums">
-                    <span>Date: {po.createdDate}</span>
-                    <span>•</span>
-                    <span>Terms: {po.paymentTerms}</span>
-                    <span>•</span>
-                    <span>Currency: {po.currency}</span>
+                  <div className="flex items-center gap-2 text-right">
+                    <span className="text-xs text-text-tertiary">Total contract value:</span>
+                    <span className="text-sm font-bold text-text-primary font-mono tabular-nums">₹{po.items.reduce((s, i) => s + i.netValue, 0).toLocaleString()}.00</span>
                   </div>
                 </div>
-                <div className="text-right">
-                  <p className="text-[10px] text-text-tertiary">Total contract value</p>
-                  <p className="text-sm font-bold text-text-primary font-mono tabular-nums">₹{po.items.reduce((s, i) => s + i.netValue, 0).toLocaleString()}.00</p>
+                <div className="flex flex-wrap items-center gap-4 text-[11px] text-text-tertiary tabular-nums">
+                  <span>Date: <span className="font-medium text-text-primary">{po.createdDate}</span></span>
+                  <span>•</span>
+                  <span>Terms: <span className="font-medium text-text-primary">{po.paymentTerms}</span></span>
+                  <span>•</span>
+                  <span>Currency: <span className="font-medium text-text-primary">{po.currency}</span></span>
                 </div>
               </div>
 
               {/* ITEMIZATION TABLE */}
-              <div className="border border-border rounded-lg overflow-x-auto">
-                <table className="w-full text-left">
+              <div className="border border-border rounded-none overflow-x-auto">
+                <table className="w-full text-left table-sticky">
                   <thead>
                     <tr>
                       <th>Line</th>
@@ -73,7 +73,7 @@ export default function POsView({
                         <td className="text-right font-semibold tabular-nums">{item.quantity.toLocaleString()} {item.uom}</td>
                         <td className="text-right font-mono tabular-nums">₹{item.unitPrice.toFixed(2)}</td>
                         <td className="text-right font-mono text-text-primary font-semibold tabular-nums">₹{item.netValue.toLocaleString()}</td>
-                        <td className="text-right font-mono text-emerald-600 font-bold tabular-nums">
+                        <td className="text-right font-mono text-emerald-400 font-bold tabular-nums">
                           {item.grnQuantity ? `${item.grnQuantity.toLocaleString()} ${item.uom}` : '-'}
                         </td>
                       </tr>
@@ -105,16 +105,16 @@ export default function POsView({
                 )}
 
                 {po.status === 'Dispatched' && (
-                  <div className="w-full flex items-center justify-between text-xs p-2.5 rounded-lg bg-amber-50/50 border border-amber-100">
-                    <span className="text-amber-700 font-bold flex items-center gap-1.5">
+                  <div className="w-full flex items-center justify-between text-xs p-2.5 rounded-none bg-amber-500/20 border border-amber-500/30">
+                    <span className="text-amber-400 font-bold flex items-center gap-1.5">
                       <Clock className="size-4 animate-pulse" /> In transit; awaiting store inspection (MIGO Sync)
                     </span>
                   </div>
                 )}
 
                 {po.status === 'Delivered' && (
-                  <div className="w-full flex items-center justify-between text-xs p-2.5 rounded-lg bg-emerald-50 border border-emerald-100">
-                    <span className="text-emerald-700 font-bold flex items-center gap-1.5">
+                  <div className="w-full flex items-center justify-between text-xs p-2.5 rounded-none bg-emerald-900/20 border border-emerald-900/50">
+                    <span className="text-emerald-400 font-bold flex items-center gap-1.5">
                       <CheckCircle2 className="size-4" /> Receipt inspected in warehouse; ready for invoicing
                     </span>
                   </div>
@@ -123,8 +123,8 @@ export default function POsView({
 
               {/* EXPANDED ASN SHIPMENT FORM */}
               {selectedPoId === po.id && (
-                <div className="mt-4 p-5 rounded-lg border border-border bg-base/60 space-y-4 animate-slide-down">
-                  <h5 className="text-[10px] font-bold text-text-tertiary uppercase tracking-wider flex items-center gap-1.5 border-b border-border pb-2">
+                <div className="mt-4 p-4 rounded-none border border-border bg-surface2 space-y-4 animate-slide-down">
+                  <h5 className="text-[10px] font-bold text-text-tertiary uppercase tracking-[0.05em] flex items-center gap-1.5 border-b border-border pb-2">
                     <Truck className="size-4 text-amber-500" /> Advanced Shipping Notice (VL31N Inbound sync)
                   </h5>
                   <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4">
@@ -183,9 +183,9 @@ export default function POsView({
 
                   {/* DISPATCH QTY */}
                   <div className="space-y-2.5 pt-2">
-                    <h6 className="text-[9px] font-bold text-text-tertiary uppercase tracking-wider">Specify shipped quantities</h6>
+                    <h6 className="text-[9px] font-bold text-text-tertiary uppercase tracking-[0.05em]">Specify shipped quantities</h6>
                     {po.items.map(item => (
-                      <div key={item.line} className="flex justify-between items-center bg-surface p-2.5 rounded-lg border border-border text-xs">
+                      <div key={item.line} className="flex justify-between items-center bg-surface p-2.5 rounded-none border border-border text-xs">
                         <div>
                           <span className="font-semibold text-text-primary">{item.description}</span>
                           <span className="text-[9px] text-text-tertiary font-mono ml-2 tabular-nums">Contract Qty: {item.quantity}</span>

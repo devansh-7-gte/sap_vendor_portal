@@ -13,7 +13,7 @@ export function KPICard({ title, value, unit, icon: Icon, trend, bgGradient }) {
   return (
     <div className="metric-panel animate-fadeUp">
       <div className="flex items-start justify-between mb-4">
-        <div className="p-2.5 rounded-md" style={{ backgroundColor: 'var(--color-emerald-dim)' }}>
+        <div className="p-2.5 rounded-none" style={{ backgroundColor: 'var(--color-emerald-dim)' }}>
           <Icon className="size-5" style={{ color: 'rgb(var(--color-emerald-default-rgb))' }} />
         </div>
         {trend && (
@@ -113,7 +113,7 @@ export function SimpleChart({ data, height = 200, type = 'line' }) {
           return (
             <div key={idx} className="flex-1 flex flex-col items-center gap-2">
               <div
-                className="w-full rounded-t-md hover:opacity-80 transition-opacity duration-150"
+                className="w-full rounded-none hover:opacity-80 transition-opacity duration-150"
                 style={{ height: `${percentage}%`, minHeight: '4px', backgroundColor: 'rgb(var(--color-emerald-default-rgb))' }}
               />
               <p className="text-[10px] font-semibold text-text-secondary">{item.month}</p>
@@ -215,7 +215,7 @@ export function DocumentCard({ doc, onPreview, onDownload }) {
           {onPreview && (
             <button
               onClick={() => onPreview(doc)}
-              className="px-2.5 py-1 text-[11px] font-semibold text-text-secondary hover:bg-surface2 hover:text-text-primary rounded-md transition-colors duration-150 cursor-pointer"
+              className="px-2.5 py-1 text-[11px] font-semibold text-text-secondary hover:bg-surface2 hover:text-text-primary rounded-none transition-colors duration-150 cursor-pointer"
             >
               View
             </button>
@@ -223,7 +223,7 @@ export function DocumentCard({ doc, onPreview, onDownload }) {
           {onDownload && (
             <button
               onClick={() => onDownload(doc)}
-              className="px-2.5 py-1 text-[11px] font-semibold text-emerald-text hover:bg-surface2 rounded-md transition-colors duration-150 cursor-pointer"
+              className="px-2.5 py-1 text-[11px] font-semibold text-emerald-400 hover:bg-surface2 rounded-none transition-colors duration-150 cursor-pointer"
             >
               Download
             </button>
@@ -240,7 +240,7 @@ export function DocumentCard({ doc, onPreview, onDownload }) {
  */
 export function EmptyState({ icon: Icon, title, description, action }) {
   return (
-    <div className="flex flex-col items-center justify-center py-12 px-6 rounded-xl border-2 border-dashed border-border bg-base">
+    <div className="flex flex-col items-center justify-center py-12 px-6 rounded-none border-2 border-dashed border-border bg-base">
       {Icon && <Icon className="size-10 text-text-tertiary mb-4" />}
       <h3 className="text-[15px] font-bold text-text-primary">{title}</h3>
       <p className="text-[12px] text-text-tertiary mt-2 max-w-sm text-center">{description}</p>
@@ -274,7 +274,7 @@ export function DataTable({ columns, data, actions, loading = false }) {
 
   return (
     <div className="overflow-x-auto card">
-      <table className="w-full text-left">
+      <table className="w-full text-left table-sticky">
         <thead>
           <tr>
             {columns.map((col) => (
@@ -300,7 +300,7 @@ export function DataTable({ columns, data, actions, loading = false }) {
                       <button
                         key={action.id}
                         onClick={() => action.handler(row)}
-                        className="text-[11px] font-semibold px-2.5 py-1.5 rounded-md transition-colors duration-150 cursor-pointer"
+                        className="text-[11px] font-semibold px-2.5 py-1.5 rounded-none transition-colors duration-150 cursor-pointer"
                         style={{
                           color: action.color || '#78716C',
                           backgroundColor: `${action.color || '#D6D3D1'}20`,
@@ -326,16 +326,16 @@ export function DataTable({ columns, data, actions, loading = false }) {
  */
 export function AlertBanner({ type = 'info', title, message, action }) {
   const typeConfig = {
-    info: { bg: 'bg-zinc-100', text: 'text-zinc-500', border: 'border-zinc-200' },
-    warning: { bg: 'bg-amber-500/10', text: 'text-amber-600', border: 'border-amber-200' },
-    error: { bg: 'bg-[#FFF1F2]', text: 'text-[#EF4444]', border: 'border-[#FECDD3]' },
-    success: { bg: 'bg-[#F0FDF4]', text: 'text-[#16A34A]', border: 'border-[#BBF7D0]' },
+    info: { bg: 'bg-zinc-900/30', text: 'text-zinc-400', border: 'border-zinc-800' },
+    warning: { bg: 'bg-amber-500/20', text: 'text-amber-400', border: 'border-amber-500/30' },
+    error: { bg: 'bg-rose-900/20', text: 'text-rose-400', border: 'border-rose-900/50' },
+    success: { bg: 'bg-emerald-900/20', text: 'text-emerald-400', border: 'border-emerald-900/50' },
   };
 
   const config = typeConfig[type];
 
   return (
-    <div className={`p-4 rounded-lg border ${config.bg} ${config.border}`}>
+    <div className={`p-4 rounded-none border ${config.bg} ${config.border}`}>
       <div className="flex items-start justify-between">
         <div>
           <p className={`font-semibold text-[13px] ${config.text}`}>{title}</p>

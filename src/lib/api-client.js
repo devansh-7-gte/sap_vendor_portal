@@ -57,7 +57,9 @@ export const apiClient = {
         localStorage.removeItem('jwt_token');
         localStorage.removeItem('clerk_user_id');
         localStorage.removeItem('sap_vendor_profile_data');
-        window.location.href = '/sign-in';
+        if (!window.location.pathname.startsWith('/sign-in')) {
+          window.location.href = '/sign-in';
+        }
       }
       const errorData = await response.json().catch(() => ({}));
       throw new Error(errorData.error || `Request failed with status ${response.status}`);

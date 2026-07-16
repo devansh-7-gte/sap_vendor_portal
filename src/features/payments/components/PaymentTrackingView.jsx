@@ -435,7 +435,7 @@ export default function PaymentTrackingView({ state }) {
 
               {/* Payments Table — scrollable, all rows visible */}
               <div className="card w-full overflow-x-auto overflow-y-auto max-h-[520px] custom-scrollbar">
-                <table className="w-full text-xs text-left border-collapse min-w-[1100px]">
+                <table className="w-full text-left border-collapse min-w-[1100px] table-sticky">
                   <thead className="sticky top-0 z-10">
                     <tr>
                       <th className="w-36">Invoice Number</th>
@@ -476,7 +476,7 @@ export default function PaymentTrackingView({ state }) {
                           <td className="font-medium text-destructive text-right font-mono whitespace-nowrap tabular-nums">
                             - ₹ {tdsAmt.toLocaleString('en-IN')}.00
                           </td>
-                          <td className="font-extrabold text-emerald-text text-right font-mono whitespace-nowrap tabular-nums">
+                          <td className="font-extrabold text-emerald-400 text-right font-mono whitespace-nowrap tabular-nums">
                             ₹ {payAmt.toLocaleString('en-IN')}.00
                           </td>
                           <td className="font-mono font-bold text-text-primary select-all break-all">
@@ -561,7 +561,7 @@ export default function PaymentTrackingView({ state }) {
 
               {/* TDS Registry Table — scrollable, all rows visible */}
               <div className="card w-full overflow-x-auto overflow-y-auto max-h-[520px] custom-scrollbar">
-                <table className="w-full text-xs text-left border-collapse min-w-[1100px]">
+                <table className="w-full text-left border-collapse min-w-[1100px] table-sticky">
                   <thead className="sticky top-0 z-10">
                     <tr>
                       <th className="whitespace-nowrap">Fiscal Year</th>
@@ -593,7 +593,7 @@ export default function PaymentTrackingView({ state }) {
                         <td className="font-medium text-text-primary select-all whitespace-nowrap">
                           {cert.deducteePan}
                         </td>
-                        <td className="font-extrabold text-emerald-text text-right whitespace-nowrap tabular-nums">
+                        <td className="font-extrabold text-emerald-400 text-right whitespace-nowrap tabular-nums">
                           ₹ {cert.taxWithheld.toLocaleString('en-IN')}.00
                         </td>
                         <td className="whitespace-nowrap tabular-nums">

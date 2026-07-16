@@ -132,7 +132,7 @@ export default function TDSDocuments({ state }) {
           value={kpis.available}
           unit="certificates"
           icon={FileCheck}
-          bgGradient="from-green-500 to-green-600"
+          bgGradient="from-emerald-500 to-emerald-600"
         />
         <KPICard
           title="Pending Certificates"
@@ -185,7 +185,7 @@ export default function TDSDocuments({ state }) {
                     <span className="text-sm font-semibold text-text-primary">{quarter}</span>
                     <span className="text-sm font-mono font-bold text-text-primary tabular-nums">{formatCurrency(totalAmount)}</span>
                   </div>
-                  <div className="w-full h-2 bg-surface2 rounded-full overflow-hidden border border-border">
+                  <div className="w-full h-2 bg-surface2 rounded-none overflow-hidden border border-border">
                     <div className="h-full bg-primary" style={{ width: `${percentage || 0}%` }} />
                   </div>
                 </div>
@@ -202,7 +202,7 @@ export default function TDSDocuments({ state }) {
               const totalAmount = yearCerts.reduce((sum, c) => sum + c.tdsAmount, 0);
 
               return (
-                <div key={year} className="flex items-center justify-between p-3 rounded-lg bg-surface2/50 border border-border">
+                <div key={year} className="flex items-center justify-between p-3 rounded-none bg-surface2/50 border border-border">
                   <span className="font-semibold text-text-primary">FY {year}</span>
                   <span className="font-mono font-bold text-text-primary tabular-nums">{formatCurrency(totalAmount)}</span>
                 </div>

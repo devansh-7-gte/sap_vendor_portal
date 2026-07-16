@@ -51,10 +51,10 @@ export default function PaymentDetailPage({ payment, state, onBack }) {
           Back to List
         </button>
         <div className="flex gap-2">
-          <button className="p-2 hover:bg-surface2 rounded-md transition-colors duration-150 cursor-pointer">
+          <button className="p-2 hover:bg-surface2 rounded-none transition-colors duration-150 cursor-pointer">
             <Share2 className="size-4 text-text-secondary" />
           </button>
-          <button className="p-2 hover:bg-surface2 rounded-md transition-colors duration-150 cursor-pointer">
+          <button className="p-2 hover:bg-surface2 rounded-none transition-colors duration-150 cursor-pointer">
             <Printer className="size-4 text-text-secondary" />
           </button>
         </div>
@@ -92,7 +92,7 @@ export default function PaymentDetailPage({ payment, state, onBack }) {
             <div className="space-y-4 text-right">
               <div>
                 <p className="label mb-0">Net Amount Paid</p>
-                <p className="text-2xl font-bold text-emerald-text font-mono mt-1 tabular-nums">{formatCurrency(payment.netAmount)}</p>
+                <p className="text-2xl font-bold text-emerald-400 font-mono mt-1 tabular-nums">{formatCurrency(payment.netAmount)}</p>
               </div>
               <div>
                 <p className="label mb-0">Clearing Status</p>
@@ -110,16 +110,16 @@ export default function PaymentDetailPage({ payment, state, onBack }) {
           <p className="text-xl font-bold text-text-primary font-mono mt-2 tabular-nums">{formatCurrency(payment.grossAmount)}</p>
         </div>
         <div className="card p-4">
-          <p className="label mb-0 text-red-500">TDS Deduction</p>
-          <p className="text-xl font-bold text-red-500 font-mono mt-2 tabular-nums">{formatCurrency(payment.tdsAmount)}</p>
+          <p className="label mb-0 text-rose-400">TDS Deduction</p>
+          <p className="text-xl font-bold text-rose-400 font-mono mt-2 tabular-nums">{formatCurrency(payment.tdsAmount)}</p>
         </div>
         <div className="card p-4">
-          <p className="label mb-0 text-amber-600">Other Adjustments</p>
-          <p className="text-xl font-bold text-amber-600 font-mono mt-2 tabular-nums">{formatCurrency(0)}</p>
+          <p className="label mb-0 text-amber-400">Other Adjustments</p>
+          <p className="text-xl font-bold text-amber-400 font-mono mt-2 tabular-nums">{formatCurrency(0)}</p>
         </div>
         <div className="card p-4">
-          <p className="label mb-0 text-emerald-text">Net Amount Paid</p>
-          <p className="text-xl font-bold text-emerald-text font-mono mt-2 tabular-nums">{formatCurrency(payment.netAmount)}</p>
+          <p className="label mb-0 text-emerald-400">Net Amount Paid</p>
+          <p className="text-xl font-bold text-emerald-400 font-mono mt-2 tabular-nums">{formatCurrency(payment.netAmount)}</p>
         </div>
       </div>
 
@@ -189,7 +189,7 @@ export default function PaymentDetailPage({ payment, state, onBack }) {
             </div>
             <div>
               <p className="label mb-0">Status</p>
-              <p className="text-base font-semibold text-emerald-text mt-1">Matched & Cleared</p>
+              <p className="text-base font-semibold text-emerald-400 mt-1">Matched & Cleared</p>
             </div>
           </div>
         </div>

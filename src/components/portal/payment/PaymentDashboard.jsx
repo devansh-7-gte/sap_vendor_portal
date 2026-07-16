@@ -75,10 +75,10 @@ export default function PaymentDashboard({ state, onSelectPayment }) {
 
   // Status distribution
   const statusDistribution = useMemo(() => [
-    { status: 'Cleared', count: payments.filter(p => p.status === 'Cleared').length, color: 'bg-green-500' },
+    { status: 'Cleared', count: payments.filter(p => p.status === 'Cleared').length, color: 'bg-emerald-500' },
     { status: 'Processing', count: payments.filter(p => p.status === 'Processing').length, color: 'bg-blue-500' },
     { status: 'Pending', count: payments.filter(p => p.status === 'Pending').length, color: 'bg-yellow-500' },
-    { status: 'Overdue', count: payments.filter(p => p.status === 'Overdue').length, color: 'bg-red-500' },
+    { status: 'Overdue', count: payments.filter(p => p.status === 'Overdue').length, color: 'bg-rose-500' },
   ], [payments]);
 
   // Recent transactions
@@ -110,7 +110,7 @@ export default function PaymentDashboard({ state, onSelectPayment }) {
           unit="Lakhs"
           icon={CheckCircle}
           trend="+8%"
-          bgGradient="from-green-500 to-emerald-600"
+          bgGradient="from-emerald-500 to-emerald-600"
         />
         <KPICard
           title="Pending Payments"
@@ -126,7 +126,7 @@ export default function PaymentDashboard({ state, onSelectPayment }) {
           unit="Lakhs"
           icon={AlertCircle}
           trend="+5%"
-          bgGradient="from-red-500 to-rose-600"
+          bgGradient="from-rose-500 to-rose-600"
         />
       </div>
 
@@ -184,7 +184,7 @@ export default function PaymentDashboard({ state, onSelectPayment }) {
                   <span className="text-text-secondary">{item.status}</span>
                   <span className="font-bold tabular-nums text-text-primary">{item.count}</span>
                 </div>
-                <div className="w-full h-2 bg-surface2 rounded-full overflow-hidden">
+                <div className="w-full h-2 bg-surface2 rounded-none overflow-hidden">
                   <div
                     className={`h-full ${item.color} transition-colors duration-150`}
                     style={{ width: `${(item.count / payments.length) * 100}%` }}

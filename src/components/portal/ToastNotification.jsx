@@ -30,9 +30,9 @@ function ToastItem({ toast, onClose }) {
   // SAC-token accent per toast type — left border accent, surface card body
   const styles = {
     success: {
-      border: 'border-l-[#16A34A]',
-      text: 'text-[#16A34A]',
-      icon: <CheckCircle2 className="size-4 text-[#16A34A] shrink-0" />
+      border: 'border-l-[#059669]',
+      text: 'text-[#059669]',
+      icon: <CheckCircle2 className="size-4 text-[#059669] shrink-0" />
     },
     info: {
       border: 'border-l-[rgb(var(--color-emerald-default-rgb))]',
@@ -41,13 +41,13 @@ function ToastItem({ toast, onClose }) {
     },
     warning: {
       border: 'border-l-amber-500',
-      text: 'text-amber-600',
+      text: 'text-amber-500',
       icon: <AlertTriangle className="size-4 text-amber-500 shrink-0" />
     },
     error: {
-      border: 'border-l-[#EF4444]',
-      text: 'text-[#EF4444]',
-      icon: <AlertCircle className="size-4 text-[#EF4444] shrink-0" />
+      border: 'border-l-[#e11d48]',
+      text: 'text-[#e11d48]',
+      icon: <AlertCircle className="size-4 text-[#e11d48] shrink-0" />
     }
   }[type || 'info'];
 

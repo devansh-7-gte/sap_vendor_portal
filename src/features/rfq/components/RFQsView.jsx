@@ -59,8 +59,8 @@ export default function RFQsView({
             </div>
 
             {/* ITEMIZATION TABLE */}
-            <div className="border border-border rounded-lg overflow-x-auto">
-              <table className="w-full text-left">
+            <div className="border border-border rounded-none overflow-x-auto">
+              <table className="w-full text-left table-sticky">
                 <thead>
                   <tr>
                     <th>Line</th>
@@ -106,24 +106,24 @@ export default function RFQsView({
               )}
 
               {rfq.status === 'Submitted' && rfq.vendorBid && (
-                <div className="w-full flex items-center justify-between text-xs p-3 rounded-lg bg-amber-50/50 border border-amber-100">
-                  <span className="text-amber-600 font-bold flex items-center gap-1.5">
+                <div className="w-full flex items-center justify-between text-xs p-3 rounded-none bg-amber-500/20 border border-amber-500/30">
+                  <span className="text-amber-400 font-bold flex items-center gap-1.5">
                     <Clock className="size-4" /> Bid registered in SAP; under evaluation cycles
                   </span>
                   <div className="space-x-4 font-mono text-text-secondary tabular-nums">
                     <span>Lead time: <strong className="text-text-primary">{rfq.vendorBid.deliveryLeadTimeDays} Days</strong></span>
-                    <span>Total Bid: <strong className="text-emerald-600">₹{rfq.items.reduce((sum, it) => sum + (rfq.vendorBid?.unitPrices[it.line] || 0) * it.quantity, 0).toLocaleString()}</strong></span>
+                    <span>Total Bid: <strong className="text-emerald-400">₹{rfq.items.reduce((sum, it) => sum + (rfq.vendorBid?.unitPrices[it.line] || 0) * it.quantity, 0).toLocaleString()}</strong></span>
                   </div>
                 </div>
               )}
 
               {rfq.status === 'Awarded' && (
-                <div className="w-full flex items-center justify-between text-xs p-3 rounded-lg bg-emerald-50 border border-emerald-100">
-                  <span className="text-emerald-700 font-bold flex items-center gap-1.5">
+                <div className="w-full flex items-center justify-between text-xs p-3 rounded-none bg-emerald-900/20 border border-emerald-900/50">
+                  <span className="text-emerald-400 font-bold flex items-center gap-1.5">
                     <CheckCircle2 className="size-4" /> Bidding Awarded & Synced to SAP Info Records (BAPI)
                   </span>
                   <div className="font-mono text-text-secondary tabular-nums">
-                    <span>Total contract: <strong className="text-emerald-700">₹{rfq.items.reduce((sum, it) => sum + (rfq.vendorBid?.unitPrices[it.line] || 0) * it.quantity, 0).toLocaleString()}</strong></span>
+                    <span>Total contract: <strong className="text-emerald-400">₹{rfq.items.reduce((sum, it) => sum + (rfq.vendorBid?.unitPrices[it.line] || 0) * it.quantity, 0).toLocaleString()}</strong></span>
                   </div>
                 </div>
               )}
@@ -131,7 +131,7 @@ export default function RFQsView({
 
             {/* EXPANDED PROPOSAL CONFIG FORM */}
             {selectedRfqId === rfq.id && (
-              <div className="mt-4 p-5 rounded-lg border border-border bg-base/60 space-y-4 animate-slide-down">
+              <div className="mt-4 p-4 rounded-none border border-border bg-surface2 space-y-4 animate-slide-down">
                 <h5 className="text-[10px] font-bold text-text-tertiary uppercase tracking-wider flex items-center gap-1.5">
                   Configure pricing proposal ({rfq.id})
                 </h5>

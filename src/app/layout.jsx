@@ -2,7 +2,11 @@ import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
 import { ShellProvider } from "@/lib/shell-context";
 import { PortalProvider } from "@/lib/portal-context";
+import { ThemeProvider } from "@/lib/theme-context";
 import PortalLayout from "@/components/portal/PortalLayout";
+
+// Runs before first paint to resolve the theme and avoid a light→dark flash.
+const themeScript = `(function(){try{var t=localStorage.getItem('vc-theme');if(!t){t=window.matchMedia('(prefers-color-scheme: dark)').matches?'dark':'light';}var r=document.documentElement;if(t==='dark'){r.classList.add('dark');}r.style.colorScheme=t;}catch(e){}})();`;
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -24,16 +28,22 @@ export default function RootLayout({ children }) {
     <html
       lang="en"
       className={`${geistSans.variable} ${geistMono.variable} h-full antialiased`}
+      suppressHydrationWarning
     >
+      <head>
+        <script dangerouslySetInnerHTML={{ __html: themeScript }} />
+      </head>
       <body className="min-h-full flex flex-col bg-base text-text-primary">
         <a href="#main-content" className="skip-link">Skip to main content</a>
-        <ShellProvider>
-          <PortalProvider>
-            <PortalLayout>
-              {children}
-            </PortalLayout>
-          </PortalProvider>
-        </ShellProvider>
+        <ThemeProvider>
+          <ShellProvider>
+            <PortalProvider>
+              <PortalLayout>
+                {children}
+              </PortalLayout>
+            </PortalProvider>
+          </ShellProvider>
+        </ThemeProvider>
       </body>
     </html>
   );

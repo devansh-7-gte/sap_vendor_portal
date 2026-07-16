@@ -30,7 +30,7 @@ export default class ErrorBoundary extends React.Component {
       return (
         <div className="w-full flex items-center justify-center p-8 select-none">
           <div className="max-w-md w-full card p-6 flex flex-col items-center text-center space-y-4">
-            <div className="p-3 bg-[#FFF1F2] rounded-full text-[#EF4444]">
+            <div className="p-3 bg-rose-900/20 rounded-none text-rose-400">
               <AlertTriangle className="size-6" />
             </div>
 
@@ -44,8 +44,8 @@ export default class ErrorBoundary extends React.Component {
             </div>
 
             {this.state.error && (
-              <div className="w-full p-3 rounded-md bg-base text-left overflow-x-auto max-h-32 border border-border">
-                <code className="text-[10px] font-mono text-[#EF4444] whitespace-pre-wrap">
+              <div className="w-full p-3 rounded-none bg-base text-left overflow-x-auto max-h-32 border border-border">
+                <code className="text-[10px] font-mono text-rose-400 whitespace-pre-wrap">
                   {this.state.error.toString()}
                 </code>
               </div>
