@@ -95,7 +95,7 @@ const acknowledgePO = asyncHandler(async (req, res, next) => {
 // @access  Public
 const simulatePO = asyncHandler(async (req, res, next) => {
   const vendorId = getVendorId(req);
-  const vendor = await Vendor.findOne({ clerkId: vendorId });
+  const vendor = await Vendor.findOne({ $or: [{ vendorId }, { clerkId: vendorId }] });
 
   const year = new Date().getFullYear();
   const prefix = `PO-${year}-`;

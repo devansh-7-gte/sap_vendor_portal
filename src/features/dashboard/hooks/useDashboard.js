@@ -23,6 +23,7 @@ export function useDashboard(profile, clearAllLogs) {
 
   // Fetch live backend performance score if vendor is approved
   useEffect(() => {
+    if (typeof window !== 'undefined' && !localStorage.getItem('jwt_token')) return;
     if (profile?.sapVendorCode && profile?.status === 'Approved') {
       dashboardService.getPerformance().then(data => {
         if (data) {
@@ -49,6 +50,7 @@ export function useDashboard(profile, clearAllLogs) {
   };
 
   const refreshChats = useCallback(async () => {
+    if (typeof window !== 'undefined' && !localStorage.getItem('jwt_token')) return;
     try {
       const data = await dashboardService.getChats();
       if (data) {

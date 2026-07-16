@@ -6,6 +6,7 @@ const Schema = mongoose.Schema;
 
 const vendorSchema = new Schema({
   vendorId:       { type: String, required: true, unique: true }, // ← Local unique user/vendor ID
+  clerkId:        { type: String },                               // ← Deprecated, kept for backward compatibility
   password:       { type: String, select: false },                // ← Hashed password (not returned by default)
   companyName:    { type: String, required: true, trim: true },
   tradeName:      { type: String, trim: true },

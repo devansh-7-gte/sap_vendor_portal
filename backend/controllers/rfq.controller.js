@@ -231,7 +231,7 @@ const submitBid = asyncHandler(async (req, res, next) => {
   }
 
   // Fetch Vendor's DB ID & Rating
-  const vendor = await Vendor.findOne({ clerkId: vendorId });
+  const vendor = await Vendor.findOne({ $or: [{ vendorId }, { clerkId: vendorId }] });
   const vendorDbId = vendor ? vendor._id : null;
   const rating = invitation.rating || 80;
 
@@ -379,7 +379,7 @@ const awardBid = asyncHandler(async (req, res, next) => {
   }
 
   // Get Vendor DB doc
-  const vendor = await Vendor.findOne({ clerkId: vendorId });
+  const vendor = await Vendor.findOne({ $or: [{ vendorId }, { clerkId: vendorId }] });
 
   // Generate sequential PO ID: PO-YYYY-SEQ
   const year = new Date().getFullYear();
