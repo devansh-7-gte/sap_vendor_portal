@@ -148,8 +148,8 @@ export default function PaymentList({ state, onSelectPayment }) {
     <div className="space-y-6 pb-12">
       {/* HEADER */}
       <div>
-        <h2 className="text-2xl font-bold text-stone-900 dark:text-white">Payment List</h2>
-        <p className="text-sm text-stone-600 dark:text-stone-400 mt-1">
+        <h2 className="text-[22px] font-bold text-text-primary">Payment List</h2>
+        <p className="text-sm text-text-tertiary mt-1">
           View and manage all your payments with advanced filtering
         </p>
       </div>
@@ -157,27 +157,27 @@ export default function PaymentList({ state, onSelectPayment }) {
       {/* SEARCH AND ACTIONS */}
       <div className="flex flex-col md:flex-row items-start md:items-center justify-between gap-4">
         <div className="relative flex-1 max-w-md">
-          <Search className="absolute left-3 top-1/2 -translate-y-1/2 size-4 text-stone-400 dark:text-stone-600" />
+          <Search className="absolute left-3 top-1/2 -translate-y-1/2 size-4 text-text-tertiary" />
           <input
             type="text"
             placeholder="Search by payment, invoice, or UTR number..."
             value={searchTerm}
             onChange={(e) => setSearchTerm(e.target.value)}
-            className="w-full pl-10 pr-4 py-2 rounded-lg border border-stone-200 dark:border-stone-800 bg-white dark:bg-stone-900 text-stone-900 dark:text-white text-sm outline-none focus:border-green-500 dark:focus:border-green-400"
+            className="!pl-10"
           />
         </div>
         <div className="flex gap-2">
           <select
             value={sortBy}
             onChange={(e) => setSortBy(e.target.value)}
-            className="px-3 py-2 rounded-lg border border-stone-200 dark:border-stone-800 bg-white dark:bg-stone-900 text-stone-900 dark:text-white text-sm font-medium outline-none focus:border-green-500"
+            className="text-sm font-medium"
           >
             <option value="date-desc">Newest First</option>
             <option value="date-asc">Oldest First</option>
             <option value="amount-desc">Highest Amount</option>
             <option value="amount-asc">Lowest Amount</option>
           </select>
-          <button className="px-3 h-8 rounded-lg border border-stone-200 dark:border-stone-800 bg-white dark:bg-stone-900 text-stone-900 dark:text-white hover:bg-stone-50 dark:hover:bg-stone-800 transition-colors flex items-center gap-2 text-xs font-medium cursor-pointer">
+          <button className="px-3 h-8 rounded-none border border-border bg-surface text-text-primary hover:bg-surface2 transition-colors duration-150 flex items-center gap-2 text-xs font-medium cursor-pointer">
             <Download className="size-4" />
             Export
           </button>
@@ -185,9 +185,9 @@ export default function PaymentList({ state, onSelectPayment }) {
       </div>
 
       {/* FILTERS */}
-      <div className="p-4 rounded-lg border border-stone-200 dark:border-stone-800 bg-stone-50 dark:bg-stone-900/30">
+      <div className="card p-4">
         <div className="flex flex-wrap gap-4">
-          <div className="flex items-center gap-2 text-sm font-semibold text-stone-600 dark:text-stone-400">
+          <div className="flex items-center gap-2 text-sm font-semibold text-text-secondary">
             <Filter className="size-4" />
             Filters:
           </div>
@@ -197,7 +197,7 @@ export default function PaymentList({ state, onSelectPayment }) {
                 <select
                   value={filter.value}
                   onChange={(e) => handleFilterChange(filter.id, e.target.value)}
-                  className="px-3 py-1.5 rounded-lg text-xs font-medium border border-stone-300 dark:border-stone-700 bg-white dark:bg-stone-800 text-stone-900 dark:text-white outline-none focus:border-green-500"
+                  className="!py-1.5 text-xs font-medium"
                 >
                   {filter.options.map((opt) => (
                     <option key={opt} value={opt}>
@@ -211,7 +211,7 @@ export default function PaymentList({ state, onSelectPayment }) {
           {Object.values(activeFilters).some(v => v !== 'All') && (
             <button
               onClick={() => setActiveFilters({ status: 'All', dateRange: 'All', amount: 'All' })}
-              className="text-xs font-semibold text-red-600 dark:text-red-400 hover:text-red-700"
+              className="text-xs font-semibold text-destructive hover:text-rose-400 transition-colors duration-150"
             >
               Clear All
             </button>
@@ -220,9 +220,9 @@ export default function PaymentList({ state, onSelectPayment }) {
       </div>
 
       {/* RESULTS COUNT */}
-      <div className="text-sm text-stone-600 dark:text-stone-400">
-        Showing <span className="font-bold text-stone-900 dark:text-white">{filteredPayments.length}</span> of{' '}
-        <span className="font-bold text-stone-900 dark:text-white">{payments.length}</span> payments
+      <div className="text-sm text-text-secondary">
+        Showing <span className="font-bold text-text-primary tabular-nums">{filteredPayments.length}</span> of{' '}
+        <span className="font-bold text-text-primary tabular-nums">{payments.length}</span> payments
       </div>
 
       {/* DATA TABLE */}

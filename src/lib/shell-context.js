@@ -45,9 +45,11 @@ export function ShellProvider({ children }) {
     }
   };
 
-  // Fetch SAP logs from backend on mount
+  // Fetch SAP logs from backend on mount (only when authenticated)
   useEffect(() => {
-    refreshSapLogs();
+    if (typeof window !== 'undefined' && localStorage.getItem('jwt_token')) {
+      refreshSapLogs();
+    }
   }, []);
 
   // Sync shell logs to localStorage on changes

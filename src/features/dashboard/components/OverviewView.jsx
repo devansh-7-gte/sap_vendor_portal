@@ -38,25 +38,25 @@ export default function OverviewView({ setActiveTab, state }) {
     <div className="space-y-8 max-w-6xl animate-fade-in">
       {/* SECTION HEADER */}
       <div>
-        <h2 className="text-xl font-bold tracking-tight text-gray-900">Portal Overview</h2>
-        <p className="text-gray-500 text-xs mt-0.5">End-to-end integration mapping, role responsibilities, and transaction architecture.</p>
+        <h2 className="text-[22px] font-bold text-text-primary">Portal Overview</h2>
+        <p className="text-text-secondary text-[13px] mt-0.5">End-to-end integration mapping, role responsibilities, and transaction architecture.</p>
       </div>
 
       {/* PROCESS STEPS CHAIN */}
       <div className="space-y-3">
-        <h3 className="text-[10px] font-bold text-gray-400 uppercase tracking-wider">End-to-End process chain</h3>
+        <h3 className="label">End-to-End process chain</h3>
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
           {chainItems.map(item => (
             <div
               key={item.label}
               onClick={() => setActiveTab(item.id)}
-              className={`p-4.5 rounded-xl border transition-all duration-200 cursor-pointer flex flex-col justify-between min-h-[96px] group shadow-sm bg-white ${item.style}`}
+              className={`card p-4.5 border transition-all duration-150 cursor-pointer flex flex-col justify-between min-h-[96px] group ${item.style}`}
             >
-              <h4 className="font-bold text-xs text-gray-900 group-hover:underline flex items-center justify-between">
+              <h4 className="font-bold text-xs text-text-primary group-hover:underline flex items-center justify-between">
                 {item.label}
-                <ChevronRight className="size-3.5 opacity-0 group-hover:opacity-100 transition-opacity ml-1" />
+                <ChevronRight className="size-3.5 opacity-0 group-hover:opacity-100 transition-opacity duration-150 ml-1" />
               </h4>
-              <p className="text-[10px] text-gray-500 mt-2 leading-relaxed">{item.desc}</p>
+              <p className="text-[11px] text-text-tertiary mt-2 leading-relaxed">{item.desc}</p>
             </div>
           ))}
         </div>
@@ -64,10 +64,10 @@ export default function OverviewView({ setActiveTab, state }) {
 
       {/* ROLES */}
       <div className="space-y-3">
-        <h3 className="text-[10px] font-bold text-gray-400 uppercase tracking-wider">User Roles & Access Areas</h3>
+        <h3 className="label">User Roles & Access Areas</h3>
         <div className="flex flex-wrap gap-2">
           {rolePills.map(pill => (
-            <span key={pill.name} className={`px-3 py-1.5 rounded-lg text-xs font-semibold ${pill.style}`}>
+            <span key={pill.name} className={`px-3 py-1.5 rounded-md text-xs font-semibold ${pill.style}`}>
               {pill.name}
             </span>
           ))}
@@ -76,22 +76,22 @@ export default function OverviewView({ setActiveTab, state }) {
 
       {/* ARCHITECTURE TABLE */}
       <div className="space-y-3">
-        <h3 className="text-[10px] font-bold text-gray-400 uppercase tracking-wider">SAP Integration Specifications</h3>
-        <div className="overflow-hidden border border-gray-200 rounded-xl bg-white shadow-sm">
+        <h3 className="label">SAP Integration Specifications</h3>
+        <div className="card overflow-hidden">
           <table className="w-full text-left border-collapse">
             <thead>
-              <tr className="border-b border-gray-200 bg-gray-50 text-[9px] font-bold text-gray-500 uppercase tracking-wider">
-                <th className="py-2.5 px-6">Process Step</th>
-                <th className="py-2.5 px-6">SAP Integration Interface</th>
-                <th className="py-2.5 px-6">Operational Description</th>
+              <tr>
+                <th>Process Step</th>
+                <th>SAP Integration Interface</th>
+                <th>Operational Description</th>
               </tr>
             </thead>
-            <tbody className="divide-y divide-gray-100 text-xs">
+            <tbody className="text-xs">
               {architectureLines.map((row, i) => (
-                <tr key={i} className="hover:bg-gray-50/40 transition-colors">
-                  <td className="py-3 px-6 font-bold text-gray-900">{row.process}</td>
-                  <td className="py-3 px-6 font-mono font-bold text-[#1b6b5a]">{row.sapDoc}</td>
-                  <td className="py-3 px-6 text-gray-500 leading-normal">{row.desc}</td>
+                <tr key={i}>
+                  <td className="font-bold text-text-primary">{row.process}</td>
+                  <td className="font-mono font-bold text-emerald-text">{row.sapDoc}</td>
+                  <td className="text-text-secondary leading-normal">{row.desc}</td>
                 </tr>
               ))}
             </tbody>

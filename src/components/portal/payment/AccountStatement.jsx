@@ -4,6 +4,7 @@ import React, { useState, useMemo } from 'react';
 import { Search, Download, FileText, Calendar } from 'lucide-react';
 import { DataTable, EmptyState } from './components/DesignComponents';
 import { generateMockAccountStatement, formatDate, formatCurrency } from './utils/dataUtils';
+import KPICard from '@/components/ui/KPICard';
 
 export default function AccountStatement({ state }) {
   const [searchTerm, setSearchTerm] = useState('');
@@ -86,7 +87,7 @@ export default function AccountStatement({ state }) {
     {
       key: 'debit',
       label: 'Debit',
-      render: (val) => <span className="font-mono font-bold text-red-600 dark:text-red-400">{val > 0 ? formatCurrency(val) : '-'}</span>,
+      render: (val) => <span className="font-mono font-bold text-rose-400">{val > 0 ? formatCurrency(val) : '-'}</span>,
     },
     {
       key: 'credit',
@@ -118,45 +119,30 @@ export default function AccountStatement({ state }) {
     <div className="space-y-6 pb-12">
       {/* HEADER */}
       <div>
-        <h2 className="text-2xl font-bold text-stone-900 dark:text-white">Account Statement (FBL1N)</h2>
-        <p className="text-sm text-stone-600 dark:text-stone-400 mt-1">
+        <h2 className="text-[22px] font-bold text-text-primary">Account Statement (FBL1N)</h2>
+        <p className="text-sm text-text-tertiary mt-1">
           Complete vendor ledger and account statement view
         </p>
       </div>
 
       {/* SUMMARY CARDS */}
       <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
-        <div className="p-6 rounded-xl border border-stone-200 dark:border-stone-800 bg-white dark:bg-stone-900/50">
-          <p className="text-xs text-stone-500 dark:text-stone-400 uppercase font-bold">Opening Balance</p>
-          <p className="text-2xl font-bold text-stone-900 dark:text-white font-mono mt-2">{formatCurrency(summary.openingBalance)}</p>
-        </div>
-
-        <div className="p-6 rounded-xl border border-green-200 dark:border-green-800 bg-green-50 dark:bg-green-900/20">
-          <p className="text-xs text-green-600 dark:text-green-400 uppercase font-bold">Credits</p>
-          <p className="text-2xl font-bold text-green-700 dark:text-green-300 font-mono mt-2">{formatCurrency(summary.credits)}</p>
-        </div>
-
-        <div className="p-6 rounded-xl border border-red-200 dark:border-red-800 bg-red-50 dark:bg-red-900/20">
-          <p className="text-xs text-red-600 dark:text-red-400 uppercase font-bold">Debits</p>
-          <p className="text-2xl font-bold text-red-700 dark:text-red-300 font-mono mt-2">{formatCurrency(summary.debits)}</p>
-        </div>
-
-        <div className="p-6 rounded-xl border border-blue-200 dark:border-blue-800 bg-blue-50 dark:bg-blue-900/20">
-          <p className="text-xs text-blue-600 dark:text-blue-400 uppercase font-bold">Closing Balance</p>
-          <p className="text-2xl font-bold text-blue-700 dark:text-blue-300 font-mono mt-2">{formatCurrency(summary.closingBalance)}</p>
-        </div>
+        <KPICard label="Opening Balance" value={<span className="tabular-nums">{formatCurrency(summary.openingBalance)}</span>} />
+        <KPICard label="Credits" value={<span className="tabular-nums text-emerald-400">{formatCurrency(summary.credits)}</span>} />
+        <KPICard label="Debits" value={<span className="tabular-nums text-destructive">{formatCurrency(summary.debits)}</span>} />
+        <KPICard label="Closing Balance" value={<span className="tabular-nums">{formatCurrency(summary.closingBalance)}</span>} />
       </div>
 
       {/* SEARCH AND FILTERS */}
       <div className="flex flex-col md:flex-row items-start md:items-center justify-between gap-4">
         <div className="relative flex-1 max-w-md">
-          <Search className="absolute left-3 top-1/2 -translate-y-1/2 size-4 text-stone-400 dark:text-stone-600" />
+          <Search className="absolute left-3 top-1/2 -translate-y-1/2 size-4 text-text-tertiary" />
           <input
             type="text"
             placeholder="Search document or reference..."
             value={searchTerm}
             onChange={(e) => setSearchTerm(e.target.value)}
-            className="w-full pl-10 pr-4 py-2 rounded-lg border border-stone-200 dark:border-stone-800 bg-white dark:bg-stone-900 text-stone-900 dark:text-white text-sm outline-none focus:border-blue-500"
+            className="!pl-10"
           />
         </div>
 
@@ -164,7 +150,7 @@ export default function AccountStatement({ state }) {
           <select
             value={docType}
             onChange={(e) => setDocType(e.target.value)}
-            className="px-3 py-2 rounded-lg border border-stone-200 dark:border-stone-800 bg-white dark:bg-stone-900 text-stone-900 dark:text-white text-sm font-medium outline-none"
+            className="text-sm font-medium"
           >
             {docTypes.map((type) => (
               <option key={type} value={type}>
@@ -176,7 +162,7 @@ export default function AccountStatement({ state }) {
           <select
             value={dateRange}
             onChange={(e) => setDateRange(e.target.value)}
-            className="px-3 py-2 rounded-lg border border-stone-200 dark:border-stone-800 bg-white dark:bg-stone-900 text-stone-900 dark:text-white text-sm font-medium outline-none"
+            className="text-sm font-medium"
           >
             <option value="all">All Dates</option>
             <option value="7">Last 7 Days</option>
@@ -184,7 +170,7 @@ export default function AccountStatement({ state }) {
             <option value="90">Last 90 Days</option>
           </select>
 
-          <button className="px-3 h-8 rounded-lg border border-stone-200 dark:border-stone-800 bg-white dark:bg-stone-900 text-stone-900 dark:text-white hover:bg-stone-50 dark:hover:bg-stone-800 transition-colors flex items-center gap-2 text-xs font-medium cursor-pointer">
+          <button className="px-3 h-8 rounded-none border border-border bg-surface text-text-primary hover:bg-surface2 transition-colors duration-150 flex items-center gap-2 text-xs font-medium cursor-pointer">
             <Download className="size-4" />
             Export
           </button>
@@ -192,19 +178,19 @@ export default function AccountStatement({ state }) {
       </div>
 
       {/* EXPORT OPTIONS */}
-      <div className="p-4 rounded-lg border border-stone-200 dark:border-stone-800 bg-stone-50 dark:bg-stone-900/30">
+      <div className="card p-4">
         <div className="flex flex-wrap gap-3 items-center">
-          <span className="text-sm font-semibold text-stone-600 dark:text-stone-400">Export as:</span>
-          <button className="px-3 py-1.5 text-xs font-semibold rounded-lg border border-stone-300 dark:border-stone-700 hover:bg-white dark:hover:bg-stone-800 transition-colors">
+          <span className="text-sm font-semibold text-text-secondary">Export as:</span>
+          <button className="px-3 py-1.5 text-xs font-semibold rounded-none border border-border hover:bg-surface2 transition-colors duration-150">
             PDF
           </button>
-          <button className="px-3 py-1.5 text-xs font-semibold rounded-lg border border-stone-300 dark:border-stone-700 hover:bg-white dark:hover:bg-stone-800 transition-colors">
+          <button className="px-3 py-1.5 text-xs font-semibold rounded-none border border-border hover:bg-surface2 transition-colors duration-150">
             Excel
           </button>
-          <button className="px-3 py-1.5 text-xs font-semibold rounded-lg border border-stone-300 dark:border-stone-700 hover:bg-white dark:hover:bg-stone-800 transition-colors">
+          <button className="px-3 py-1.5 text-xs font-semibold rounded-none border border-border hover:bg-surface2 transition-colors duration-150">
             CSV
           </button>
-          <button className="px-3 py-1.5 text-xs font-semibold rounded-lg border border-stone-300 dark:border-stone-700 hover:bg-white dark:hover:bg-stone-800 transition-colors">
+          <button className="px-3 py-1.5 text-xs font-semibold rounded-none border border-border hover:bg-surface2 transition-colors duration-150">
             Print
           </button>
         </div>

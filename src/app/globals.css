@@ -2,212 +2,375 @@
 @import "tw-animate-css";
 @import "shadcn/tailwind.css";
 
-@theme inline {
-  --color-background: var(--background);
-  --color-foreground: var(--foreground);
-  --font-sans: var(--font-sans);
-  --font-mono: var(--font-geist-mono);
-  --color-ring: var(--ring);
-  --color-input: var(--input);
-  --color-border: var(--border);
-  --color-destructive: var(--destructive);
-  --color-accent-foreground: var(--accent-foreground);
-  --color-accent: var(--accent);
-  --color-muted-foreground: var(--muted-foreground);
-  --color-muted: var(--muted);
-  --color-secondary-foreground: var(--secondary-foreground);
-  --color-secondary: var(--secondary);
-  --color-primary-foreground: var(--primary-foreground);
-  --color-primary: var(--primary);
-  --color-popover-foreground: var(--popover-foreground);
-  --color-popover: var(--popover);
-  --color-card-foreground: var(--card-foreground);
-  --color-card: var(--card);
-  --radius-sm: calc(var(--radius) * 0.6);
-  --radius-md: calc(var(--radius) * 0.8);
-  --radius-lg: var(--radius);
-  --radius-xl: calc(var(--radius) * 1.4);
-  --color-sidebar: var(--sidebar);
-}
-
+/* ── Kinetic Industrial Console Tokens: RGB triplets for opacity modifiers ─────────── */
 :root {
-  --background: #f0f4f8; /* Soft SAP gray-blue background */
-  --foreground: #1c1c1c; /* Dark gray for high contrast text */
-  --card: #ffffff; /* Clean white cards */
-  --card-foreground: #1c1c1c;
-  --popover: #ffffff;
-  --popover-foreground: #1c1c1c;
-  --primary: #004080; /* Classic SAP Steel Blue */
-  --primary-foreground: #ffffff;
-  --secondary: #e1ebf4; /* Light Fiori Blue */
-  --secondary-foreground: #004080;
-  --muted: #f4f6f9;
-  --muted-foreground: #555555;
-  --accent: #0a6ed1; /* Standard blue accent */
-  --accent-foreground: #ffffff;
-  --destructive: #bb0000;
-  --border: #d2d5d8; /* Distinct enterprise border grid line */
-  --input: #ffffff;
-  --ring: #0a6ed1;
-  --radius: 0.25rem; /* Standard sharper Fiori corners */
-  --sidebar: #eff3f8; /* Light sidebar */
+  /* ── Arctic Light Theme ────────────────────────────────────────── */
+  --color-base-rgb: 250, 251, 254;          /* App background: #FAFBFE */
+  --color-surface-rgb: 255, 255, 255;       /* Card surface: #FFFFFF */
+  --color-surface2-rgb: 244, 246, 250;      /* Hover fill / row highlight: #F4F6FA */
+  --color-border-rgb: 226, 232, 240;        /* Default border: #E2E8F0 */
+  --color-border-subtle-rgb: 248, 250, 252; /* Alternating table border */
+  --color-border-em-rgb: 203, 213, 225;     /* Emphasis border: #CBD5E1 */
+
+  --color-text-primary-rgb: 15, 23, 42;     /* Primary text: #0F172A */
+  --color-text-secondary-rgb: 71, 85, 105;  /* Body text: #475569 */
+  --color-text-tertiary-rgb: 100, 116, 139; /* Muted labels: #64748B */
+
+  /* Primary action -> Deep Indigo #3730A3 */
+  --color-emerald-default-rgb: 55, 48, 163;
+  --color-emerald-dim: rgba(55, 48, 163, 0.1);
+  --color-emerald-text-rgb: 55, 48, 163;
 }
 
+/* ── Monochrome Slate Dark Theme ─────────────────────────────────────────────
+   Every surface/text/border in the app reads from these RGB triplets, so
+   overriding them on `.dark` flips the entire chrome with no per-component work. */
+.dark {
+  --color-base-rgb: 11, 14, 20;             /* App background: #0B0E14 */
+  --color-surface-rgb: 18, 22, 31;          /* Card surface: #12161F */
+  --color-surface2-rgb: 28, 34, 48;         /* Hover fill / row highlight: #1C2230 */
+  --color-border-rgb: 35, 42, 56;           /* Default border: #232A38 */
+  --color-border-subtle-rgb: 23, 28, 38;    /* Alternating table border: #171C26 */
+  --color-border-em-rgb: 50, 60, 78;        /* Emphasis border: #323C4E */
+
+  --color-text-primary-rgb: 230, 233, 239;  /* Primary text: #E6E9EF */
+  --color-text-secondary-rgb: 155, 163, 180;/* Body text: #9BA3B4 */
+  --color-text-tertiary-rgb: 107, 115, 133; /* Muted labels: #6B7385 */
+
+  /* Primary action brightened for contrast on the dark canvas -> Indigo #6366F1;
+     accent text uses a lighter Indigo #A5B4FC for links & active nav. */
+  --color-emerald-default-rgb: 99, 102, 241;
+  --color-emerald-dim: rgba(129, 140, 248, 0.16);
+  --color-emerald-text-rgb: 165, 180, 252;
+
+  color-scheme: dark;
+}
+
+@theme inline {
+  --color-base: rgb(var(--color-base-rgb));
+  --color-surface: rgb(var(--color-surface-rgb));
+  --color-surface2: rgb(var(--color-surface2-rgb));
+  --color-border-em: rgb(var(--color-border-em-rgb));
+  --color-border-subtle: rgb(var(--color-border-subtle-rgb));
+  --color-text-primary: rgb(var(--color-text-primary-rgb));
+  --color-text-secondary: rgb(var(--color-text-secondary-rgb));
+  --color-text-tertiary: rgb(var(--color-text-tertiary-rgb));
+  --color-emerald: rgb(var(--color-emerald-default-rgb));
+  --color-emerald-text: rgb(var(--color-emerald-text-rgb));
+
+  --font-sans: var(--font-geist-sans), system-ui, sans-serif;
+  --font-mono: var(--font-geist-mono), monospace;
+
+  /* Soft 4px radius */
+  --radius-sm: 2px;
+  --radius-md: 4px;
+  --radius-lg: 8px;
+  --radius-xl: 12px;
+
+  /* ── shadcn variable aliases -> SAC tokens ── */
+  --color-background: rgb(var(--color-base-rgb));
+  --color-foreground: rgb(var(--color-text-primary-rgb));
+  --color-card: rgb(var(--color-surface-rgb));
+  --color-card-foreground: rgb(var(--color-text-primary-rgb));
+  --color-popover: rgb(var(--color-surface-rgb));
+  --color-popover-foreground: rgb(var(--color-text-primary-rgb));
+  --color-primary: rgb(var(--color-emerald-default-rgb));
+  --color-primary-foreground: #FFFFFF;
+  --color-secondary: rgb(var(--color-surface2-rgb));
+  --color-secondary-foreground: rgb(var(--color-text-primary-rgb));
+  --color-muted: rgb(var(--color-surface2-rgb));
+  --color-muted-foreground: rgb(var(--color-text-secondary-rgb));
+  --color-accent: rgb(var(--color-surface2-rgb));
+  --color-accent-foreground: rgb(var(--color-text-primary-rgb));
+  --color-destructive: #ef4444;
+  --color-border: rgb(var(--color-border-rgb));
+  --color-input: rgb(var(--color-border-rgb));
+  --color-ring: rgb(var(--color-emerald-default-rgb));
+  --color-sidebar: rgb(var(--color-surface-rgb));
+
+  --animate-fadeUp: fadeUp 0.2s ease-out both;
+  --animate-slideIn: slideIn 0.2s ease-out both;
+  --animate-borderPulse: borderPulse 1s ease-out;
+
+  @keyframes fadeUp {
+    from { opacity: 0; transform: translateY(10px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+  @keyframes slideIn {
+    from { opacity: 0; transform: translateX(-8px); }
+    to { opacity: 1; transform: translateX(0); }
+  }
+  @keyframes borderPulse {
+    0% { box-shadow: 0 0 0 0 rgba(55, 48, 163, 0.4); }
+    70% { box-shadow: 0 0 0 6px rgba(55, 48, 163, 0); }
+    100% { box-shadow: 0 0 0 0 rgba(55, 48, 163, 0); }
+  }
+}
+
+/* ── Skip link (keyboard accessibility) ──────────────────────────────────── */
+.skip-link {
+  position: absolute;
+  top: -100%;
+  left: 8px;
+  background: rgb(var(--color-emerald-default-rgb));
+  color: #FFFFFF;
+  padding: 6px 14px;
+  border-radius: 4px;
+  font-size: 13px;
+  font-weight: 600;
+  z-index: 9999;
+  transition: top 0.1s;
+}
+.skip-link:focus {
+  top: 8px;
+}
+
+/* ── Scrollbars ────────────────────────────────────────────────────────────── */
+::-webkit-scrollbar { width: 5px; height: 5px; }
+::-webkit-scrollbar-track { background: rgb(var(--color-base-rgb)); }
+::-webkit-scrollbar-thumb { background: rgb(var(--color-border-em-rgb)); border-radius: 4px; }
+::-webkit-scrollbar-thumb:hover { background: rgb(var(--color-text-tertiary-rgb)); }
+
+aside nav::-webkit-scrollbar { width: 4px; }
+aside nav::-webkit-scrollbar-track { background: transparent; }
+aside nav::-webkit-scrollbar-thumb {
+  background: rgba(var(--color-border-em-rgb), 0.35);
+  border-radius: 4px;
+}
+aside nav::-webkit-scrollbar-thumb:hover {
+  background: rgba(var(--color-border-em-rgb), 0.6);
+}
+
+.custom-scrollbar::-webkit-scrollbar { width: 5px; height: 5px; }
+.custom-scrollbar::-webkit-scrollbar-track { background: transparent; }
+.custom-scrollbar::-webkit-scrollbar-thumb {
+  background: rgb(var(--color-border-em-rgb));
+  border-radius: 4px;
+}
+.custom-scrollbar::-webkit-scrollbar-thumb:hover {
+  background: rgb(var(--color-text-tertiary-rgb));
+}
+
+/* ── Base layer ─────────────────────────────────────────────────────────────── */
 @layer base {
   * {
     @apply border-border outline-ring/50;
   }
-  
+
   html {
-    zoom: 1.25;
-    font-size: 16px; /* Back to standard 16px to prevent layout distortion */
-    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
-    max-width: 100%;
-    overflow-x: hidden;
-  }
-  
-  body {
-    @apply bg-background text-foreground;
-    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
-    -webkit-font-smoothing: antialiased;
-    font-size: 0.95rem; /* Clean grid text sizing */
+    font-size: 16px;
     max-width: 100%;
     overflow-x: hidden;
   }
 
-  /* Support clean input fields inside table cells and forms */
-  body:not(.auth-mode) input[type="text"]:not(.rounded-xl):not(.rounded-lg), 
-  body:not(.auth-mode) input[type="number"]:not(.rounded-xl):not(.rounded-lg), 
-  body:not(.auth-mode) select:not(.rounded-xl):not(.rounded-lg), 
-  body:not(.auth-mode) textarea:not(.rounded-xl):not(.rounded-lg) {
-    background-color: #ffffff !important;
-    border-radius: 2px !important;
-    border: 1px solid #d6d3d1 !important;
-    padding: 0.25rem 0.5rem !important;
-    font-size: 0.75rem !important;
-    height: 2rem !important;
-    box-shadow: none !important;
-    outline: none !important;
-    color: #1c1917 !important;
+  body {
+    @apply bg-base text-text-primary font-sans antialiased;
+    font-size: 14px;
+    max-width: 100%;
+    overflow-x: hidden;
   }
-  /* Date inputs: base styles for standalone date inputs (no custom icon wrapper) */
-  body:not(.auth-mode) input[type="date"]:not(.rounded-xl):not(.rounded-lg) {
-    background-color: #ffffff !important;
-    border-radius: 2px !important;
-    border: 1px solid #d6d3d1 !important;
-    padding: 0.25rem 0.5rem !important;
-    font-size: 0.75rem !important;
-    height: 2rem !important;
-    box-shadow: none !important;
-    outline: none !important;
-    color: #1c1917 !important;
+
+  /* Table header cells */
+  th {
+    @apply text-left px-4 py-3 text-[11px] font-bold uppercase tracking-[0.06em] text-text-secondary border-b border-border bg-surface2 whitespace-nowrap;
   }
-  body:not(.auth-mode) input[type="text"]:not(.rounded-xl):not(.rounded-lg):focus, 
-  body:not(.auth-mode) input[type="number"]:not(.rounded-xl):not(.rounded-lg):focus, 
-  body:not(.auth-mode) input[type="date"]:not(.rounded-xl):not(.rounded-lg):focus, 
-  body:not(.auth-mode) select:not(.rounded-xl):not(.rounded-lg):focus, 
-  body:not(.auth-mode) textarea:not(.rounded-xl):not(.rounded-lg):focus {
-    border-color: #2563eb !important;
-    box-shadow: 0 0 0 1px #2563eb !important;
+  /* Table data cells */
+  td {
+    @apply px-4 py-3 border-b border-border text-[13px] align-middle text-text-secondary;
+  }
+
+  tbody tr {
+    transition: all 0.2s ease;
+  }
+  tbody tr:hover td {
+    background-color: rgb(var(--color-surface2-rgb));
+  }
+  /* Subtle left indicator on hover */
+  tbody tr:hover td:first-child {
+    box-shadow: inset 3px 0 0 0 rgb(var(--color-emerald-default-rgb));
+  }
+
+  tbody tr:last-child td {
+    @apply border-b-0;
+  }
+
+  /* Inputs (Floating Unboxed Style) */
+  input[type=text],
+  input[type=email],
+  input[type=number],
+  input[type=password],
+  input[type=date],
+  input[type=tel],
+  input[type=search],
+  select,
+  textarea {
+    @apply bg-indigo-50/40 border-0 border-b border-transparent rounded-none px-[11px] py-[7px] text-[13px] text-text-primary outline-none transition-all duration-150 w-full placeholder:text-text-tertiary;
+  }
+  input:focus,
+  select:focus,
+  textarea:focus {
+    @apply bg-white;
+    border-bottom-color: rgb(var(--color-emerald-default-rgb));
   }
   textarea {
-    height: auto !important;
-    min-height: 4.5rem !important;
+    height: auto;
+    min-height: 4.5rem;
   }
-
-  /* Center absolute search and calendar icons vertically within their relative containers */
-  .relative > svg.absolute {
-    top: 50% !important;
-    transform: translateY(-50%) !important;
-  }
-
-  /* Adjust padding for text/search inputs containing left icons */
-  .relative > svg.absolute[class*="left-"] ~ input {
-    padding-left: 2rem !important;
-  }
-
-  /*
-   * DATE-FIELD-BOX: flex container that ACTS as the visible input border.
-   * The real <input type="date"> inside has no border of its own.
-   * The Calendar SVG icon is a plain flex sibling — no absolute positioning needed.
-   */
-  .date-field-box {
-    display: flex !important;
-    align-items: center !important;
-    height: 2rem !important;
-    background: #ffffff !important;
-    border: 1px solid #d6d3d1 !important;
-    border-radius: 2px !important;
-    overflow: hidden !important;
-  }
-  .date-field-box:focus-within {
-    border-color: #2563eb !important;
-    box-shadow: 0 0 0 1px #2563eb !important;
-  }
-  /* Strip the real input of its own border/bg so the wrapper provides it */
-  .date-field-box input[type="date"] {
-    border: none !important;
-    box-shadow: none !important;
-    background: transparent !important;
-    height: 100% !important;
-    flex: 1 1 0% !important;
-    min-width: 0 !important;
-    padding: 0 0.25rem 0 0.625rem !important;
-    font-size: 0.75rem !important;
-    color: #1c1917 !important;
-    outline: none !important;
-  }
-  /* Hide the native calendar picker indicator; clicking the icon area still works */
-  .date-field-box input[type="date"]::-webkit-calendar-picker-indicator {
-    opacity: 0 !important;
-    cursor: pointer !important;
-    width: 1.25rem !important;
-  }
-  }
+}
 
 /* Animations */
 @keyframes fadeIn {
   from { opacity: 0; transform: translateY(4px); }
   to { opacity: 1; transform: translateY(0); }
 }
-
 @keyframes slideDown {
   from { opacity: 0; transform: translateY(-8px); }
   to { opacity: 1; transform: translateY(0); }
 }
-
 .animate-fade-in {
-  animation: fadeIn 0.25s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+  animation: fadeIn 0.4s cubic-bezier(0.4, 0, 0.2, 1) forwards;
 }
-
 .animate-slide-down {
-  animation: slideDown 0.2s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+  animation: slideDown 0.4s cubic-bezier(0.4, 0, 0.2, 1) forwards;
 }
 
-/* Custom Scrollbars */
-.custom-scrollbar::-webkit-scrollbar {
-  width: 6px;
-  height: 6px;
+.animate-stagger-1 { animation-fill-mode: both; animation-delay: 50ms; }
+.animate-stagger-2 { animation-fill-mode: both; animation-delay: 100ms; }
+.animate-stagger-3 { animation-fill-mode: both; animation-delay: 150ms; }
+.animate-stagger-4 { animation-fill-mode: both; animation-delay: 200ms; }
+
+/* ── Component layer ────────────────────────────────────── */
+@layer components {
+  /* ── Buttons ──────────────────────────────────────────────────────────── */
+  .btn {
+    @apply inline-flex items-center gap-1.5 px-3.5 py-[7px] rounded-md text-[12px] font-semibold transition-all duration-150 whitespace-nowrap cursor-pointer font-sans border border-transparent;
+  }
+  .btn-v {
+    @apply border-transparent;
+    background-color: rgb(var(--color-emerald-default-rgb));
+    color: #FFFFFF;
+  }
+  .btn-v:hover { opacity: 0.9; }
+  .btn-o { @apply bg-transparent border-border-em text-text-primary hover:bg-surface2 hover:text-text-primary; }
+  .btn-r { @apply bg-transparent border-red-500 text-red-500 hover:bg-red-500/10; }
+  .btn-g { @apply text-emerald-text border-transparent; background-color: var(--color-emerald-dim); }
+  .btn-g:hover { background-color: rgba(var(--color-emerald-default-rgb), 0.2); }
+  .btn-amber { @apply bg-amber-500/20 text-amber-500 border-transparent hover:bg-amber-500/30; }
+
+  /* ── Cards / Panels (Unboxed) ─────────────────────────────────────────── */
+  .card {
+    @apply bg-transparent;
+  }
+  .metric-panel {
+    @apply bg-transparent flex flex-col gap-1.5;
+  }
+
+  .chip {
+    @apply inline-flex items-center gap-1 text-[10px] font-bold px-2.5 py-0.5 rounded-full font-mono tracking-[0.05em];
+  }
+
+  /* ── StatusBadge ──────────────────────────────────────────────────────── */
+  .status-badge {
+    @apply inline-flex items-center gap-1.5 text-[10px] font-bold px-2 py-0.5 rounded-full font-mono tracking-[0.05em] border uppercase;
+  }
+  .status-badge-active { @apply bg-emerald-900/20 text-emerald-400 border-emerald-900/50; }
+  .status-badge-suspended { @apply bg-rose-900/20 text-rose-400 border-rose-900/50; }
+  .status-badge-trial { @apply bg-amber-500/20 text-amber-400 border-amber-500/30; }
+  .status-badge-pending { @apply bg-zinc-800 text-zinc-400 border-zinc-700; }
+  .status-badge-warn { @apply bg-amber-500/20 text-amber-400 border-amber-500/30; }
+  .status-badge-info { @apply bg-zinc-800 text-zinc-400 border-zinc-700; }
+  .status-badge-cooling { @apply bg-amber-500/20 text-amber-400 border-amber-500/30; }
+  .status-badge-revoked { @apply bg-zinc-800 text-zinc-600 border-zinc-700; }
+
+  /* ── Plan / tier badges (repurposed for vendor tiers/categories) ────────── */
+  .plan-badge-starter { @apply bg-zinc-800 text-zinc-400 font-bold rounded-full px-2.5 py-0.5 text-[10px] inline-block tracking-[0.05em] uppercase border border-zinc-700; }
+  .plan-badge-pro { @apply bg-blue-900/30 text-blue-400 font-bold rounded-full px-2.5 py-0.5 text-[10px] inline-block tracking-[0.05em] uppercase border border-blue-900/50; }
+  .plan-badge-enterprise { @apply bg-zinc-200 text-zinc-900 font-bold rounded-full px-2.5 py-0.5 text-[10px] inline-block tracking-[0.05em] uppercase; }
+
+  .status-dot { @apply w-1.5 h-1.5 rounded-none shrink-0 inline-block; }
+  .status-dot-active { @apply bg-[#059669]; }
+  .status-dot-error { @apply bg-[#e11d48]; }
+  .status-dot-warn { @apply bg-amber-500; }
+  .status-dot-idle { @apply bg-zinc-500; }
+
+  .mono { @apply font-mono tabular-nums; }
+
+  .input {
+    @apply bg-indigo-50/40 border-0 border-b border-transparent rounded-none px-[11px] py-[7px] text-[13px] text-text-primary outline-none transition-all duration-150 placeholder:text-text-tertiary;
+  }
+  .input:focus { 
+    @apply bg-white;
+    border-bottom-color: rgb(var(--color-emerald-default-rgb));
+  }
+
+  .label {
+    @apply block text-[10px] font-bold uppercase tracking-[0.05em] text-text-tertiary mb-1;
+  }
+
+  .pill {
+    @apply inline-flex items-center px-3 py-1 rounded-full text-[12px] font-semibold border border-border-em text-text-secondary bg-surface hover:bg-surface2 hover:text-text-primary transition-colors cursor-pointer;
+  }
+  .pill-active {
+    @apply text-black border-transparent;
+    background-color: rgb(var(--color-emerald-default-rgb));
+  }
+
+  /* ── Sidebar nav link ─────────────────────────────────────────────────── */
+  .sidebar-link {
+    @apply flex items-center gap-3 px-4 py-2.5 text-[14px] font-medium bg-transparent w-full text-left cursor-pointer transition-all duration-200 border-none outline-none rounded-r-lg;
+    color: rgb(var(--color-text-secondary-rgb));
+    border-left: 3px solid transparent;
+    padding-left: calc(1rem - 3px);
+  }
+  .sidebar-link:hover {
+    @apply bg-surface2 text-text-primary;
+  }
+  .sidebar-link.active {
+    @apply text-emerald-text font-bold;
+    background: linear-gradient(90deg, var(--color-emerald-dim) 0%, transparent 100%);
+    border-left: 3px solid rgb(var(--color-emerald-default-rgb));
+  }
+
+  .table-sticky thead { @apply sticky top-0 z-10 bg-surface2; }
+
+  .skeleton {
+    background-color: rgb(var(--color-border-em-rgb));
+    @apply rounded-none animate-pulse;
+  }
+
+  .flash-success { @apply animate-borderPulse; }
 }
 
-.custom-scrollbar::-webkit-scrollbar-track {
-  background: transparent;
+/* ── Dark theme overrides for hardcoded-color inputs ───────────────────────
+   The base/component input styles hardcode a light indigo fill + white focus;
+   flip those to slate surfaces under `.dark`. */
+.dark input[type=text],
+.dark input[type=email],
+.dark input[type=number],
+.dark input[type=password],
+.dark input[type=date],
+.dark input[type=tel],
+.dark input[type=search],
+.dark select,
+.dark textarea,
+.dark .input {
+  background-color: rgba(255, 255, 255, 0.04);
+}
+.dark input:focus,
+.dark select:focus,
+.dark textarea:focus,
+.dark .input:focus {
+  background-color: rgb(var(--color-surface2-rgb));
+}
+.dark input[type=date]::-webkit-calendar-picker-indicator {
+  filter: invert(0.8);
 }
 
-.custom-scrollbar::-webkit-scrollbar-thumb {
-  background: rgba(148, 163, 184, 0.3); /* Soft Slate-400 */
-  border-radius: 9999px;
+/* ── Focus-visible global ring ─────────────────────────────────────────── */
+:focus-visible {
+  outline: 1px solid rgb(var(--color-emerald-default-rgb));
+  outline-offset: 1px;
 }
-
-.custom-scrollbar::-webkit-scrollbar-thumb:hover {
-  background: rgba(148, 163, 184, 0.5);
-}
-
-/* Global hover overrides to map all black hovers and borders to theme-aligned amber color */
-.hover\:bg-black:hover {
-  background-color: #f59e0b !important; /* amber-500 */
-}
-
-.hover\:border-black:hover {
-  border-color: #f59e0b !important; /* amber-500 */
+:focus:not(:focus-visible) {
+  outline: none;
 }

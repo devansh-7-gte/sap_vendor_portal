@@ -9,23 +9,27 @@ import {
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import FileUploadZone from '@/components/shared/FileUploadZone';
-import SkeletonLoader from '@/components/shared/SkeletonLoader';
 import ErrorBoundary from '@/components/ErrorBoundary';
+import StatusBadge from '@/components/ui/StatusBadge';
+import EmptyState from '@/components/ui/EmptyState';
+import TableSkeleton from '@/components/ui/TableSkeleton';
+import KPICard from '@/components/ui/KPICard';
+import { poStatusVariant } from '@/lib/statusColors';
 
 function EnterpriseFieldCard({ label, required, error, children, icon: Icon }) {
   return (
-    <div className={`h-full p-3 rounded-lg border border-stone-200 bg-white hover:border-stone-350 hover:shadow-xs transition-all duration-150 flex flex-col justify-between relative min-h-[76px] select-none ${error ? 'border-red-300 bg-red-50/10' : ''
+    <div className={`h-full p-3 rounded-lg border border-border bg-surface hover:border-border-em transition-all duration-150 flex flex-col justify-between relative min-h-[76px] select-none ${error ? 'border-red-300 bg-red-50/10' : ''
       }`}>
       <div className="flex justify-between items-start w-full gap-2">
-        <label className="text-[10px] font-bold text-stone-800 uppercase tracking-wider block leading-tight" title={label}>
+        <label className="text-[10px] font-bold text-text-secondary uppercase tracking-wider block leading-tight" title={label}>
           {label} {required && <span className="text-red-500 font-bold select-none ml-0.5">*</span>}
         </label>
-        {Icon && <Icon className="size-3.5 text-stone-600 shrink-0" />}
+        {Icon && <Icon className="size-3.5 text-text-tertiary shrink-0" />}
       </div>
-      <div className="w-full min-w-0 mt-1.5 flex flex-col justify-end text-stone-600 font-medium [&_span:not(.rounded)]:font-medium [&_span:not(.rounded)]:text-stone-600 [&_input]:font-medium [&_input]:text-stone-600">
+      <div className="w-full min-w-0 mt-1.5 flex flex-col justify-end text-text-secondary font-medium [&_span:not(.rounded)]:font-medium [&_span:not(.rounded)]:text-text-secondary [&_input]:font-medium [&_input]:text-text-secondary">
         {children}
         {error && (
-          <span className="text-[10px] font-bold text-red-650 mt-1 select-none">{error}</span>
+          <span className="text-[10px] font-bold text-red-600 mt-1 select-none">{error}</span>
         )}
       </div>
     </div>
@@ -36,17 +40,17 @@ function EnterpriseFieldCard({ label, required, error, children, icon: Icon }) {
 function SapReadOnlyField({ label, value, isFile, isMonospace = true, valueClassName = '', containerClassName = '', icon: Icon }) {
   return (
     <div className="flex flex-col gap-1 select-none focus-within:outline-none">
-      <span className="text-[9px] font-extrabold text-stone-600 uppercase tracking-wider flex items-center gap-1 leading-none" title={label}>
-        {Icon && <Icon className="size-3 text-stone-500 shrink-0" />}
+      <span className="text-[9px] font-extrabold text-text-secondary uppercase tracking-wider flex items-center gap-1 leading-none" title={label}>
+        {Icon && <Icon className="size-3 text-text-tertiary shrink-0" />}
         <span>{label}</span>
       </span>
       <div
-        className={`inline-flex items-center gap-1.5 border rounded-[3px] px-2.5 text-xs h-6.5 font-semibold cursor-default box-border w-fit max-w-full overflow-hidden text-ellipsis whitespace-nowrap focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-blue-400 focus-visible:ring-offset-1 select-all transition-all duration-150 ${isMonospace ? 'font-mono' : 'font-sans'
-          } ${containerClassName || 'bg-stone-50 text-stone-900 border-stone-200'} ${valueClassName}`}
+        className={`inline-flex items-center gap-1.5 border rounded-[3px] px-2.5 text-xs h-6.5 font-semibold cursor-default box-border w-fit max-w-full overflow-hidden text-ellipsis whitespace-nowrap focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-blue-400 focus-visible:ring-offset-1 select-all transition-all duration-150 tabular-nums ${isMonospace ? 'font-mono' : 'font-sans'
+          } ${containerClassName || 'bg-base text-text-primary border-border'} ${valueClassName}`}
         title={value || ''}
         tabIndex={0}
       >
-        {isFile && <FileText className="size-3.5 text-stone-500 shrink-0" />}
+        {isFile && <FileText className="size-3.5 text-text-tertiary shrink-0" />}
         <span>{value || '—'}</span>
       </div>
     </div>
@@ -57,8 +61,8 @@ function SapReadOnlyField({ label, value, isFile, isMonospace = true, valueClass
 function SapInputField({ label, required, children, icon: Icon }) {
   return (
     <div className="flex flex-col gap-1 focus-within:outline-none">
-      <span className="text-[9px] font-extrabold text-stone-600 uppercase tracking-wider flex items-center gap-1 leading-none">
-        {Icon && <Icon className="size-3 text-stone-500 shrink-0" />}
+      <span className="text-[9px] font-extrabold text-text-secondary uppercase tracking-wider flex items-center gap-1 leading-none">
+        {Icon && <Icon className="size-3 text-text-tertiary shrink-0" />}
         <span>
           {label}
           {required && <span className="text-red-500 font-bold ml-0.5">*</span>}
@@ -550,57 +554,24 @@ export default function PurchaseOrdersView({
 
   // Status Chip formatting
   const renderStatusChip = (status) => {
-    switch (status) {
-      case 'Open':
-        return (
-          <span className="px-2.5 py-0.5 rounded-full text-[10px] font-bold border bg-blue-50 text-blue-700 border-blue-200 flex items-center gap-1.5 w-fit">
-            <span className="size-1.5 rounded-full bg-blue-500"></span> New
-          </span>
-        );
-      case 'Acknowledged':
-        return (
-          <span className="px-2.5 py-0.5 rounded-full text-[10px] font-bold border bg-purple-50 text-purple-700 border-purple-200 flex items-center gap-1.5 w-fit">
-            <span className="size-1.5 rounded-full bg-purple-500"></span> Acknowledged
-          </span>
-        );
-      case 'Dispatched':
-        return (
-          <span className="px-2.5 py-0.5 rounded-full text-[10px] font-bold border bg-orange-50 text-orange-700 border-orange-200 flex items-center gap-1.5 w-fit">
-            <span className="size-1.5 rounded-full bg-orange-400 animate-pulse"></span> ASN Submitted
-          </span>
-        );
-      case 'Delivered':
-        return (
-          <span className="px-2.5 py-0.5 rounded-full text-[10px] font-bold border bg-green-50 text-green-700 border-green-200 flex items-center gap-1.5 w-fit">
-            <span className="size-1.5 rounded-full bg-green-500"></span> GRN Complete
-          </span>
-        );
-      case 'Invoiced':
-        return (
-          <span className="px-2.5 py-0.5 rounded-full text-[10px] font-bold border bg-teal-50 text-teal-700 border-teal-200 flex items-center gap-1.5 w-fit">
-            <span className="size-1.5 rounded-full bg-teal-500"></span> Invoice Posted
-          </span>
-        );
-      case 'Paid':
-        return (
-          <span className="px-2.5 py-0.5 rounded-full text-[10px] font-bold border bg-stone-100 text-stone-700 border-stone-300 flex items-center gap-1.5 w-fit">
-            <Check className="size-3 text-stone-600" /> Paid (F110)
-          </span>
-        );
-      default:
-        return (
-          <span className="px-2.5 py-0.5 rounded-full text-[10px] font-bold border bg-stone-50 text-stone-700 border-stone-200 w-fit">
-            {status}
-          </span>
-        );
-    }
+    const labelMap = {
+      Open: 'New',
+      Acknowledged: 'Acknowledged',
+      Dispatched: 'ASN Submitted',
+      Delivered: 'GRN Complete',
+      Invoiced: 'Invoice Posted',
+      Paid: 'Paid (F110)'
+    };
+    return (
+      <StatusBadge label={labelMap[status] || status} variant={poStatusVariant(status)} className="w-fit" />
+    );
   };
 
   if (isLoading) {
     return (
       <ErrorBoundary>
-        <div className="p-4 space-y-4">
-          <SkeletonLoader type="table" rows={6} cols={5} />
+        <div className="p-4 space-y-4 card overflow-hidden">
+          <TableSkeleton rows={6} cols={5} />
         </div>
       </ErrorBoundary>
     );
@@ -612,35 +583,35 @@ export default function PurchaseOrdersView({
 
         {/* ==================== SUB-TABS NAVIGATION BAR ==================== */}
         {currentView === 'list' && (
-          <div className="flex flex-col md:flex-row justify-between items-start md:items-center border-b border-stone-200 pb-2 gap-4">
+          <div className="flex flex-col md:flex-row justify-between items-start md:items-center border-b border-border pb-2 gap-4">
             <div className="flex items-center gap-6">
               <button
                 onClick={() => { setPoSubTab('list'); setCurrentPage(1); }}
-                className={`pb-2.5 text-sm font-bold border-b-2 transition-all cursor-pointer flex items-center gap-2 ${poSubTab === 'list' ? 'border-stone-850 text-stone-900' : 'border-transparent text-stone-400 hover:text-stone-600'}`}
+                className={`pb-2.5 text-sm font-bold border-b-2 transition-all duration-150 cursor-pointer flex items-center gap-2 ${poSubTab === 'list' ? 'border-text-primary text-text-primary' : 'border-transparent text-text-tertiary hover:text-text-secondary'}`}
               >
                 <ShoppingBag className="size-4.5" />
                 <span>Orders Monitor</span>
-                <span className="bg-stone-100 text-stone-600 font-mono text-[10px] px-1.5 py-0.5 rounded-full border border-stone-200">
+                <span className="bg-surface2 text-text-secondary font-mono text-[10px] px-1.5 py-0.5 rounded-full border border-border tabular-nums">
                   {cleanPOs.length}
                 </span>
               </button>
               <button
                 onClick={() => { setPoSubTab('grn'); }}
-                className={`pb-2.5 text-sm font-bold border-b-2 transition-all cursor-pointer flex items-center gap-2 ${poSubTab === 'grn' ? 'border-stone-850 text-stone-900' : 'border-transparent text-stone-400 hover:text-stone-600'}`}
+                className={`pb-2.5 text-sm font-bold border-b-2 transition-all duration-150 cursor-pointer flex items-center gap-2 ${poSubTab === 'grn' ? 'border-text-primary text-text-primary' : 'border-transparent text-text-tertiary hover:text-text-secondary'}`}
               >
                 <Truck className="size-4.5" />
                 <span>Goods Receipts (MIGO)</span>
-                <span className="bg-stone-100 text-stone-600 font-mono text-[10px] px-1.5 py-0.5 rounded-full border border-stone-200">
+                <span className="bg-surface2 text-text-secondary font-mono text-[10px] px-1.5 py-0.5 rounded-full border border-border tabular-nums">
                   {cleanGrns.length}
                 </span>
               </button>
               <button
                 onClick={() => { setPoSubTab('invoice'); }}
-                className={`pb-2.5 text-sm font-bold border-b-2 transition-all cursor-pointer flex items-center gap-2 ${poSubTab === 'invoice' ? 'border-stone-850 text-stone-900' : 'border-transparent text-stone-400 hover:text-stone-600'}`}
+                className={`pb-2.5 text-sm font-bold border-b-2 transition-all duration-150 cursor-pointer flex items-center gap-2 ${poSubTab === 'invoice' ? 'border-text-primary text-text-primary' : 'border-transparent text-text-tertiary hover:text-text-secondary'}`}
               >
                 <FileCheck className="size-4.5" />
                 <span>Invoice Ready (MIRO)</span>
-                <span className="bg-amber-100 text-amber-700 font-mono text-[10px] px-1.5 py-0.5 rounded-full border border-amber-200 font-bold">
+                <span className="bg-amber-500/10 text-amber-600 font-mono text-[10px] px-1.5 py-0.5 rounded-full border border-amber-200 font-bold tabular-nums">
                   {cleanGrns.filter(g => !g.invoiceSubmitted).length}
                 </span>
               </button>
@@ -650,9 +621,8 @@ export default function PurchaseOrdersView({
               <Button
                 onClick={simulateIncomingPO}
                 variant="outline"
-                className="border-stone-300 text-stone-700 hover:bg-stone-50 text-xs font-bold rounded-lg flex items-center gap-1.5 shadow-sm"
               >
-                <RefreshCw className="size-3.5 text-stone-400 animate-spin-hover" />
+                <RefreshCw className="size-3.5" />
                 <span>Simulate SAP PO (ME21N)</span>
               </Button>
             </div>
@@ -667,63 +637,38 @@ export default function PurchaseOrdersView({
 
             {/* KPI Cards Row */}
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-              <div className="bg-white border border-stone-200 rounded-xl p-5 shadow-sm hover:shadow-md transition-all flex items-start justify-between">
-                <div className="space-y-1">
-                  <p className="text-[10px] font-bold text-stone-400 uppercase tracking-wider">Total Contract Orders</p>
-                  <p className="text-2xl font-bold text-stone-900">{cleanPOs.length}</p>
-                  <p className="text-[10px] text-stone-500 font-semibold">Synced from ERP ledger</p>
-                </div>
-                <div className="size-9 rounded-full bg-stone-50 border border-stone-200 flex items-center justify-center text-stone-600">
-                  <ShoppingBag className="size-4.5" />
-                </div>
-              </div>
-
-              <div className="bg-white border border-stone-200 rounded-xl p-5 shadow-sm hover:shadow-md transition-all flex items-start justify-between">
-                <div className="space-y-1">
-                  <p className="text-[10px] font-bold text-stone-400 uppercase tracking-wider">New POs Awaiting Ack</p>
-                  <p className="text-2xl font-bold text-blue-600">
-                    {cleanPOs.filter(p => p.status === 'Open').length}
-                  </p>
-                  <p className="text-[10px] text-blue-500 font-bold">Requires attention</p>
-                </div>
-                <div className="size-9 rounded-full bg-blue-50 border border-blue-100 flex items-center justify-center text-blue-600">
-                  <Clock className="size-4.5" />
-                </div>
-              </div>
-
-              <div className="bg-white border border-stone-200 rounded-xl p-5 shadow-sm hover:shadow-md transition-all flex items-start justify-between">
-                <div className="space-y-1">
-                  <p className="text-[10px] font-bold text-stone-400 uppercase tracking-wider">Pending ASN Dispatches</p>
-                  <p className="text-2xl font-bold text-teal-700">
-                    {cleanPOs.filter(p => p.status === 'Acknowledged').length}
-                  </p>
-                  <p className="text-[10px] text-teal-600 font-semibold">Ready for shipment</p>
-                </div>
-                <div className="size-9 rounded-full bg-teal-50 border border-teal-100 flex items-center justify-center text-teal-600">
-                  <Truck className="size-4.5" />
-                </div>
-              </div>
-
-              <div className="bg-white border border-stone-200 rounded-xl p-5 shadow-sm hover:shadow-md transition-all flex items-start justify-between">
-                <div className="space-y-1">
-                  <p className="text-[10px] font-bold text-stone-400 uppercase tracking-wider">Completed Orders</p>
-                  <p className="text-2xl font-bold text-green-600">
-                    {cleanPOs.filter(p => p.status === 'Delivered' || p.status === 'Invoiced' || p.status === 'Paid').length}
-                  </p>
-                  <p className="text-[10px] text-green-500 font-semibold">Stores receipted & post</p>
-                </div>
-                <div className="size-9 rounded-full bg-green-50 border border-green-100 flex items-center justify-center text-green-600">
-                  <CheckCircle2 className="size-4.5" />
-                </div>
-              </div>
+              <KPICard
+                label="Total Contract Orders"
+                value={<span className="tabular-nums">{cleanPOs.length}</span>}
+                sub="Synced from ERP ledger"
+                icon={ShoppingBag}
+              />
+              <KPICard
+                label="New POs Awaiting Ack"
+                value={<span className="tabular-nums">{cleanPOs.filter(p => p.status === 'Open').length}</span>}
+                sub="Requires attention"
+                icon={Clock}
+              />
+              <KPICard
+                label="Pending ASN Dispatches"
+                value={<span className="tabular-nums">{cleanPOs.filter(p => p.status === 'Acknowledged').length}</span>}
+                sub="Ready for shipment"
+                icon={Truck}
+              />
+              <KPICard
+                label="Completed Orders"
+                value={<span className="tabular-nums">{cleanPOs.filter(p => p.status === 'Delivered' || p.status === 'Invoiced' || p.status === 'Paid').length}</span>}
+                sub="Stores receipted & post"
+                icon={CheckCircle2}
+              />
             </div>
 
             {/* Sticky Filter Bar */}
-            <div className="bg-white border border-stone-200 rounded-xl p-4 shadow-sm space-y-3">
+            <div className="card p-4 space-y-3">
               <div className="flex flex-wrap items-center justify-between gap-4">
                 <div className="flex items-center gap-2">
-                  <Filter className="size-4 text-stone-400" />
-                  <h4 className="text-xs font-bold text-stone-700 uppercase tracking-wider">Search & Filter</h4>
+                  <Filter className="size-4 text-text-tertiary" />
+                  <h4 className="label mb-0">Search & Filter</h4>
                 </div>
                 {(searchQuery || statusFilter !== 'all' || plantFilter !== 'all' || buyerFilter !== 'all') && (
                   <button
@@ -733,7 +678,7 @@ export default function PurchaseOrdersView({
                       setPlantFilter('all');
                       setBuyerFilter('all');
                     }}
-                    className="text-stone-500 hover:text-stone-900 text-xs font-semibold hover:underline"
+                    className="text-text-secondary hover:text-text-primary text-xs font-semibold hover:underline transition-colors duration-150"
                   >
                     Reset all filters
                   </button>
@@ -743,23 +688,23 @@ export default function PurchaseOrdersView({
               <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-3.5">
                 {/* Search Bar */}
                 <div className="relative">
-                  <Search className="absolute left-3 top-2.5 size-4 text-stone-400" />
+                  <Search className="absolute left-3 top-2.5 size-4 text-text-tertiary" />
                   <input
                     type="text"
                     placeholder="PO # or material description..."
                     value={searchQuery}
                     onChange={e => { setSearchQuery(e.target.value); setCurrentPage(1); }}
-                    className="w-full bg-stone-50 border border-stone-250 focus:border-stone-500 focus:bg-white rounded-lg pl-9 pr-3 py-1.5 text-xs outline-none text-stone-900 transition-all font-medium"
+                    className="w-full pl-9"
                   />
                 </div>
 
                 {/* Status Filter */}
-                <div className="flex items-center bg-stone-50 border border-stone-250 rounded-lg px-2 py-1">
-                  <label className="text-[10px] font-bold text-stone-400 uppercase mr-2 shrink-0">Status</label>
+                <div className="flex items-center bg-base border border-border rounded-md px-2 py-1">
+                  <label className="text-[10px] font-bold text-text-tertiary uppercase mr-2 shrink-0">Status</label>
                   <select
                     value={statusFilter}
                     onChange={e => { setStatusFilter(e.target.value); setCurrentPage(1); }}
-                    className="w-full bg-transparent text-xs text-stone-700 outline-none font-semibold cursor-pointer"
+                    className="w-full !border-0 !p-0 bg-transparent text-xs text-text-secondary outline-none font-semibold cursor-pointer"
                   >
                     <option value="all">All Statuses</option>
                     <option value="New">New (Open)</option>
@@ -770,12 +715,12 @@ export default function PurchaseOrdersView({
                 </div>
 
                 {/* Plant Filter */}
-                <div className="flex items-center bg-stone-50 border border-stone-250 rounded-lg px-2 py-1">
-                  <label className="text-[10px] font-bold text-stone-400 uppercase mr-2 shrink-0">Plant</label>
+                <div className="flex items-center bg-base border border-border rounded-md px-2 py-1">
+                  <label className="text-[10px] font-bold text-text-tertiary uppercase mr-2 shrink-0">Plant</label>
                   <select
                     value={plantFilter}
                     onChange={e => { setPlantFilter(e.target.value); setCurrentPage(1); }}
-                    className="w-full bg-transparent text-xs text-stone-700 outline-none font-semibold cursor-pointer"
+                    className="w-full !border-0 !p-0 bg-transparent text-xs text-text-secondary outline-none font-semibold cursor-pointer"
                   >
                     <option value="all">All Plants</option>
                     {uniquePlants.map((plant, idx) => (
@@ -785,12 +730,12 @@ export default function PurchaseOrdersView({
                 </div>
 
                 {/* Buyer Filter */}
-                <div className="flex items-center bg-stone-50 border border-stone-250 rounded-lg px-2 py-1">
-                  <label className="text-[10px] font-bold text-stone-400 uppercase mr-2 shrink-0">Buyer</label>
+                <div className="flex items-center bg-base border border-border rounded-md px-2 py-1">
+                  <label className="text-[10px] font-bold text-text-tertiary uppercase mr-2 shrink-0">Buyer</label>
                   <select
                     value={buyerFilter}
                     onChange={e => { setBuyerFilter(e.target.value); setCurrentPage(1); }}
-                    className="w-full bg-transparent text-xs text-stone-700 outline-none font-semibold cursor-pointer"
+                    className="w-full !border-0 !p-0 bg-transparent text-xs text-text-secondary outline-none font-semibold cursor-pointer"
                   >
                     <option value="all">All Buyers</option>
                     {uniqueBuyers.map((buyer, idx) => (
@@ -803,40 +748,40 @@ export default function PurchaseOrdersView({
 
             {/* PO List Table */}
             {cleanPOs.length === 0 ? (
-              <div className="p-12 rounded-xl border border-stone-250 bg-white text-center shadow-sm">
-                <ShoppingBag className="size-12 mx-auto text-stone-300 mb-4 animate-pulse" />
-                <h4 className="text-sm font-bold text-stone-700">No Purchase Orders Found</h4>
-                <p className="text-xs text-stone-450 mt-1 max-w-sm mx-auto">
-                  No PO records synced yet. Complete onboarding checklist approval or bid conversion to sync your order schedule, or click the simulation button above.
-                </p>
+              <div className="card">
+                <EmptyState
+                  icon={ShoppingBag}
+                  title="No Purchase Orders Found"
+                  description="No PO records synced yet. Complete onboarding checklist approval or bid conversion to sync your order schedule, or click the simulation button above."
+                />
               </div>
             ) : (
-              <div className="bg-white border border-stone-200 rounded-xl shadow-sm overflow-hidden">
-                <div className="overflow-x-auto custom-scrollbar">
-                  <table className="w-full text-left text-xs border-collapse">
+              <div className="card overflow-hidden">
+                <div className="overflow-x-auto custom-scrollbar border border-border">
+                  <table className="w-full text-left border-collapse table-sticky">
                     <thead>
-                      <tr className="bg-stone-50 border-b border-stone-200 text-stone-500 font-bold text-[9px] uppercase tracking-wider">
-                        <th className="py-3 px-4 font-mono select-none cursor-pointer hover:bg-stone-100/50" onClick={() => handleSort('id')}>
+                      <tr>
+                        <th className="cursor-pointer" onClick={() => handleSort('id')}>
                           PO Number {sortField === 'id' && (sortOrder === 'asc' ? '▲' : '▼')}
                         </th>
-                        <th className="py-3 px-4 select-none cursor-pointer hover:bg-stone-100/50" onClick={() => handleSort('createdDate')}>
+                        <th className="cursor-pointer" onClick={() => handleSort('createdDate')}>
                           PO Date {sortField === 'createdDate' && (sortOrder === 'asc' ? '▲' : '▼')}
                         </th>
-                        <th className="py-3 px-4">Buyer Group</th>
-                        <th className="py-3 px-4">Plant</th>
-                        <th className="py-3 px-4 text-center select-none cursor-pointer hover:bg-stone-100/50" onClick={() => handleSort('itemsCount')}>
+                        <th>Buyer Group</th>
+                        <th>Plant</th>
+                        <th className="text-center cursor-pointer" onClick={() => handleSort('itemsCount')}>
                           Items Count {sortField === 'itemsCount' && (sortOrder === 'asc' ? '▲' : '▼')}
                         </th>
-                        <th className="py-3 px-4 text-right select-none cursor-pointer hover:bg-stone-100/50" onClick={() => handleSort('value')}>
+                        <th className="text-right cursor-pointer" onClick={() => handleSort('value')}>
                           Order Value {sortField === 'value' && (sortOrder === 'asc' ? '▲' : '▼')}
                         </th>
-                        <th className="py-3 px-4 select-none cursor-pointer hover:bg-stone-100/50" onClick={() => handleSort('status')}>
+                        <th className="cursor-pointer" onClick={() => handleSort('status')}>
                           Status {sortField === 'status' && (sortOrder === 'asc' ? '▲' : '▼')}
                         </th>
-                        <th className="py-3 px-4 text-center">Row Actions</th>
+                        <th className="text-center">Row Actions</th>
                       </tr>
                     </thead>
-                    <tbody className="divide-y divide-stone-100 text-stone-700">
+                    <tbody>
                       {paginatedPOs.map(po => {
                         if (!po) return null;
                         const totalValue = (po.items || []).reduce((s, i) => s + (i.netValue || 0), 0);
@@ -847,42 +792,44 @@ export default function PurchaseOrdersView({
                           <tr
                             key={po.id}
                             onDoubleClick={() => handleOpenPoDetails(po)}
-                            className="hover:bg-stone-50/40 transition-colors group cursor-pointer"
+                            className="group cursor-pointer"
                           >
-                            <td className="py-3.5 px-4 font-mono font-bold text-stone-900 group-hover:underline whitespace-nowrap">
+                            <td className="font-mono font-bold text-text-primary group-hover:underline whitespace-nowrap">
                               {po.id}
                             </td>
-                            <td className="py-3.5 px-4 font-mono text-stone-500 whitespace-nowrap">{formatDate(po.createdDate)}</td>
-                            <td className="py-3.5 px-4 font-semibold text-stone-700">{buyerName}</td>
-                            <td className="py-3.5 px-4 text-stone-600 font-medium">{plantName}</td>
-                            <td className="py-3.5 px-4 text-center font-mono font-bold">{(po.items || []).length}</td>
-                            <td className="py-3.5 px-4 text-right font-mono font-bold text-stone-900 whitespace-nowrap">
+                            <td className="font-mono whitespace-nowrap tabular-nums">{formatDate(po.createdDate)}</td>
+                            <td className="font-semibold text-text-primary">{buyerName}</td>
+                            <td className="font-medium">{plantName}</td>
+                            <td className="text-center font-mono font-bold tabular-nums">{(po.items || []).length}</td>
+                            <td className="text-right font-mono font-bold text-text-primary whitespace-nowrap tabular-nums">
                               ₹ {totalValue.toLocaleString()}.00
                             </td>
-                            <td className="py-3.5 px-4">
+                            <td>
                               {renderStatusChip(po.status)}
                             </td>
-                            <td className="py-3.5 px-4 text-center" onClick={e => e.stopPropagation()}>
+                            <td className="text-center" onClick={e => e.stopPropagation()}>
                               <div className="flex items-center justify-center gap-1.5">
-                                <button
+                                <Button
+                                  size="xs"
+                                  variant="secondary"
                                   onClick={() => handleOpenPoDetails(po)}
-                                  className="px-2 py-1 bg-stone-100 hover:bg-stone-200 text-stone-700 rounded-md text-[10px] font-bold border border-stone-200 transition-colors"
                                 >
                                   View PO
-                                </button>
+                                </Button>
 
                                 {po.status === 'Acknowledged' && (
-                                  <button
+                                  <Button
+                                    size="xs"
+                                    variant="outline"
                                     onClick={() => handleOpenAsnForm(po)}
-                                    className="px-2 py-1 bg-blue-50 border border-blue-200 text-blue-700 hover:bg-blue-600 hover:text-white hover:border-blue-600 rounded-md text-[10px] font-bold transition-colors"
                                   >
                                     Create ASN
-                                  </button>
+                                  </Button>
                                 )}
 
                                 <button
                                   onClick={(e) => handleOpenDrawer(e, po)}
-                                  className="p-1 text-stone-400 hover:text-stone-700 hover:bg-stone-100 rounded-md transition-colors"
+                                  className="p-1 text-text-tertiary hover:text-text-primary hover:bg-surface2 rounded-md transition-colors duration-150"
                                   title="Chat / Raise Issue"
                                 >
                                   <MessageSquare className="size-4" />
@@ -898,34 +845,36 @@ export default function PurchaseOrdersView({
 
                 {/* Pagination footer */}
                 {totalPages > 1 && (
-                  <div className="px-6 py-4 border-t border-stone-200 flex items-center justify-between bg-stone-50 text-stone-500 text-xs font-semibold">
+                  <div className="px-6 py-4 border-t border-border flex items-center justify-between bg-surface2/50 text-text-secondary text-xs font-semibold">
                     <div>
                       Showing {(currentPage - 1) * itemsPerPage + 1} to {Math.min(currentPage * itemsPerPage, filteredPOs.length)} of {filteredPOs.length} purchase orders
                     </div>
                     <div className="flex items-center gap-1">
-                      <button
+                      <Button
+                        size="sm"
+                        variant="outline"
                         disabled={currentPage === 1}
                         onClick={() => setCurrentPage(prev => Math.max(1, prev - 1))}
-                        className="px-2.5 py-1 bg-white border border-stone-300 hover:bg-stone-50 rounded-md text-stone-700 disabled:opacity-40 disabled:hover:bg-white text-xs font-bold transition-colors"
                       >
                         Previous
-                      </button>
+                      </Button>
                       {Array.from({ length: totalPages }, (_, i) => i + 1).map(page => (
                         <button
                           key={page}
                           onClick={() => setCurrentPage(page)}
-                          className={`size-7 rounded-md font-bold text-xs flex items-center justify-center transition-colors border ${currentPage === page ? 'bg-stone-850 text-white border-stone-850' : 'bg-white border-stone-300 hover:bg-stone-50 text-stone-700'}`}
+                          className={`size-7 rounded-md font-bold text-xs flex items-center justify-center transition-colors duration-150 border tabular-nums ${currentPage === page ? 'bg-[rgb(var(--color-emerald-default-rgb))] text-white border-transparent' : 'bg-surface border-border hover:bg-surface2 text-text-secondary'}`}
                         >
                           {page}
                         </button>
                       ))}
-                      <button
+                      <Button
+                        size="sm"
+                        variant="outline"
                         disabled={currentPage === totalPages}
                         onClick={() => setCurrentPage(prev => Math.min(totalPages, prev + 1))}
-                        className="px-2.5 py-1 bg-white border border-stone-300 hover:bg-stone-50 rounded-md text-stone-700 disabled:opacity-40 disabled:hover:bg-white text-xs font-bold transition-colors"
                       >
                         Next
-                      </button>
+                      </Button>
                     </div>
                   </div>
                 )}
@@ -939,23 +888,23 @@ export default function PurchaseOrdersView({
         {/* ================================================================= */}
         {currentView === 'list' && poSubTab === 'grn' && (
           <div className="space-y-4">
-            <div className="bg-white p-4 border border-stone-200 rounded-xl shadow-sm flex items-center justify-between">
+            <div className="card p-4 flex items-center justify-between">
               <div>
-                <h3 className="text-sm font-bold text-stone-900">Goods Receipt Notes (GRN) Registry</h3>
-                <p className="text-xs text-stone-500">View and track MIGO post logs synchronized automatically from stores inspections.</p>
+                <h3 className="text-sm font-bold text-text-primary">Goods Receipt Notes (GRN) Registry</h3>
+                <p className="text-xs text-text-secondary">View and track MIGO post logs synchronized automatically from stores inspections.</p>
               </div>
-              <div className="text-xs text-stone-500 font-semibold font-mono">
+              <div className="text-xs text-text-secondary font-semibold font-mono tabular-nums">
                 Total Inbound Documents: {cleanGrns.length}
               </div>
             </div>
 
             {cleanGrns.length === 0 ? (
-              <div className="p-12 rounded-xl border border-stone-250 bg-white text-center shadow-sm">
-                <Truck className="size-12 mx-auto text-stone-300 mb-4 animate-pulse" />
-                <h4 className="text-sm font-bold text-stone-700">No Goods Receipts Registered</h4>
-                <p className="text-xs text-stone-450 mt-1 max-w-sm mx-auto">
-                  Once you submit an ASN, the warehouse team performs check-ins and quality inspections (Movement Type 101). The synced GRN will appear here within 10 seconds.
-                </p>
+              <div className="card">
+                <EmptyState
+                  icon={Truck}
+                  title="No Goods Receipts Registered"
+                  description="Once you submit an ASN, the warehouse team performs check-ins and quality inspections (Movement Type 101). The synced GRN will appear here within 10 seconds."
+                />
               </div>
             ) : (
               <div className="grid grid-cols-1 gap-3.5">
@@ -970,43 +919,39 @@ export default function PurchaseOrdersView({
                     <div
                       key={grn.id}
                       onClick={() => handleOpenGrnDetails(grn)}
-                      className="p-4 bg-white border border-stone-200 hover:border-stone-400 rounded-xl shadow-sm hover:shadow-md cursor-pointer transition-all flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4"
+                      className="card p-4 hover:border-border-em cursor-pointer transition-colors duration-150 flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4"
                     >
                       <div className="space-y-1">
                         <div className="flex items-center gap-2">
-                          <span className="text-xs font-bold text-stone-900 font-mono bg-stone-50 border border-stone-200 px-2 py-0.5 rounded">
+                          <span className="text-xs font-bold text-text-primary font-mono bg-base border border-border px-2 py-0.5 rounded">
                             {grn.id}
                           </span>
-                          <span className="text-[10px] text-stone-400 font-mono">
+                          <span className="text-[10px] text-text-tertiary font-mono">
                             SAP Doc: {grn.sapMigoDoc}
                           </span>
                           {hasRejections ? (
-                            <span className="px-2 py-0.5 rounded bg-red-50 text-red-700 border border-red-200 text-[9px] font-bold flex items-center gap-1">
-                              <AlertTriangle className="size-3" /> QC Discrepancy
-                            </span>
+                            <StatusBadge label="QC Discrepancy" variant="suspended" />
                           ) : (
-                            <span className="px-2 py-0.5 rounded bg-green-50 text-green-700 border border-green-200 text-[9px] font-bold flex items-center gap-1">
-                              <Check className="size-3" /> QC Passed
-                            </span>
+                            <StatusBadge label="QC Passed" variant="active" />
                           )}
                         </div>
-                        <div className="flex flex-wrap items-center gap-x-4 gap-y-1 mt-1 text-[10px] text-stone-450 font-bold">
+                        <div className="flex flex-wrap items-center gap-x-4 gap-y-1 mt-1 text-[10px] text-text-tertiary font-bold">
                           <span>PO Ref: {grn.poId}</span>
                           <span>&bull;</span>
-                          <span>Posting Date: {grn.postingDate}</span>
+                          <span className="tabular-nums">Posting Date: {grn.postingDate}</span>
                           <span>&bull;</span>
                           <span>Inspector: {grn.receivedBy}</span>
                         </div>
                       </div>
 
-                      <div className="flex items-center gap-6 self-stretch sm:self-auto justify-between border-t border-stone-100 pt-3 sm:border-t-0 sm:pt-0">
+                      <div className="flex items-center gap-6 self-stretch sm:self-auto justify-between border-t border-border pt-3 sm:border-t-0 sm:pt-0">
                         <div className="text-right">
-                          <p className="text-[10px] text-stone-400 font-bold uppercase">Accepted / Rejected</p>
-                          <p className="text-xs font-bold text-stone-885 font-mono">
-                            {acceptedCount} units / <span className={rejectedCount > 0 ? 'text-red-650 font-extrabold' : 'text-stone-400'}>{rejectedCount} rejected</span>
+                          <p className="text-[10px] text-text-tertiary font-bold uppercase">Accepted / Rejected</p>
+                          <p className="text-xs font-bold text-text-primary font-mono tabular-nums">
+                            {acceptedCount} units / <span className={rejectedCount > 0 ? 'text-red-600 font-extrabold' : 'text-text-tertiary'}>{rejectedCount} rejected</span>
                           </p>
                         </div>
-                        <ChevronRight className="size-5 text-stone-300" />
+                        <ChevronRight className="size-5 text-text-tertiary" />
                       </div>
                     </div>
                   );
@@ -1021,23 +966,23 @@ export default function PurchaseOrdersView({
         {/* ================================================================= */}
         {currentView === 'list' && poSubTab === 'invoice' && (
           <div className="space-y-4">
-            <div className="bg-white p-4 border border-stone-200 rounded-xl shadow-sm flex items-center justify-between">
+            <div className="card p-4 flex items-center justify-between">
               <div>
-                <h3 className="text-sm font-bold text-stone-900">MIRO Invoice Eligibility Portal</h3>
-                <p className="text-xs text-stone-500">Select verified warehouse receipts that are pending financial billing. Pre-fills lines automatically.</p>
+                <h3 className="text-sm font-bold text-text-primary">MIRO Invoice Eligibility Portal</h3>
+                <p className="text-xs text-text-secondary">Select verified warehouse receipts that are pending financial billing. Pre-fills lines automatically.</p>
               </div>
-              <div className="text-xs text-stone-500 font-semibold font-mono bg-stone-50 border border-stone-200 px-2.5 py-1 rounded">
+              <div className="text-xs text-text-secondary font-semibold font-mono bg-base border border-border px-2.5 py-1 rounded tabular-nums">
                 Awaiting Billing: {cleanGrns.filter(g => !g.invoiceSubmitted).length} docs
               </div>
             </div>
 
             {cleanGrns.filter(g => !g.invoiceSubmitted).length === 0 ? (
-              <div className="p-12 rounded-xl border border-stone-250 bg-white text-center shadow-sm">
-                <FileCheck className="size-12 mx-auto text-stone-300 mb-4 animate-pulse" />
-                <h4 className="text-sm font-bold text-stone-700">No Pending Receipts for Invoicing</h4>
-                <p className="text-xs text-stone-450 mt-1 max-w-sm mx-auto">
-                  Once goods receipts are posted by the warehouse and accepted, they will show up here as &quot;Invoice Ready&quot;. If all are billed, verify under Invoices Registry.
-                </p>
+              <div className="card">
+                <EmptyState
+                  icon={FileCheck}
+                  title="No Pending Receipts for Invoicing"
+                  description={'Once goods receipts are posted by the warehouse and accepted, they will show up here as "Invoice Ready". If all are billed, verify under Invoices Registry.'}
+                />
               </div>
             ) : (
               <div className="grid grid-cols-1 gap-3.5">
@@ -1051,33 +996,31 @@ export default function PurchaseOrdersView({
                     <div
                       key={grn.id}
                       onClick={() => handleOpenInvoiceDetail(grn)}
-                      className="p-4 bg-white border border-stone-200 hover:border-amber-300 rounded-xl shadow-sm hover:shadow-md cursor-pointer transition-all flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4"
+                      className="card p-4 hover:border-amber-300 cursor-pointer transition-colors duration-150 flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4"
                     >
                       <div className="space-y-1">
                         <div className="flex items-center gap-2">
-                          <span className="text-xs font-bold text-amber-800 font-mono bg-amber-50 border border-amber-250 px-2 py-0.5 rounded">
+                          <span className="text-xs font-bold text-amber-700 font-mono bg-amber-500/10 border border-amber-200 px-2 py-0.5 rounded">
                             {grn.id}
                           </span>
-                          <span className="text-[10px] text-stone-400 font-mono">
+                          <span className="text-[10px] text-text-tertiary font-mono">
                             MIGO reference: {grn.sapMigoDoc}
                           </span>
-                          <span className="px-2 py-0.5 rounded bg-amber-50 text-amber-700 border border-amber-200 text-[9px] font-bold">
-                            Ready for MIRO Posting
-                          </span>
+                          <StatusBadge label="Ready for MIRO Posting" variant="warn" />
                         </div>
-                        <div className="flex flex-wrap items-center gap-x-4 gap-y-1 mt-1 text-[10px] text-stone-450 font-bold">
+                        <div className="flex flex-wrap items-center gap-x-4 gap-y-1 mt-1 text-[10px] text-text-tertiary font-bold">
                           <span>PO Ref: {grn.poId}</span>
                           <span>&bull;</span>
-                          <span>Receipt Date: {grn.postingDate}</span>
+                          <span className="tabular-nums">Receipt Date: {grn.postingDate}</span>
                           <span>&bull;</span>
                           <span>Billed To: Plant {po?.plant || '1000'}</span>
                         </div>
                       </div>
 
-                      <div className="flex items-center gap-6 self-stretch sm:self-auto justify-between border-t border-stone-100 pt-3 sm:border-t-0 sm:pt-0">
+                      <div className="flex items-center gap-6 self-stretch sm:self-auto justify-between border-t border-border pt-3 sm:border-t-0 sm:pt-0">
                         <div className="text-right">
-                          <p className="text-[10px] text-stone-400 font-bold uppercase">Accepted Quantity</p>
-                          <p className="text-xs font-bold text-stone-800 font-mono">
+                          <p className="text-[10px] text-text-tertiary font-bold uppercase">Accepted Quantity</p>
+                          <p className="text-xs font-bold text-text-primary font-mono tabular-nums">
                             {acceptedTotal} units ({itemsCount} lines)
                           </p>
                         </div>
@@ -1086,7 +1029,8 @@ export default function PurchaseOrdersView({
                             e.stopPropagation();
                             handleOpenInvoiceDetail(grn);
                           }}
-                          className="bg-amber-600 hover:bg-amber-700 text-white font-bold text-[11px] h-8 px-4 rounded-lg flex items-center gap-1 shadow-sm transition-colors border border-amber-650"
+                          variant="default"
+                          size="sm"
                         >
                           <span>MIRO Invoice</span>
                           <ChevronRight className="size-3.5" />
@@ -1106,16 +1050,16 @@ export default function PurchaseOrdersView({
         {currentView === 'detail' && activePo && (
           <div className="space-y-6 animate-fade-in">
             {/* Header Block & Back button */}
-            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-stone-200 pb-4">
+            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-border pb-4">
               <div className="space-y-1.5">
                 <button
                   onClick={() => setCurrentView('list')}
-                  className="flex items-center gap-2 text-stone-500 hover:text-stone-900 text-xs font-bold transition-colors cursor-pointer w-fit"
+                  className="flex items-center gap-2 text-text-secondary hover:text-text-primary text-xs font-bold transition-colors duration-150 cursor-pointer w-fit"
                 >
                   <ArrowLeft className="size-4" />
                   <span>Back to PO Ledger</span>
                 </button>
-                <h2 className="text-xl font-bold tracking-tight text-stone-900 flex items-center gap-2.5">
+                <h2 className="text-[22px] font-bold tracking-tight text-text-primary flex items-center gap-2.5">
                   <span>Purchase Order: {activePo.id}</span>
                   {renderStatusChip(activePo.status)}
                 </h2>
@@ -1127,15 +1071,14 @@ export default function PurchaseOrdersView({
                 <Button
                   onClick={(e) => handleOpenDrawer(e, activePo)}
                   variant="outline"
-                  className="border-stone-300 text-stone-700 hover:bg-stone-50 text-xs font-bold rounded-lg flex items-center gap-1.5 shadow-sm"
                 >
-                  <MessageSquare className="size-4 text-stone-400" />
+                  <MessageSquare className="size-4" />
                   <span>Chat</span>
                 </Button>
                 {activePo.status === 'Open' && (
                   <Button
                     onClick={() => acknowledgePO(activePo.id)}
-                    className="bg-blue-50 border border-blue-200 text-blue-700 hover:bg-blue-600 hover:text-white hover:border-blue-600 font-bold text-xs rounded-lg px-4 transition-all duration-150"
+                    variant="default"
                   >
                     Acknowledge Purchase Order
                   </Button>
@@ -1155,7 +1098,7 @@ export default function PurchaseOrdersView({
               const statusOrder = ['Open', 'Acknowledged', 'Dispatched', 'Delivered', 'Invoiced', 'Paid'];
               const currentIdx = statusOrder.indexOf(activePo.status);
               return (
-                <div className="flex items-center bg-white border border-stone-200 rounded-xl px-5 py-3.5 shadow-sm overflow-x-auto gap-0 select-none">
+                <div className="flex items-center card px-5 py-3.5 overflow-x-auto gap-0 select-none">
                   {steps.map((step, idx) => {
                     const stepIdx = statusOrder.indexOf(step.key);
                     const isPast = stepIdx < currentIdx;
@@ -1172,20 +1115,20 @@ export default function PurchaseOrdersView({
                     return (
                       <React.Fragment key={step.key}>
                         <div className="flex flex-col items-center gap-1 flex-shrink-0">
-                          <div className={`size-7 rounded-full flex items-center justify-center border-2 transition-all ${
+                          <div className={`size-7 rounded-full flex items-center justify-center border-2 transition-all duration-150 ${
                             isPast ? 'border-green-500 bg-green-500 text-white' :
                             isActive ? `${c.ring} shadow-sm` :
-                            'border-stone-200 bg-stone-50 text-stone-300'
+                            'border-border bg-base text-text-tertiary'
                           }`}>
                             {isPast ? <Check className="size-3.5" /> : <StepIcon className="size-3.5" />}
                           </div>
                           <span className={`text-[8px] font-extrabold uppercase tracking-wider whitespace-nowrap ${
-                            isPast ? 'text-green-600' : isActive ? c.text : 'text-stone-300'
+                            isPast ? 'text-green-600' : isActive ? c.text : 'text-text-tertiary'
                           }`}>{step.label}</span>
                         </div>
                         {idx < steps.length - 1 && (
-                          <div className={`h-0.5 flex-1 min-w-6 mx-1 mb-3.5 rounded-full transition-all ${
-                            isPast ? 'bg-green-400' : 'bg-stone-150'
+                          <div className={`h-0.5 flex-1 min-w-6 mx-1 mb-3.5 rounded-full transition-all duration-150 ${
+                            isPast ? 'bg-green-400' : 'bg-border'
                           }`} />
                         )}
                       </React.Fragment>
@@ -1196,7 +1139,7 @@ export default function PurchaseOrdersView({
             })()}
 
             {/* TAB HEADERS */}
-            <div className="flex items-center gap-6 border-b border-stone-200">
+            <div className="flex items-center gap-6 border-b border-border">
               {[
                 { id: 'po_detail', label: '1. PO Detail View' },
                 { id: 'create_asn', label: '2. Create ASN' },
@@ -1205,9 +1148,9 @@ export default function PurchaseOrdersView({
                 <button
                   key={t.id}
                   onClick={() => setDetailTab(t.id)}
-                  className={`pb-2.5 text-xs font-bold border-b-2 transition-all cursor-pointer focus-visible:outline-none ${detailTab === t.id
-                      ? 'border-stone-800 text-stone-900'
-                      : 'border-transparent text-stone-400 hover:text-stone-700'
+                  className={`pb-2.5 text-xs font-bold border-b-2 transition-all duration-150 cursor-pointer focus-visible:outline-none ${detailTab === t.id
+                      ? 'border-text-primary text-text-primary'
+                      : 'border-transparent text-text-tertiary hover:text-text-secondary'
                     }`}
                 >
                   {t.label}
@@ -1216,17 +1159,17 @@ export default function PurchaseOrdersView({
             </div>
 
             {/* TAB CONTENT */}
-            <div className="bg-stone-50/30 p-1 rounded-xl">
+            <div className="bg-base/30 p-1 rounded-xl">
               {/* TAB 1: PO Detail View */}
               {detailTab === 'po_detail' && (
                 <div className="space-y-6 animate-fade-in">
                   {/* PO Header Fields — 3-column grid, each cell has label-on-top + full-width value box */}
-                  <div className="bg-white border border-stone-200 rounded-xl shadow-sm overflow-hidden">
-                    <div className="flex items-center gap-2 px-5 py-3 border-b border-stone-100 bg-stone-50/60">
+                  <div className="card overflow-hidden">
+                    <div className="flex items-center gap-2 px-5 py-3 border-b border-border bg-surface2/40">
                       <div className="size-1.5 rounded-full bg-blue-500"></div>
-                      <span className="text-[10px] font-extrabold text-stone-500 uppercase tracking-widest">Purchase Order Header Data</span>
+                      <span className="text-[10px] font-extrabold text-text-secondary uppercase tracking-widest">Purchase Order Header Data</span>
                     </div>
-                    <div className="grid grid-cols-2 md:grid-cols-3 gap-4 p-5">
+                    <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-4 p-5">
                       <SapReadOnlyField
                         label="PO Number"
                         value={activePo.id}
@@ -1248,7 +1191,7 @@ export default function PurchaseOrdersView({
                             ? 'bg-emerald-50 text-emerald-800 border-emerald-200'
                             : activePo.status === 'Open'
                             ? 'bg-amber-50 text-amber-700 border-amber-200'
-                            : 'bg-stone-100 text-stone-700 border-stone-200'
+                            : 'bg-surface2 text-text-secondary border-border'
                         }
                       />
                       <SapReadOnlyField
@@ -1289,8 +1232,8 @@ export default function PurchaseOrdersView({
                     </div>
                   </div>
                   <div className="space-y-4">
-                    <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b border-stone-200 pb-2">
-                      <h4 className="text-xs font-bold text-stone-900 uppercase tracking-wider">
+                    <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b border-border pb-2">
+                      <h4 className="text-xs font-bold text-text-primary uppercase tracking-wider">
                         PO Line Items
                       </h4>
 
@@ -1301,18 +1244,18 @@ export default function PurchaseOrdersView({
                             type="button"
                             disabled={activeLineIdx === 0}
                             onClick={() => setActiveLineIdx(prev => Math.max(0, prev - 1))}
-                            className="p-1.5 border border-stone-200 rounded-lg hover:bg-stone-50 disabled:opacity-40 disabled:hover:bg-white text-stone-700 cursor-pointer transition-colors"
+                            className="p-1.5 border border-border rounded-lg hover:bg-surface2 disabled:opacity-40 disabled:hover:bg-transparent text-text-secondary cursor-pointer transition-colors duration-150"
                           >
                             <ChevronLeft className="size-4" />
                           </button>
-                          <span className="text-xs font-semibold text-stone-600 font-mono select-none">
+                          <span className="text-xs font-semibold text-text-secondary font-mono select-none tabular-nums">
                             Page {activeLineIdx + 1} of {Math.max(1, Math.ceil(activePo.items.length / 5))}
                           </span>
                           <button
                             type="button"
                             disabled={activeLineIdx >= Math.ceil(activePo.items.length / 5) - 1}
                             onClick={() => setActiveLineIdx(prev => Math.min(Math.ceil(activePo.items.length / 5) - 1, prev + 1))}
-                            className="p-1.5 border border-stone-200 rounded-lg hover:bg-stone-50 disabled:opacity-40 disabled:hover:bg-white text-stone-700 cursor-pointer transition-colors"
+                            className="p-1.5 border border-border rounded-lg hover:bg-surface2 disabled:opacity-40 disabled:hover:bg-transparent text-text-secondary cursor-pointer transition-colors duration-150"
                           >
                             <ChevronRight className="size-4" />
                           </button>
@@ -1323,36 +1266,36 @@ export default function PurchaseOrdersView({
                     {activePo.items && activePo.items.length > 0 && (
                       <div className="w-full space-y-4">
                         {/* Responsive Table Container */}
-                        <div className="w-full overflow-x-auto border border-stone-200 rounded-lg bg-white shadow-xs">
-                          <table className="w-full text-xs text-left border-collapse min-w-[900px]">
+                        <div className="w-full overflow-x-auto card">
+                          <table className="w-full text-left border-collapse min-w-[900px]">
                             <thead>
-                              <tr className="bg-stone-50/75 border-b border-stone-200 text-stone-900 font-bold uppercase text-[10px] tracking-wider font-sans">
-                                <th className="py-2 px-3 border-r border-stone-200 w-16">Line</th>
-                                <th className="py-2 px-3 border-r border-stone-200 w-36">Material Code</th>
-                                <th className="py-2 px-3 border-r border-stone-200 min-w-[200px]">Description</th>
-                                <th className="py-2 px-3 border-r border-stone-200 w-28 text-right">Ordered Qty</th>
-                                <th className="py-2 px-3 border-r border-stone-200 w-20">UoM</th>
-                                <th className="py-2 px-3 border-r border-stone-200 w-32 text-right">Net Price</th>
-                                <th className="py-2 px-3 border-r border-stone-200 w-28">GST Tax Code</th>
-                                <th className="py-2 px-3 border-r border-stone-200 w-36">Delivery Date</th>
-                                <th className="py-2 px-3 text-right w-36">Line Net Value</th>
+                              <tr>
+                                <th className="w-16">Line</th>
+                                <th className="w-36">Material Code</th>
+                                <th className="min-w-[200px]">Description</th>
+                                <th className="w-28 text-right">Ordered Qty</th>
+                                <th className="w-20">UoM</th>
+                                <th className="w-32 text-right">Net Price</th>
+                                <th className="w-28">GST Tax Code</th>
+                                <th className="w-36">Delivery Date</th>
+                                <th className="text-right w-36">Line Net Value</th>
                               </tr>
                             </thead>
-                            <tbody className="divide-y divide-stone-200">
+                            <tbody>
                               {activePo.items.slice(activeLineIdx * 5, activeLineIdx * 5 + 5).map((item, idx) => {
                                 return (
-                                  <tr key={item.line || idx} className="hover:bg-stone-50/50 transition-colors">
-                                    <td className="py-2 px-3 border-r border-stone-200 text-stone-600 font-semibold font-mono">{item.line}</td>
-                                    <td className="py-2 px-3 border-r border-stone-200">
+                                  <tr key={item.line || idx}>
+                                    <td className="font-semibold font-mono">{item.line}</td>
+                                    <td>
                                       <span className="text-blue-600 font-bold hover:underline cursor-pointer">{item.materialCode}</span>
                                     </td>
-                                    <td className="py-2 px-3 border-r border-stone-200 text-stone-800 font-sans font-medium">{item.description}</td>
-                                    <td className="py-2 px-3 border-r border-stone-200 font-bold text-stone-900 text-right font-mono">{item.quantity}</td>
-                                    <td className="py-2 px-3 border-r border-stone-200 text-stone-600 font-medium">{item.uom || 'EA'}</td>
-                                    <td className="py-2 px-3 border-r border-stone-200 font-bold text-stone-900 text-right font-mono">₹ {item.unitPrice.toLocaleString()}.00</td>
-                                    <td className="py-2 px-3 border-r border-stone-200 text-stone-600 font-medium">G1 (18%)</td>
-                                    <td className="py-2 px-3 border-r border-stone-200 font-medium font-mono text-stone-700">{formatDate(item.deliveryDate || activePo.createdDate)}</td>
-                                    <td className="py-2 px-3 font-bold text-stone-900 text-right font-mono">₹ {item.netValue.toLocaleString()}.00</td>
+                                    <td className="text-text-primary font-medium">{item.description}</td>
+                                    <td className="font-bold text-text-primary text-right font-mono tabular-nums">{item.quantity}</td>
+                                    <td className="font-medium">{item.uom || 'EA'}</td>
+                                    <td className="font-bold text-text-primary text-right font-mono tabular-nums">₹ {item.unitPrice.toLocaleString()}.00</td>
+                                    <td className="font-medium">G1 (18%)</td>
+                                    <td className="font-medium font-mono tabular-nums">{formatDate(item.deliveryDate || activePo.createdDate)}</td>
+                                    <td className="font-bold text-text-primary text-right font-mono tabular-nums">₹ {item.netValue.toLocaleString()}.00</td>
                                   </tr>
                                 );
                               })}
@@ -1369,8 +1312,8 @@ export default function PurchaseOrdersView({
                                 type="button"
                                 onClick={() => setActiveLineIdx(dotIdx)}
                                 className={`size-2 rounded-full transition-all duration-150 cursor-pointer ${activeLineIdx === dotIdx
-                                    ? 'bg-stone-800 w-4.5'
-                                    : 'bg-stone-300 hover:bg-stone-400'
+                                    ? 'bg-text-primary w-4.5'
+                                    : 'bg-border-em hover:bg-text-tertiary'
                                   }`}
                                 title={`Go to page ${dotIdx + 1}`}
                               />
@@ -1387,39 +1330,40 @@ export default function PurchaseOrdersView({
               {detailTab === 'create_asn' && (
                 <div className="space-y-6 animate-fade-in">
                   {activePo.status === 'Open' ? (
-                    <div className="p-6 border border-stone-200 bg-white rounded-xl shadow-sm text-center">
+                    <div className="card p-6 text-center">
                       <AlertTriangle className="size-8 text-amber-500 mx-auto mb-2" />
-                      <h4 className="text-xs font-bold text-stone-850">PO Acknowledgement Required</h4>
-                      <p className="text-xs text-stone-500 mt-1">
+                      <h4 className="text-xs font-bold text-text-primary">PO Acknowledgement Required</h4>
+                      <p className="text-xs text-text-secondary mt-1">
                         You must acknowledge this purchase order before you can create an Inbound ASN Delivery.
                       </p>
                       <Button
                         onClick={() => acknowledgePO(activePo.id)}
-                        className="mt-4 bg-orange-50 border border-orange-200 text-orange-700 hover:bg-orange-500 hover:text-white hover:border-orange-500 font-bold text-xs rounded-lg px-6 transition-all duration-150"
+                        variant="outline"
+                        className="mt-4"
                       >
                         Acknowledge PO
                       </Button>
                     </div>
                   ) : (
                     <div className="space-y-6">
-                      <div className="p-4 bg-white border border-stone-200 rounded-xl flex items-center justify-between shadow-sm">
+                      <div className="card p-4 flex items-center justify-between">
                         <div>
-                          <h4 className="text-xs font-bold text-stone-900 uppercase tracking-wider">Advanced Shipping Notice Form (VL31N)</h4>
-                          <p className="text-[10px] text-stone-500 font-medium mt-0.5">Provide actual shipment details and dispatch quantities</p>
+                          <h4 className="text-xs font-bold text-text-primary uppercase tracking-wider">Advanced Shipping Notice Form (VL31N)</h4>
+                          <p className="text-[10px] text-text-secondary font-medium mt-0.5">Provide actual shipment details and dispatch quantities</p>
                         </div>
                         <Button
                           onClick={handleAsnSubmitClick}
-                          className="bg-gray-850 hover:bg-blue-500  text-black hover:text-white font-bold text-xs rounded-lg px-6"
+                          variant="default"
                         >
                           Submit Inbound Delivery
                         </Button>
                       </div>
 
                       {/* ASN Header Fields — 3-column grid, label-on-top aligned */}
-                      <div className="bg-white border border-stone-200 rounded-xl shadow-sm overflow-hidden">
-                        <div className="flex items-center gap-2 px-5 py-3 border-b border-stone-100 bg-stone-50/60">
+                      <div className="card overflow-hidden">
+                        <div className="flex items-center gap-2 px-5 py-3 border-b border-border bg-surface2/40">
                           <div className="size-1.5 rounded-full bg-purple-500"></div>
-                          <span className="text-[10px] font-extrabold text-stone-500 uppercase tracking-widest">ASN Shipment Header</span>
+                          <span className="text-[10px] font-extrabold text-text-secondary uppercase tracking-widest">ASN Shipment Header</span>
                         </div>
                         <div className="grid grid-cols-2 md:grid-cols-3 gap-4 p-5">
                           <SapReadOnlyField
@@ -1435,7 +1379,7 @@ export default function PurchaseOrdersView({
                               required
                               value={asnForm.shipDate}
                               onChange={e => setAsnForm({ ...asnForm, shipDate: e.target.value })}
-                              className="w-36 bg-white border border-stone-200 focus:border-blue-400 rounded-[3px] px-2.5 h-6.5 text-xs outline-none text-stone-900 font-mono font-bold transition-all duration-150"
+                              className="w-36 bg-surface border border-border focus:border-[rgb(var(--color-emerald-default-rgb))] rounded-[3px] px-2.5 h-6.5 text-xs outline-none text-text-primary font-mono font-bold tabular-nums transition-all duration-150"
                             />
                           </SapInputField>
 
@@ -1445,7 +1389,7 @@ export default function PurchaseOrdersView({
                               required
                               value={asnForm.estimatedDeliveryDate}
                               onChange={e => setAsnForm({ ...asnForm, estimatedDeliveryDate: e.target.value })}
-                              className="w-36 bg-white border border-stone-200 focus:border-blue-400 rounded-[3px] px-2.5 h-6.5 text-xs outline-none text-stone-900 font-mono font-bold transition-all duration-150"
+                              className="w-36 bg-surface border border-border focus:border-[rgb(var(--color-emerald-default-rgb))] rounded-[3px] px-2.5 h-6.5 text-xs outline-none text-text-primary font-mono font-bold tabular-nums transition-all duration-150"
                             />
                           </SapInputField>
 
@@ -1456,7 +1400,7 @@ export default function PurchaseOrdersView({
                               value={asnForm.carrierName}
                               onChange={e => setAsnForm({ ...asnForm, carrierName: e.target.value })}
                               placeholder="e.g. DHL Express"
-                              className="w-48 bg-white border border-stone-200 focus:border-blue-400 rounded-[3px] px-2.5 h-6.5 text-xs outline-none text-stone-900 font-bold transition-all duration-150"
+                              className="w-48 bg-surface border border-border focus:border-[rgb(var(--color-emerald-default-rgb))] rounded-[3px] px-2.5 h-6.5 text-xs outline-none text-text-primary font-bold transition-all duration-150"
                             />
                           </SapInputField>
 
@@ -1466,7 +1410,7 @@ export default function PurchaseOrdersView({
                               value={asnForm.vehicleNumber}
                               onChange={e => setAsnForm({ ...asnForm, vehicleNumber: e.target.value })}
                               placeholder="e.g. MH-12-XY-4321"
-                              className="w-40 bg-white border border-stone-200 focus:border-blue-400 rounded-[3px] px-2.5 h-6.5 text-xs outline-none text-stone-900 font-mono font-bold uppercase transition-all duration-150"
+                              className="w-40 bg-surface border border-border focus:border-[rgb(var(--color-emerald-default-rgb))] rounded-[3px] px-2.5 h-6.5 text-xs outline-none text-text-primary font-mono font-bold uppercase transition-all duration-150"
                             />
                           </SapInputField>
 
@@ -1477,7 +1421,7 @@ export default function PurchaseOrdersView({
                               value={ewayBillNo}
                               onChange={e => setEwayBillNo(e.target.value.replace(/\D/g, ''))}
                               placeholder="12-digit numeric code"
-                              className="w-36 bg-white border border-stone-200 focus:border-blue-400 rounded-[3px] px-2.5 h-6.5 text-xs outline-none text-stone-900 font-mono font-bold transition-all duration-150"
+                              className="w-36 bg-surface border border-border focus:border-[rgb(var(--color-emerald-default-rgb))] rounded-[3px] px-2.5 h-6.5 text-xs outline-none text-text-primary font-mono font-bold tabular-nums transition-all duration-150"
                             />
                           </SapInputField>
                         </div>
@@ -1485,8 +1429,8 @@ export default function PurchaseOrdersView({
 
                       {/* ASN Document Attachments */}
                       <div className="space-y-4">
-                        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b border-stone-200 pb-2">
-                          <h4 className="text-xs font-bold text-stone-900 uppercase tracking-wider">
+                        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b border-border pb-2">
+                          <h4 className="text-xs font-bold text-text-primary uppercase tracking-wider">
                             Shipment Document Attachments
                           </h4>
                         </div>
@@ -1520,8 +1464,8 @@ export default function PurchaseOrdersView({
 
                       {/* Dispatch quantities allocation */}
                       <div className="space-y-4">
-                        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b border-stone-200 pb-2">
-                          <h4 className="text-xs font-bold text-stone-900 uppercase tracking-wider">
+                        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b border-border pb-2">
+                          <h4 className="text-xs font-bold text-text-primary uppercase tracking-wider">
                             Dispatch Qty Allocation
                           </h4>
 
@@ -1532,18 +1476,18 @@ export default function PurchaseOrdersView({
                                 type="button"
                                 disabled={asnLineIdx === 0}
                                 onClick={() => setAsnLineIdx(prev => Math.max(0, prev - 1))}
-                                className="p-1.5 border border-stone-200 rounded-lg hover:bg-stone-50 disabled:opacity-40 disabled:hover:bg-white text-stone-700 cursor-pointer transition-colors"
+                                className="p-1.5 border border-border rounded-lg hover:bg-surface2 disabled:opacity-40 disabled:hover:bg-transparent text-text-secondary cursor-pointer transition-colors duration-150"
                               >
                                 <ChevronLeft className="size-4" />
                               </button>
-                              <span className="text-xs font-semibold text-stone-600 font-mono select-none">
+                              <span className="text-xs font-semibold text-text-secondary font-mono select-none tabular-nums">
                                 Page {asnLineIdx + 1} of {Math.max(1, Math.ceil(activePo.items.length / 5))}
                               </span>
                               <button
                                 type="button"
                                 disabled={asnLineIdx >= Math.ceil(activePo.items.length / 5) - 1}
                                 onClick={() => setAsnLineIdx(prev => Math.min(Math.ceil(activePo.items.length / 5) - 1, prev + 1))}
-                                className="p-1.5 border border-stone-200 rounded-lg hover:bg-stone-50 disabled:opacity-40 disabled:hover:bg-white text-stone-700 cursor-pointer transition-colors"
+                                className="p-1.5 border border-border rounded-lg hover:bg-surface2 disabled:opacity-40 disabled:hover:bg-transparent text-text-secondary cursor-pointer transition-colors duration-150"
                               >
                                 <ChevronRight className="size-4" />
                               </button>
@@ -1554,35 +1498,35 @@ export default function PurchaseOrdersView({
                         {activePo.items && activePo.items.length > 0 && (
                           <div className="w-full space-y-4">
                             {/* Responsive Table Container */}
-                            <div className="w-full overflow-x-auto border border-stone-200 rounded-lg bg-white shadow-xs">
-                              <table className="w-full text-xs text-left border-collapse min-w-[900px]">
+                            <div className="w-full overflow-x-auto card">
+                              <table className="w-full text-left border-collapse min-w-[900px]">
                                 <thead>
-                                  <tr className="bg-stone-50/75 border-b border-stone-200 text-stone-900 font-bold uppercase text-[10px] tracking-wider font-sans">
-                                    <th className="py-2 px-3 border-r border-stone-200 w-16">Line</th>
-                                    <th className="py-2 px-3 border-r border-stone-200 w-36">Material Code</th>
-                                    <th className="py-2 px-3 border-r border-stone-200 min-w-[200px]">Description</th>
-                                    <th className="py-2 px-3 border-r border-stone-200 w-28 text-right">Ordered Qty</th>
-                                    <th className="py-2 px-3 border-r border-stone-200 w-28 text-right">Remaining Qty</th>
-                                    <th className="py-2 px-3 border-r border-stone-200 w-36 text-center">Dispatched Qty</th>
-                                    <th className="py-2 px-3 border-r border-stone-200 w-20">UoM</th>
-                                    <th className="py-2 px-3 border-r border-stone-200 w-32 text-right">Net Price</th>
-                                    <th className="py-2 px-3 text-right w-36">Delivery Date</th>
+                                  <tr>
+                                    <th className="w-16">Line</th>
+                                    <th className="w-36">Material Code</th>
+                                    <th className="min-w-[200px]">Description</th>
+                                    <th className="w-28 text-right">Ordered Qty</th>
+                                    <th className="w-28 text-right">Remaining Qty</th>
+                                    <th className="w-36 text-center">Dispatched Qty</th>
+                                    <th className="w-20">UoM</th>
+                                    <th className="w-32 text-right">Net Price</th>
+                                    <th className="text-right w-36">Delivery Date</th>
                                   </tr>
                                 </thead>
-                                <tbody className="divide-y divide-stone-200">
+                                <tbody>
                                   {activePo.items.slice(asnLineIdx * 5, asnLineIdx * 5 + 5).map((item, idx) => {
                                     const remaining = item.quantity - (item.grnQuantity || 0);
                                     const error = validationErrors[item.line];
                                     return (
-                                      <tr key={item.line || idx} className="hover:bg-stone-50/50 transition-colors">
-                                        <td className="py-2 px-3 border-r border-stone-200 text-stone-600 font-semibold font-mono">{item.line}</td>
-                                        <td className="py-2 px-3 border-r border-stone-200">
+                                      <tr key={item.line || idx}>
+                                        <td className="font-semibold font-mono">{item.line}</td>
+                                        <td>
                                           <span className="text-blue-600 font-bold hover:underline cursor-pointer">{item.materialCode}</span>
                                         </td>
-                                        <td className="py-2 px-3 border-r border-stone-200 text-stone-800 font-sans font-medium">{item.description}</td>
-                                        <td className="py-2 px-3 border-r border-stone-200 font-bold text-stone-900 text-right font-mono">{item.quantity}</td>
-                                        <td className="py-2 px-3 border-r border-stone-200 font-bold text-amber-700 text-right font-mono">{remaining}</td>
-                                        <td className="py-1 px-3 border-r border-stone-200 text-center">
+                                        <td className="text-text-primary font-medium">{item.description}</td>
+                                        <td className="font-bold text-text-primary text-right font-mono tabular-nums">{item.quantity}</td>
+                                        <td className="font-bold text-amber-700 text-right font-mono tabular-nums">{remaining}</td>
+                                        <td className="text-center">
                                           <div className="flex flex-col items-center justify-center gap-0.5">
                                             <input
                                               type="number"
@@ -1601,21 +1545,21 @@ export default function PurchaseOrdersView({
                                                   }
                                                 }));
                                               }}
-                                              className={`w-24 bg-white border focus:border-stone-500 rounded-[3px] px-2 py-0.5 text-xs text-right font-mono font-semibold outline-none transition-all ${
-                                                error ? 'border-red-500 focus:border-red-500 bg-red-50/30' : 'border-stone-300'
+                                              className={`w-24 bg-surface border focus:border-[rgb(var(--color-emerald-default-rgb))] rounded-[3px] px-2 py-0.5 text-xs text-right font-mono font-semibold outline-none tabular-nums transition-all duration-150 ${
+                                                error ? 'border-red-500 focus:border-red-500 bg-red-50/30' : 'border-border-em'
                                               }`}
                                               placeholder="0"
                                             />
                                             {error && (
-                                              <span className="text-[9px] text-red-650 font-bold block max-w-24 leading-tight truncate" title={error}>
+                                              <span className="text-[9px] text-red-600 font-bold block max-w-24 leading-tight truncate" title={error}>
                                                 {error}
                                               </span>
                                             )}
                                           </div>
                                         </td>
-                                        <td className="py-2 px-3 border-r border-stone-200 text-stone-600 font-medium">{item.uom || 'EA'}</td>
-                                        <td className="py-2 px-3 border-r border-stone-200 font-bold text-stone-900 text-right font-mono">₹ {item.unitPrice.toLocaleString()}.00</td>
-                                        <td className="py-2 px-3 font-medium font-mono text-stone-700 text-right">{formatDate(item.deliveryDate || activePo.createdDate)}</td>
+                                        <td className="font-medium">{item.uom || 'EA'}</td>
+                                        <td className="font-bold text-text-primary text-right font-mono tabular-nums">₹ {item.unitPrice.toLocaleString()}.00</td>
+                                        <td className="font-medium font-mono tabular-nums text-right">{formatDate(item.deliveryDate || activePo.createdDate)}</td>
                                       </tr>
                                     );
                                   })}
@@ -1632,8 +1576,8 @@ export default function PurchaseOrdersView({
                                     type="button"
                                     onClick={() => setAsnLineIdx(dotIdx)}
                                     className={`size-2 rounded-full transition-all duration-150 cursor-pointer ${asnLineIdx === dotIdx
-                                        ? 'bg-stone-800 w-4.5'
-                                        : 'bg-stone-300 hover:bg-stone-400'
+                                        ? 'bg-text-primary w-4.5'
+                                        : 'bg-border-em hover:bg-text-tertiary'
                                       }`}
                                     title={`Go to page ${dotIdx + 1}`}
                                   />
@@ -1662,46 +1606,46 @@ export default function PurchaseOrdersView({
                               <div className="size-12 bg-green-50 border border-green-200 text-green-600 rounded-full flex items-center justify-center mx-auto shadow-xs">
                                 <Check className="size-6 animate-pulse" />
                               </div>
-                              <h4 className="text-sm font-bold text-amber-850">ASN Dispatch Submitted Successfully</h4>
-                              <p className="text-xs text-stone-500 max-w-md mx-auto leading-normal">
+                              <h4 className="text-sm font-bold text-amber-800">ASN Dispatch Submitted Successfully</h4>
+                              <p className="text-xs text-text-secondary max-w-md mx-auto leading-normal">
                                 Logistics dispatch details successfully transmitted via SAP BAPI (`BAPI_DELIVERY_CREATE_DN`).
                               </p>
                             </div>
 
-                            <div className="p-4 bg-white border border-amber-250/60 rounded-xl text-xs space-y-3.5 shadow-sm">
+                            <div className="p-4 bg-surface border border-amber-200/60 rounded-xl text-xs space-y-3.5 shadow-sm">
                               <div className="grid grid-cols-2 gap-x-4 gap-y-2 text-left font-mono">
                                 <div>
-                                  <span className="text-[9px] text-stone-400 font-bold uppercase block font-sans">ASN Reference ID</span>
-                                  <span className="font-bold text-stone-900 text-xs select-all">
+                                  <span className="text-[9px] text-text-tertiary font-bold uppercase block font-sans">ASN Reference ID</span>
+                                  <span className="font-bold text-text-primary text-xs select-all">
                                     {activeAsn?.id || activeAsn?.asnId || 'N/A'}
                                   </span>
                                 </div>
                                 <div>
-                                  <span className="text-[9px] text-stone-400 font-bold uppercase block font-sans">SAP Delivery Note ID</span>
-                                  <span className="font-bold text-stone-900 text-xs select-all">
+                                  <span className="text-[9px] text-text-tertiary font-bold uppercase block font-sans">SAP Delivery Note ID</span>
+                                  <span className="font-bold text-text-primary text-xs select-all">
                                     {activeAsn?.sapInboundDelivery || activeAsn?.sapInbound || 'N/A'}
                                   </span>
                                 </div>
                                 <div>
-                                  <span className="text-[9px] text-stone-400 font-bold uppercase block font-sans">Carrier / Transporter</span>
-                                  <span className="font-bold text-stone-700 text-xs font-sans">
+                                  <span className="text-[9px] text-text-tertiary font-bold uppercase block font-sans">Carrier / Transporter</span>
+                                  <span className="font-bold text-text-secondary text-xs font-sans">
                                     {activeAsn?.carrierName || 'N/A'}
                                   </span>
                                 </div>
                                 <div>
-                                  <span className="text-[9px] text-stone-400 font-bold uppercase block font-sans">Tracking / Vehicle No</span>
-                                  <span className="font-bold text-stone-700 text-xs">
+                                  <span className="text-[9px] text-text-tertiary font-bold uppercase block font-sans">Tracking / Vehicle No</span>
+                                  <span className="font-bold text-text-secondary text-xs">
                                     {activeAsn?.trackingNumber || activeAsn?.vehicleNumber || 'N/A'}
                                   </span>
                                 </div>
                               </div>
 
-                              <div className="border-t border-stone-100 pt-3 flex items-center justify-between bg-stone-50/50 p-2.5 rounded-lg">
+                              <div className="border-t border-border pt-3 flex items-center justify-between bg-surface2/50 p-2.5 rounded-lg">
                                 <div className="flex items-center gap-2">
                                   <Truck className="size-4.5 text-amber-500 animate-pulse" />
-                                  <span className="font-semibold text-stone-600 font-sans">Warehouse MIGO receipt simulation:</span>
+                                  <span className="font-semibold text-text-secondary font-sans">Warehouse MIGO receipt simulation:</span>
                                 </div>
-                                <span className="text-amber-600 animate-pulse font-bold font-mono text-sm">
+                                <span className="text-amber-600 animate-pulse font-bold font-mono text-sm tabular-nums">
                                   {countdown[activePo.id] !== undefined ? `${countdown[activePo.id]}s` : '10s'}
                                 </span>
                               </div>
@@ -1710,10 +1654,10 @@ export default function PurchaseOrdersView({
                         );
                       }
                       return (
-                        <div className="p-6 border border-stone-200 bg-white rounded-xl shadow-sm text-center">
-                          <AlertTriangle className="size-8 text-stone-400 mx-auto mb-2" />
-                          <h4 className="text-xs font-bold text-stone-700">Goods Receipt Not Synced</h4>
-                          <p className="text-xs text-stone-500 mt-1">
+                        <div className="card p-6 text-center">
+                          <AlertTriangle className="size-8 text-text-tertiary mx-auto mb-2" />
+                          <h4 className="text-xs font-bold text-text-primary">Goods Receipt Not Synced</h4>
+                          <p className="text-xs text-text-secondary mt-1">
                             Please prepare and submit ASN shipment dispatch (Tab 2) first to initiate delivery sync.
                           </p>
                         </div>
@@ -1723,31 +1667,31 @@ export default function PurchaseOrdersView({
                     // GRN exists!
                     return (
                       <div className="space-y-6 animate-fade-in">
-                        <div className="p-4 bg-white border border-stone-200 rounded-xl flex items-center justify-between shadow-sm">
+                        <div className="card p-4 flex items-center justify-between">
                           <div>
-                            <h4 className="text-xs font-bold text-stone-850 uppercase tracking-wider">SAP Goods Receipt Note (MIGO 101)</h4>
-                            <p className="text-[10px] text-stone-500 font-medium mt-0.5">Inspected & cleared by warehouse stores division</p>
+                            <h4 className="text-xs font-bold text-text-primary uppercase tracking-wider">SAP Goods Receipt Note (MIGO 101)</h4>
+                            <p className="text-[10px] text-text-secondary font-medium mt-0.5">Inspected & cleared by warehouse stores division</p>
                           </div>
                           {!grn.invoiceSubmitted ? (
                             <Button
                               onClick={() => handleOpenInvoiceDetail(grn)}
-                              className="bg-blue-50 border border-blue-200 text-blue-700 hover:bg-blue-600 hover:text-white hover:border-blue-600 font-bold text-xs rounded-lg px-5 shadow-sm flex items-center gap-1.5 transition-all duration-150"
+                              variant="default"
                             >
                               <span>Proceed with Invoice</span>
                               <ChevronRight className="size-3.5" />
                             </Button>
                           ) : (
-                            <span className="px-3 py-1 rounded bg-stone-100 text-stone-700 border border-stone-200 text-xs font-bold font-mono">
+                            <span className="px-3 py-1 rounded bg-surface2 text-text-secondary border border-border text-xs font-bold font-mono">
                               Invoice Posted (MIRO complete)
                             </span>
                           )}
                         </div>
 
                         {/* GRN Header Fields — 3-column grid, label-on-top aligned */}
-                        <div className="bg-white border border-stone-200 rounded-xl shadow-sm overflow-hidden">
-                          <div className="flex items-center gap-2 px-5 py-3 border-b border-stone-100 bg-stone-50/60">
+                        <div className="card overflow-hidden">
+                          <div className="flex items-center gap-2 px-5 py-3 border-b border-border bg-surface2/40">
                             <div className="size-1.5 rounded-full bg-green-500"></div>
-                            <span className="text-[10px] font-extrabold text-stone-500 uppercase tracking-widest">Goods Receipt (MIGO) Header Data</span>
+                            <span className="text-[10px] font-extrabold text-text-secondary uppercase tracking-widest">Goods Receipt (MIGO) Header Data</span>
                           </div>
                           <div className="grid grid-cols-2 md:grid-cols-3 gap-4 p-5">
                             <SapReadOnlyField
@@ -1792,8 +1736,8 @@ export default function PurchaseOrdersView({
 
                         {/* QC Line Status Table Itemization (Create ASN Style) */}
                         <div className="space-y-4">
-                          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b border-stone-200 pb-2">
-                            <h4 className="text-xs font-bold text-stone-900 uppercase tracking-wider">
+                          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b border-border pb-2">
+                            <h4 className="text-xs font-bold text-text-primary uppercase tracking-wider">
                               GRN Line Items &amp; QC Status
                             </h4>
 
@@ -1804,18 +1748,18 @@ export default function PurchaseOrdersView({
                                   type="button"
                                   disabled={grnLineIdx === 0}
                                   onClick={() => setGrnLineIdx(prev => Math.max(0, prev - 1))}
-                                  className="p-1.5 border border-stone-200 rounded-lg hover:bg-stone-50 disabled:opacity-40 disabled:hover:bg-white text-stone-700 cursor-pointer transition-colors"
+                                  className="p-1.5 border border-border rounded-lg hover:bg-surface2 disabled:opacity-40 disabled:hover:bg-transparent text-text-secondary cursor-pointer transition-colors duration-150"
                                 >
                                   <ChevronLeft className="size-4" />
                                 </button>
-                                <span className="text-xs font-semibold text-stone-600 font-mono select-none">
+                                <span className="text-xs font-semibold text-text-secondary font-mono select-none tabular-nums">
                                   Page {grnLineIdx + 1} of {Math.max(1, Math.ceil(grn.items.length / 5))}
                                 </span>
                                 <button
                                   type="button"
                                   disabled={grnLineIdx >= Math.ceil(grn.items.length / 5) - 1}
                                   onClick={() => setGrnLineIdx(prev => Math.min(Math.ceil(grn.items.length / 5) - 1, prev + 1))}
-                                  className="p-1.5 border border-stone-200 rounded-lg hover:bg-stone-50 disabled:opacity-40 disabled:hover:bg-white text-stone-700 cursor-pointer transition-colors"
+                                  className="p-1.5 border border-border rounded-lg hover:bg-surface2 disabled:opacity-40 disabled:hover:bg-transparent text-text-secondary cursor-pointer transition-colors duration-150"
                                 >
                                   <ChevronRight className="size-4" />
                                 </button>
@@ -1826,45 +1770,43 @@ export default function PurchaseOrdersView({
                           {grn.items && grn.items.length > 0 && (
                             <div className="w-full space-y-4">
                               {/* Responsive Table Container */}
-                              <div className="w-full overflow-x-auto border border-stone-200 rounded-lg bg-white shadow-xs">
-                                <table className="w-full text-xs text-left border-collapse min-w-[900px] whitespace-nowrap">
+                              <div className="w-full overflow-x-auto card">
+                                <table className="w-full text-left border-collapse min-w-[900px] whitespace-nowrap">
                                   <thead>
-                                    <tr className="bg-stone-50/75 border-b border-stone-200 text-stone-900 font-bold uppercase text-[10px] tracking-wider font-sans">
-                                      <th className="py-2 px-3 border-r border-stone-200 w-16">Line</th>
-                                      <th className="py-2 px-3 border-r border-stone-200 w-36">Material Code</th>
-                                      <th className="py-2 px-3 border-r border-stone-200 min-w-[200px]">Description</th>
-                                      <th className="py-2 px-3 border-r border-stone-200 w-28 text-right">Received Qty</th>
-                                      <th className="py-2 px-3 border-r border-stone-200 w-28 text-right">Accepted Qty</th>
-                                      <th className="py-2 px-3 border-r border-stone-200 w-28 text-right">Rejected Qty</th>
-                                      <th className="py-2 px-3 border-r border-stone-200 w-20">UoM</th>
-                                      <th className="py-2 px-3 border-r border-stone-200 text-center w-28">Quality Status</th>
-                                      <th className="py-2 px-3 text-right w-36 font-sans">Posting Date</th>
+                                    <tr>
+                                      <th className="w-16">Line</th>
+                                      <th className="w-36">Material Code</th>
+                                      <th className="min-w-[200px]">Description</th>
+                                      <th className="w-28 text-right">Received Qty</th>
+                                      <th className="w-28 text-right">Accepted Qty</th>
+                                      <th className="w-28 text-right">Rejected Qty</th>
+                                      <th className="w-20">UoM</th>
+                                      <th className="text-center w-28">Quality Status</th>
+                                      <th className="text-right w-36 font-sans">Posting Date</th>
                                     </tr>
                                   </thead>
-                                  <tbody className="divide-y divide-stone-200 text-stone-700">
+                                  <tbody>
                                     {grn.items.slice(grnLineIdx * 5, grnLineIdx * 5 + 5).map((item, idx) => {
                                       const isRejected = (item.rejectedQuantity || 0) > 0;
                                       return (
-                                        <tr key={item.line || idx} className="hover:bg-stone-50/50 transition-colors">
-                                          <td className="py-2 px-3 border-r border-stone-200 text-stone-600 font-semibold font-mono">{item.line}</td>
-                                          <td className="py-2 px-3 border-r border-stone-200">
+                                        <tr key={item.line || idx}>
+                                          <td className="font-semibold font-mono">{item.line}</td>
+                                          <td>
                                             <span className="text-blue-600 font-bold hover:underline cursor-pointer">{item.materialCode}</span>
                                           </td>
-                                          <td className="py-2 px-3 border-r border-stone-200 font-sans font-medium text-stone-850">{item.description}</td>
-                                          <td className="py-2 px-3 border-r border-stone-200 font-bold text-stone-900 text-right font-mono">{item.receivedQuantity || (item.acceptedQuantity + (item.rejectedQuantity || 0))}</td>
-                                          <td className="py-2 px-3 border-r border-stone-200 font-bold text-emerald-700 text-right font-mono">{item.acceptedQuantity}</td>
-                                          <td className={`py-2 px-3 border-r border-stone-200 font-bold text-right font-mono ${isRejected ? 'text-rose-600' : 'text-stone-500'}`}>{item.rejectedQuantity || 0}</td>
-                                          <td className="py-2 px-3 border-r border-stone-200 text-stone-600 font-medium">{item.uom || 'EA'}</td>
-                                          <td className="py-2 px-3 border-r border-stone-200 text-center">
-                                            <span className={`px-2 py-0.5 rounded text-[10px] font-bold border ${
-                                              isRejected 
-                                                ? 'bg-rose-50 text-rose-700 border-rose-200' 
-                                                : 'bg-emerald-50 text-emerald-700 border-emerald-200'
-                                            }`}>
-                                              {isRejected ? 'QC FAIL' : 'QC PASS'}
-                                            </span>
+                                          <td className="font-sans font-medium text-text-primary">{item.description}</td>
+                                          <td className="font-bold text-text-primary text-right font-mono tabular-nums">{item.receivedQuantity || (item.acceptedQuantity + (item.rejectedQuantity || 0))}</td>
+                                          <td className="font-bold text-emerald-700 text-right font-mono tabular-nums">{item.acceptedQuantity}</td>
+                                          <td className={`font-bold text-right font-mono tabular-nums ${isRejected ? 'text-rose-600' : 'text-text-tertiary'}`}>{item.rejectedQuantity || 0}</td>
+                                          <td className="font-medium">{item.uom || 'EA'}</td>
+                                          <td className="text-center">
+                                            {isRejected ? (
+                                              <StatusBadge label="QC FAIL" variant="suspended" />
+                                            ) : (
+                                              <StatusBadge label="QC PASS" variant="active" />
+                                            )}
                                           </td>
-                                          <td className="py-2 px-3 text-right font-mono font-medium text-stone-500">{formatDate(grn.postingDate)}</td>
+                                          <td className="text-right font-mono font-medium tabular-nums">{formatDate(grn.postingDate)}</td>
                                         </tr>
                                       );
                                     })}
@@ -1881,8 +1823,8 @@ export default function PurchaseOrdersView({
                                       type="button"
                                       onClick={() => setGrnLineIdx(dotIdx)}
                                       className={`size-2 rounded-full transition-all duration-150 cursor-pointer ${grnLineIdx === dotIdx
-                                          ? 'bg-stone-800 w-4.5'
-                                          : 'bg-stone-300 hover:bg-stone-400'
+                                          ? 'bg-text-primary w-4.5'
+                                          : 'bg-border-em hover:bg-text-tertiary'
                                         }`}
                                       title={`Go to page ${dotIdx + 1}`}
                                     />
@@ -1907,7 +1849,7 @@ export default function PurchaseOrdersView({
             <div className="flex items-center gap-2">
               <button
                 onClick={() => { setCurrentView('list'); setPoSubTab('invoice'); }}
-                className="flex items-center gap-2 text-stone-500 hover:text-stone-900 text-xs font-bold transition-colors cursor-pointer w-fit"
+                className="flex items-center gap-2 text-text-secondary hover:text-text-primary text-xs font-bold transition-colors duration-150 cursor-pointer w-fit"
               >
                 <ArrowLeft className="size-4" />
                 <span>Back to Invoice Ready List</span>
@@ -1916,23 +1858,23 @@ export default function PurchaseOrdersView({
 
             {/* Success Post view */}
             {invoicePostedSuccess ? (
-              <div className="bg-white border border-stone-200 rounded-xl p-8 shadow-md text-center max-w-md mx-auto space-y-6">
+              <div className="card p-8 text-center max-w-md mx-auto space-y-6">
                 <div className="size-16 bg-green-50 border-2 border-green-500 rounded-full flex items-center justify-center text-green-600 mx-auto">
                   <Check className="size-8" />
                 </div>
                 <div className="space-y-1">
-                  <h3 className="text-base font-bold text-stone-900">MIRO Invoice Posted Successfully</h3>
-                  <p className="text-xs text-stone-500">BAPI_INCOMINGINVOICE_CREATE matched &amp; posted in SAP ledger</p>
+                  <h3 className="text-base font-bold text-text-primary">MIRO Invoice Posted Successfully</h3>
+                  <p className="text-xs text-text-secondary">BAPI_INCOMINGINVOICE_CREATE matched &amp; posted in SAP ledger</p>
                 </div>
 
-                <div className="p-3 bg-stone-50 border border-stone-200 rounded-lg text-xs font-mono font-bold text-stone-700 text-left space-y-1">
+                <div className="p-3 bg-base border border-border rounded-lg text-xs font-mono font-bold text-text-secondary text-left space-y-1">
                   <p>PO Reference: {activePo.id}</p>
                   <p>GRN Reference: {activeGrn.id}</p>
                   <p>Invoice Doc Reference: {vendorInvoiceNo.toUpperCase()}</p>
                   <p>SAP MIRO Doc: 510560{String(activeGrn?.id || '').split('').reduce((acc, char) => acc + char.charCodeAt(0), 0) % 9000 + 1000}</p>
                 </div>
 
-                <div className="p-3 bg-amber-50 border border-amber-200 rounded-lg text-[10px] text-amber-800 leading-normal font-semibold text-left">
+                <div className="p-3 bg-amber-500/10 border border-amber-200 rounded-lg text-[10px] text-amber-800 leading-normal font-semibold text-left">
                   💳 The invoice is now posted. SAP payment run (F110 RTGS/NEFT batch) is simulated weekly. The invoice status will update to Paid within 12 seconds automatically.
                 </div>
 
@@ -1941,7 +1883,7 @@ export default function PurchaseOrdersView({
                     onClick={() => {
                       setActiveTab('invoices');
                     }}
-                    className="bg-stone-850 hover:bg-black text-white font-bold text-xs rounded-lg px-4"
+                    variant="default"
                   >
                     Go to Invoices Registry
                   </Button>
@@ -1951,7 +1893,6 @@ export default function PurchaseOrdersView({
                       setPoSubTab('list');
                     }}
                     variant="outline"
-                    className="border-stone-300 text-stone-700 hover:bg-stone-50 text-xs font-bold rounded-lg px-4"
                   >
                     Close
                   </Button>
@@ -1961,44 +1902,44 @@ export default function PurchaseOrdersView({
               <div className="space-y-6">
 
                 {/* Notice Banner */}
-                <div className="bg-emerald-50 border border-emerald-250 rounded-xl p-4 flex items-start gap-3">
-                  <ShieldCheck className="size-5 text-emerald-650 shrink-0 mt-0.5" />
+                <div className="bg-emerald-50 border border-emerald-200 rounded-xl p-4 flex items-start gap-3">
+                  <ShieldCheck className="size-5 text-emerald-600 shrink-0 mt-0.5" />
                   <div>
                     <h4 className="font-bold text-emerald-800 text-xs uppercase tracking-wider">3-Way Match Verification Complete</h4>
-                    <p className="text-emerald-750 text-xs mt-1 leading-normal font-semibold">
+                    <p className="text-emerald-700 text-xs mt-1 leading-normal font-semibold">
                       Purchase Order quantities, Unit prices, and Warehouse Goods Receipt (MIGO) accepted counts match perfectly. You are eligible to post MIRO billing for this receipt.
                     </p>
                   </div>
                 </div>
 
                 {/* Prefilled Fields Section */}
-                <div className="bg-white border border-stone-200 rounded-xl p-5 shadow-sm space-y-4">
-                  <h3 className="text-xs font-bold text-stone-850 uppercase border-b border-stone-100 pb-2">Prefilled Header Parameters</h3>
+                <div className="card p-5 space-y-4">
+                  <h3 className="text-xs font-bold text-text-primary uppercase border-b border-border pb-2">Prefilled Header Parameters</h3>
 
                   <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-4 text-xs">
                     <div>
-                      <span className="text-[10px] text-stone-400 font-bold uppercase block">Vendor Code</span>
-                      <span className="font-semibold text-stone-700">{state?.profile?.sapVendorCode || 'VND-4001'}</span>
+                      <span className="text-[10px] text-text-tertiary font-bold uppercase block">Vendor Code</span>
+                      <span className="font-semibold text-text-secondary">{state?.profile?.sapVendorCode || 'VND-4001'}</span>
                     </div>
                     <div>
-                      <span className="text-[10px] text-stone-400 font-bold uppercase block">Vendor Name</span>
-                      <span className="font-semibold text-stone-700">{state?.profile?.companyName || 'Your Firm'}</span>
+                      <span className="text-[10px] text-text-tertiary font-bold uppercase block">Vendor Name</span>
+                      <span className="font-semibold text-text-secondary">{state?.profile?.companyName || 'Your Firm'}</span>
                     </div>
                     <div>
-                      <span className="text-[10px] text-stone-400 font-bold uppercase block">PO Reference</span>
-                      <span className="font-mono font-bold text-stone-700">{activePo.id}</span>
+                      <span className="text-[10px] text-text-tertiary font-bold uppercase block">PO Reference</span>
+                      <span className="font-mono font-bold text-text-secondary">{activePo.id}</span>
                     </div>
                     <div>
-                      <span className="text-[10px] text-stone-400 font-bold uppercase block">GRN Document</span>
-                      <span className="font-mono font-bold text-stone-700">{activeGrn.id} (SAP MIGO: {activeGrn.sapMigoDoc})</span>
+                      <span className="text-[10px] text-text-tertiary font-bold uppercase block">GRN Document</span>
+                      <span className="font-mono font-bold text-text-secondary">{activeGrn.id} (SAP MIGO: {activeGrn.sapMigoDoc})</span>
                     </div>
                     <div>
-                      <span className="text-[10px] text-stone-400 font-bold uppercase block">Tax Scheme</span>
-                      <span className="font-semibold text-stone-700">GST 18% (G1 code)</span>
+                      <span className="text-[10px] text-text-tertiary font-bold uppercase block">Tax Scheme</span>
+                      <span className="font-semibold text-text-secondary">GST 18% (G1 code)</span>
                     </div>
                     <div>
-                      <span className="text-[10px] text-stone-400 font-bold uppercase block">Payment Terms</span>
-                      <span className="font-semibold text-stone-700">{activePo.paymentTerms}</span>
+                      <span className="text-[10px] text-text-tertiary font-bold uppercase block">Payment Terms</span>
+                      <span className="font-semibold text-text-secondary">{activePo.paymentTerms}</span>
                     </div>
                   </div>
                 </div>
@@ -2007,40 +1948,40 @@ export default function PurchaseOrdersView({
                 <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 items-start">
 
                   {/* Billing items grid (8 cols) */}
-                  <div className="lg:col-span-8 bg-white border border-stone-200 rounded-xl p-5 shadow-sm space-y-4">
-                    <h3 className="text-xs font-bold text-stone-850 uppercase border-b border-stone-100 pb-2">Billed Line Allocation</h3>
+                  <div className="lg:col-span-8 card p-5 space-y-4">
+                    <h3 className="text-xs font-bold text-text-primary uppercase border-b border-border pb-2">Billed Line Allocation</h3>
 
-                    <div className="border border-stone-200 rounded-lg overflow-hidden bg-stone-50/10">
-                      <table className="w-full text-left text-xs border-collapse">
+                    <div className="border border-border rounded-lg overflow-hidden">
+                      <table className="w-full text-left border-collapse">
                         <thead>
-                          <tr className="bg-stone-50 border-b border-stone-200 text-stone-500 font-bold text-[9px] uppercase tracking-wider">
-                            <th className="py-2.5 px-3">Line</th>
-                            <th className="py-2.5 px-3">Material & Description</th>
-                            <th className="py-2.5 px-3 text-right">Billed Qty</th>
-                            <th className="py-2.5 px-3 text-right font-mono">Unit Price</th>
-                            <th className="py-2.5 px-3 text-right">GST Tax</th>
-                            <th className="py-2.5 px-3 text-right">Total Net Value</th>
+                          <tr>
+                            <th>Line</th>
+                            <th>Material & Description</th>
+                            <th className="text-right">Billed Qty</th>
+                            <th className="text-right font-mono">Unit Price</th>
+                            <th className="text-right">GST Tax</th>
+                            <th className="text-right">Total Net Value</th>
                           </tr>
                         </thead>
-                        <tbody className="divide-y divide-stone-100 text-stone-700">
+                        <tbody>
                           {(activeGrn.items || []).map(item => {
                             const poItem = activePo?.items?.find(pi => pi.line === item.line);
                             const unitPrice = poItem?.unitPrice || 0;
                             const netValue = item.acceptedQuantity * unitPrice;
 
                             return (
-                              <tr key={item.line} className="hover:bg-stone-50/20">
-                                <td className="py-3 px-3 font-mono text-stone-400">{item.line}</td>
-                                <td className="py-3 px-3">
-                                  <p className="font-semibold text-stone-900">{item.description}</p>
-                                  <p className="text-[10px] text-stone-450 font-mono mt-0.5">{item.materialCode}</p>
+                              <tr key={item.line}>
+                                <td className="font-mono text-text-tertiary">{item.line}</td>
+                                <td>
+                                  <p className="font-semibold text-text-primary">{item.description}</p>
+                                  <p className="text-[10px] text-text-tertiary font-mono mt-0.5">{item.materialCode}</p>
                                 </td>
-                                <td className="py-3 px-3 text-right font-mono font-bold text-emerald-800 bg-emerald-50/20">
+                                <td className="text-right font-mono font-bold text-emerald-700 bg-emerald-50/20 tabular-nums">
                                   {item.acceptedQuantity} {poItem?.uom || 'EA'}
                                 </td>
-                                <td className="py-3 px-3 text-right font-mono text-stone-600">₹ {unitPrice.toLocaleString()}.00</td>
-                                <td className="py-3 px-3 text-right font-mono text-stone-500">18% (G1)</td>
-                                <td className="py-3 px-3 text-right font-mono font-bold text-stone-900">
+                                <td className="text-right font-mono tabular-nums">₹ {unitPrice.toLocaleString()}.00</td>
+                                <td className="text-right font-mono">18% (G1)</td>
+                                <td className="text-right font-mono font-bold text-text-primary tabular-nums">
                                   ₹ {netValue.toLocaleString()}.00
                                 </td>
                               </tr>
@@ -2051,24 +1992,24 @@ export default function PurchaseOrdersView({
                     </div>
 
                     {/* Manual Billing Inputs */}
-                    <div className="border-t border-stone-100 pt-4">
+                    <div className="border-t border-border pt-4">
                       <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                        <EnterpriseFieldCard label="Vendor Tax Invoice No." required icon={FileText} accentColor="bg-blue-600">
+                        <EnterpriseFieldCard label="Vendor Tax Invoice No." required icon={FileText}>
                           <input
                             type="text"
                             value={vendorInvoiceNo}
                             onChange={e => setVendorInvoiceNo(e.target.value)}
                             placeholder="e.g. INV-2026-8890"
-                            className="w-full bg-white border border-stone-300 focus:border-stone-500 rounded-lg px-2.5 py-1 text-xs outline-none text-stone-900 font-mono font-bold uppercase h-8"
+                            className="w-full uppercase h-8"
                           />
                         </EnterpriseFieldCard>
 
-                        <EnterpriseFieldCard label="Invoice Date" required icon={Calendar} accentColor="bg-blue-600">
+                        <EnterpriseFieldCard label="Invoice Date" required icon={Calendar}>
                           <input
                             type="date"
                             value={billingDate}
                             onChange={e => setBillingDate(e.target.value)}
-                            className="w-full bg-white border border-stone-300 focus:border-stone-500 rounded-lg px-2.5 py-1 text-xs outline-none text-stone-900 font-mono font-bold h-8"
+                            className="w-full h-8"
                           />
                         </EnterpriseFieldCard>
                       </div>
@@ -2076,8 +2017,8 @@ export default function PurchaseOrdersView({
                   </div>
 
                   {/* Summary calculation card (4 cols) */}
-                  <div className="lg:col-span-4 bg-white border border-stone-200 rounded-xl p-5 shadow-sm space-y-4">
-                    <h3 className="text-xs font-bold text-stone-850 uppercase border-b border-stone-100 pb-2">Invoice Summary</h3>
+                  <div className="lg:col-span-4 card p-5 space-y-4">
+                    <h3 className="text-xs font-bold text-text-primary uppercase border-b border-border pb-2">Invoice Summary</h3>
 
                     {(() => {
                       const subtotal = (activeGrn.items || []).reduce((sum, item) => {
@@ -2090,24 +2031,24 @@ export default function PurchaseOrdersView({
 
                       return (
                         <div className="space-y-4 text-xs">
-                          <div className="space-y-2 text-stone-500 font-semibold">
+                          <div className="space-y-2 text-text-secondary font-semibold">
                             <div className="flex justify-between">
                               <span>Subtotal</span>
-                              <span className="font-mono text-stone-700">₹ {subtotal.toLocaleString()}.00</span>
+                              <span className="font-mono text-text-secondary tabular-nums">₹ {subtotal.toLocaleString()}.00</span>
                             </div>
                             <div className="flex justify-between">
                               <span>GST Tax (18% G1)</span>
-                              <span className="font-mono text-stone-700">₹ {gst.toLocaleString()}</span>
+                              <span className="font-mono text-text-secondary tabular-nums">₹ {gst.toLocaleString()}</span>
                             </div>
                             <div className="flex justify-between">
                               <span>Freight charges</span>
-                              <span className="font-mono text-stone-700">₹ 0.00</span>
+                              <span className="font-mono text-text-secondary tabular-nums">₹ 0.00</span>
                             </div>
                           </div>
 
-                          <div className="border-t border-stone-200 pt-3 flex justify-between items-baseline">
-                            <span className="font-bold text-stone-800 text-sm">Grand Gross Value</span>
-                            <span className="text-lg font-bold text-stone-950 font-mono">
+                          <div className="border-t border-border pt-3 flex justify-between items-baseline">
+                            <span className="font-bold text-text-primary text-sm">Grand Gross Value</span>
+                            <span className="text-lg font-bold text-text-primary font-mono tabular-nums">
                               ₹ {total.toLocaleString()}
                             </span>
                           </div>
@@ -2116,7 +2057,8 @@ export default function PurchaseOrdersView({
                             <Button
                               disabled={isPostingInvoice}
                               onClick={handleMiroInvoicePost}
-                              className="w-full bg-orange-50 border border-orange-200 text-orange-700 hover:bg-orange-500 hover:text-white hover:border-orange-500 font-bold text-xs py-2 rounded-lg flex items-center justify-center gap-1.5 shadow-md transition-all duration-150 disabled:opacity-50 disabled:cursor-not-allowed"
+                              variant="default"
+                              className="w-full"
                             >
                               {isPostingInvoice ? (
                                 <>
@@ -2146,42 +2088,42 @@ export default function PurchaseOrdersView({
         {/* ================================================================= */}
         {drawerOpen && drawerPo && (
           <div className="fixed inset-0 z-50 overflow-hidden" onClick={() => setDrawerOpen(false)}>
-            <div className="absolute inset-0 bg-stone-900/20 backdrop-blur-xs transition-opacity animate-fade-in" />
+            <div className="absolute inset-0 bg-black/20 backdrop-blur-xs transition-opacity animate-fade-in" />
 
             <div className="absolute inset-y-0 right-0 pl-10 max-w-full flex" onClick={e => e.stopPropagation()}>
-              <div className="w-screen max-w-md bg-white shadow-xl flex flex-col h-full border-l border-stone-200 animate-slide-left">
+              <div className="w-screen max-w-md bg-surface shadow-xl flex flex-col h-full border-l border-border animate-slide-left">
 
                 {/* Drawer Header */}
-                <div className="p-5 border-b border-stone-200 bg-stone-50 flex items-center justify-between">
+                <div className="p-5 border-b border-border bg-surface2/40 flex items-center justify-between">
                   <div>
-                    <h3 className="font-bold text-sm text-stone-900 flex items-center gap-2">
-                      <MessageSquare className="size-4.5 text-stone-500" />
+                    <h3 className="font-bold text-sm text-text-primary flex items-center gap-2">
+                      <MessageSquare className="size-4.5 text-text-tertiary" />
                       <span>Communication Desk</span>
                     </h3>
-                    <p className="text-[10px] text-stone-450 font-mono mt-0.5">PO Ref: {drawerPo.id}</p>
+                    <p className="text-[10px] text-text-tertiary font-mono mt-0.5">PO Ref: {drawerPo.id}</p>
                   </div>
                   <button
                     onClick={() => setDrawerOpen(false)}
-                    className="p-1.5 text-stone-400 hover:text-stone-700 hover:bg-stone-150 rounded-md transition-colors"
+                    className="p-1.5 text-text-tertiary hover:text-text-primary hover:bg-surface2 rounded-md transition-colors duration-150"
                   >
                     <X className="size-4" />
                   </button>
                 </div>
 
                 {/* Status control */}
-                <div className="px-5 py-3 border-b border-stone-100 flex items-center justify-between text-xs bg-stone-50/50">
-                  <span className="font-bold text-stone-500 uppercase text-[9px] tracking-wider">Issue Status Tag:</span>
+                <div className="px-5 py-3 border-b border-border flex items-center justify-between text-xs bg-surface2/30">
+                  <span className="font-bold text-text-secondary uppercase text-[9px] tracking-wider">Issue Status Tag:</span>
                   <div className="flex items-center gap-1.5">
                     {['Open', 'In Review', 'Resolved'].map(st => (
                       <button
                         key={st}
                         onClick={() => setPoIssueStatus(prev => ({ ...prev, [drawerPo.id]: st }))}
-                        className={`px-2 py-0.5 rounded text-[10px] font-bold border transition-colors ${
+                        className={`px-2 py-0.5 rounded text-[10px] font-bold border transition-colors duration-150 ${
                             poIssueStatus[drawerPo.id] === st
                               ? st === 'Open' ? 'bg-red-50 text-red-700 border-red-200'
                               : st === 'In Review' ? 'bg-amber-50 text-amber-700 border-amber-200'
                               : 'bg-green-50 text-green-700 border-green-200'
-                              : 'bg-white border-stone-200 text-stone-600 hover:bg-stone-50'
+                              : 'bg-surface border-border text-text-secondary hover:bg-surface2'
                           }`}
                       >
                         {st}
@@ -2191,16 +2133,16 @@ export default function PurchaseOrdersView({
                 </div>
 
                 {/* Messages Body */}
-                <div className="flex-1 overflow-y-auto p-5 space-y-4 custom-scrollbar bg-stone-50/20">
+                <div className="flex-1 overflow-y-auto p-5 space-y-4 custom-scrollbar bg-base/20">
                   {(poChats[drawerPo.id] || []).map((msg, idx) => (
                     <div key={idx} className={`flex flex-col gap-1 max-w-[85%] ${msg.sender === 'Vendor' ? 'ml-auto items-end' : 'mr-auto items-start'}`}>
-                      <span className="text-[8px] font-bold text-stone-400 uppercase tracking-widest font-mono">
+                      <span className="text-[8px] font-bold text-text-tertiary uppercase tracking-widest font-mono">
                         {msg.sender === 'Vendor' ? 'Your Firm' : 'Amit Sharma (Buyer)'}
                       </span>
-                      <div className={`p-3 rounded-2xl border text-xs ${msg.sender === 'Vendor' ? 'bg-stone-900 border-stone-900 text-stone-50 rounded-tr-none' : 'bg-white border-stone-200 text-stone-850 rounded-tl-none shadow-xs'}`}>
+                      <div className={`p-3 rounded-2xl border text-xs ${msg.sender === 'Vendor' ? 'bg-[rgb(var(--color-emerald-default-rgb))] border-transparent text-white rounded-tr-none' : 'bg-surface border-border text-text-primary rounded-tl-none shadow-xs'}`}>
                         <p className="leading-relaxed">{msg.message}</p>
                       </div>
-                      <span className="text-[8px] text-stone-400 font-mono mt-0.5">
+                      <span className="text-[8px] text-text-tertiary font-mono mt-0.5 tabular-nums">
                         {new Date(msg.timestamp).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
                       </span>
                     </div>
@@ -2208,18 +2150,18 @@ export default function PurchaseOrdersView({
                 </div>
 
                 {/* Message Input Footer */}
-                <div className="p-4 border-t border-stone-200 bg-white flex gap-2">
+                <div className="p-4 border-t border-border bg-surface flex gap-2">
                   <input
                     type="text"
                     placeholder="Ask buyer a question..."
                     value={chatMessageInput}
                     onChange={e => setChatMessageInput(e.target.value)}
                     onKeyDown={e => e.key === 'Enter' && handleSendDrawerMessage()}
-                    className="flex-1 bg-stone-50 border border-stone-250 focus:border-stone-400 rounded-lg px-3 py-2 text-xs outline-none text-stone-900 font-medium"
+                    className="flex-1"
                   />
                   <button
                     onClick={handleSendDrawerMessage}
-                    className="px-3 bg-stone-850 hover:bg-stone-950 text-white rounded-lg transition-colors cursor-pointer flex items-center justify-center"
+                    className="px-3 bg-[rgb(var(--color-emerald-default-rgb))] hover:opacity-90 text-white rounded-lg transition-all duration-150 cursor-pointer flex items-center justify-center"
                   >
                     <Send className="size-4" />
                   </button>

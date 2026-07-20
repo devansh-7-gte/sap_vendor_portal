@@ -27,6 +27,9 @@ import {
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import ErrorBoundary from '@/components/ErrorBoundary';
+import EmptyState from '@/components/ui/EmptyState';
+import KPICard from '@/components/ui/KPICard';
+import StatusBadge from '@/components/ui/StatusBadge';
 
 const BASE_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000/api';
 
@@ -165,47 +168,47 @@ export default function AdminPage() {
   return (
     <ErrorBoundary>
       <div className="space-y-8 max-w-7xl mx-auto px-4 py-6 animate-fade-in pb-24 select-none font-sans">
-        
-        {/* Enterprise Glassmorphic Gradient Page Header */}
-        <div className="relative bg-gradient-to-r from-slate-950 via-slate-900 to-blue-950 text-white rounded-2xl shadow-xl p-6 md:p-8 flex flex-col md:flex-row justify-between items-start md:items-center gap-6 overflow-hidden border border-slate-800">
-          <div className="absolute top-0 right-0 w-80 h-80 bg-blue-500/10 rounded-full blur-3xl pointer-events-none"></div>
-          <div className="absolute bottom-0 left-12 w-64 h-64 bg-emerald-500/5 rounded-full blur-2xl pointer-events-none"></div>
-          
+
+        {/* Enterprise Page Header */}
+        <div className="relative card p-6 md:p-8 flex flex-col md:flex-row justify-between items-start md:items-center gap-6 overflow-hidden">
+          <div className="absolute top-0 right-0 w-80 h-80 rounded-full blur-3xl pointer-events-none" style={{ backgroundColor: 'var(--color-emerald-dim)' }}></div>
+
           <div className="space-y-3 z-10">
             <div className="flex items-center gap-3">
-              <span className="p-2.5 bg-white/10 text-blue-300 rounded-xl backdrop-blur-md border border-white/10 shadow-inner flex items-center justify-center">
-                <ShieldAlert className="size-6 text-blue-400" />
+              <span className="p-2.5 bg-surface2 text-text-primary rounded-xl border border-border shadow-inner flex items-center justify-center">
+                <ShieldAlert className="size-6" />
               </span>
               <div>
-                <h1 className="text-xl md:text-2xl font-extrabold tracking-tight text-white">
+                <h1 className="text-[22px] font-bold text-text-primary">
                   SAP Integration &amp; Supplier Administration
                 </h1>
                 <div className="flex items-center gap-2 mt-1">
-                  <span className="text-[10px] bg-blue-500/20 text-blue-300 border border-blue-400/20 px-2 py-0.5 rounded-full font-bold font-mono tracking-wider">
+                  <span className="text-[10px] bg-surface2 text-text-secondary border border-border px-2 py-0.5 rounded-full font-bold font-mono tracking-wider">
                     V1.2.0-SECURE
                   </span>
-                  <span className="text-[10px] bg-emerald-500/20 text-emerald-400 border border-emerald-400/20 px-2 py-0.5 rounded-full font-bold font-mono tracking-wider">
+                  <span className="text-[10px] text-emerald-text border border-border px-2 py-0.5 rounded-full font-bold font-mono tracking-wider" style={{ backgroundColor: 'var(--color-emerald-dim)' }}>
                     PORTAL ADMIN
                   </span>
                 </div>
               </div>
             </div>
-            <p className="text-slate-400 text-xs max-w-3xl leading-relaxed">
+            <p className="text-text-tertiary text-xs max-w-3xl leading-relaxed">
               Global administration dashboard and control plane. Monitor active system configurations, database health parameters, verify supplier onboarding document submissions, and audit interface transaction logs.
             </p>
           </div>
-          
+
           <div className="flex items-center gap-4 self-stretch md:self-auto justify-end z-10 shrink-0">
             <div className="flex flex-col text-right pr-2 hidden sm:flex">
-              <span className="text-[9px] text-slate-400 font-extrabold uppercase tracking-widest">System Sync Time</span>
-              <span className="text-xs text-blue-300 font-bold font-mono">
+              <span className="text-[9px] text-text-tertiary font-extrabold uppercase tracking-widest">System Sync Time</span>
+              <span className="text-xs text-text-secondary font-bold font-mono tabular-nums">
                 {new Date().toLocaleTimeString('en-IN')}
               </span>
             </div>
-            <Button 
-              onClick={fetchData} 
+            <Button
+              onClick={fetchData}
               disabled={isLoading}
-              className="bg-white/10 hover:bg-white/15 active:bg-white/25 text-white font-extrabold text-xs flex items-center gap-2 px-5 h-11 border border-white/15 backdrop-blur-md rounded-xl transition-all shadow-lg cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500"
+              variant="outline"
+              size="lg"
             >
               <RefreshCw className={`size-4 ${isLoading ? 'animate-spin' : ''}`} />
               <span>Sync Feeds</span>
@@ -213,43 +216,43 @@ export default function AdminPage() {
           </div>
         </div>
 
-        {/* Crisp Premium Segmented Tab Bars */}
-        <div className="bg-slate-200/50 p-1 rounded-2xl border border-slate-200/60 flex flex-wrap gap-1.5 w-max shadow-sm select-none">
+        {/* Segmented Tab Bar */}
+        <div className="bg-surface2 p-1 rounded-xl border border-border flex flex-wrap gap-1.5 w-max select-none">
           <button
             onClick={() => setActiveTab('dashboard')}
-            className={`px-6 py-2.5 text-xs font-bold transition-all rounded-xl flex items-center gap-2.5 h-10 cursor-pointer select-none focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 ${
+            className={`px-6 py-2.5 text-xs font-bold transition-colors duration-150 rounded-lg flex items-center gap-2.5 h-10 cursor-pointer select-none focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring/50 ${
               activeTab === 'dashboard'
-                ? 'bg-white text-blue-900 shadow-md border border-slate-200/30'
-                : 'text-slate-500 hover:text-slate-800 hover:bg-white/50'
+                ? 'bg-surface text-text-primary shadow-sm border border-border'
+                : 'text-text-tertiary hover:text-text-primary hover:bg-surface/50'
             }`}
           >
             <Activity className="size-4 shrink-0" />
             <span>Systems Dashboard</span>
           </button>
-          
+
           <button
             onClick={() => setActiveTab('queue')}
-            className={`px-6 py-2.5 text-xs font-bold transition-all rounded-xl flex items-center gap-2.5 h-10 cursor-pointer relative select-none focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 ${
+            className={`px-6 py-2.5 text-xs font-bold transition-colors duration-150 rounded-lg flex items-center gap-2.5 h-10 cursor-pointer relative select-none focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring/50 ${
               activeTab === 'queue'
-                ? 'bg-white text-blue-900 shadow-md border border-slate-200/30'
-                : 'text-slate-500 hover:text-slate-800 hover:bg-white/50'
+                ? 'bg-surface text-text-primary shadow-sm border border-border'
+                : 'text-text-tertiary hover:text-text-primary hover:bg-surface/50'
             }`}
           >
             <Users className="size-4 shrink-0" />
             <span>Compliance Queue</span>
             {registrationQueue.length > 0 && (
-              <span className="h-5 min-w-5 px-1 bg-rose-600 text-white text-[9px] font-bold rounded-full flex items-center justify-center border-2 border-white shadow-sm shrink-0">
+              <span className="h-5 min-w-5 px-1 bg-red-500 text-white text-[9px] font-bold rounded-full flex items-center justify-center border-2 border-surface shadow-sm shrink-0 tabular-nums">
                 {registrationQueue.length}
               </span>
             )}
           </button>
-          
+
           <button
             onClick={() => setActiveTab('logs')}
-            className={`px-6 py-2.5 text-xs font-bold transition-all rounded-xl flex items-center gap-2.5 h-10 cursor-pointer select-none ${
+            className={`px-6 py-2.5 text-xs font-bold transition-colors duration-150 rounded-lg flex items-center gap-2.5 h-10 cursor-pointer select-none ${
               activeTab === 'logs'
-                ? 'bg-white text-blue-900 shadow-md border border-slate-200/30'
-                : 'text-slate-500 hover:text-slate-800 hover:bg-white/50'
+                ? 'bg-surface text-text-primary shadow-sm border border-border'
+                : 'text-text-tertiary hover:text-text-primary hover:bg-surface/50'
             }`}
           >
             <FileCode className="size-4 shrink-0" />
@@ -265,43 +268,40 @@ export default function AdminPage() {
             <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
               
               {/* Card 1: Database Status */}
-              <div className="p-5 bg-white border border-slate-100 rounded-2xl shadow-sm flex items-center gap-4 relative overflow-hidden transition-all hover:shadow-md">
-                <div className="absolute top-0 left-0 w-full h-1 bg-emerald-500/20"></div>
-                <div className={`p-3.5 rounded-xl ${systemStatus.db === 'connected' ? 'bg-emerald-550/10 text-emerald-600' : 'bg-rose-50 text-rose-600'}`}>
+              <div className="p-5 card flex items-center gap-4 relative overflow-hidden transition-colors duration-150 hover:border-border-em">
+                <div className={`p-3.5 rounded-xl ${systemStatus.db === 'connected' ? 'text-emerald-text' : 'bg-red-500/10 text-red-600'}`} style={systemStatus.db === 'connected' ? { backgroundColor: 'var(--color-emerald-dim)' } : undefined}>
                   <Database className="size-6" />
                 </div>
                 <div className="space-y-1">
-                  <span className="text-[10px] text-slate-400 font-extrabold uppercase tracking-wider block">Enterprise Database</span>
+                  <span className="label mb-0">Enterprise Database</span>
                   <div className="flex items-center gap-2">
-                    <span className={`size-2.5 rounded-full ${systemStatus.db === 'connected' ? 'bg-emerald-500 animate-pulse' : 'bg-rose-500'}`} />
-                    <span className="text-sm font-extrabold text-slate-800 capitalize font-mono leading-none">{systemStatus.db}</span>
+                    <span className={`size-2.5 rounded-full ${systemStatus.db === 'connected' ? 'bg-emerald-500 animate-pulse' : 'bg-red-500'}`} />
+                    <span className="text-sm font-extrabold text-text-primary capitalize font-mono leading-none">{systemStatus.db}</span>
                   </div>
                 </div>
               </div>
 
               {/* Card 2: Socket.io Client Sessions */}
-              <div className="p-5 bg-white border border-slate-100 rounded-2xl shadow-sm flex items-center gap-4 relative overflow-hidden transition-all hover:shadow-md">
-                <div className="absolute top-0 left-0 w-full h-1 bg-blue-500/20"></div>
-                <div className="p-3.5 rounded-xl bg-blue-50 text-blue-600">
+              <div className="p-5 card flex items-center gap-4 relative overflow-hidden transition-colors duration-150 hover:border-border-em">
+                <div className="p-3.5 rounded-xl bg-surface2 text-text-secondary">
                   <Server className="size-6" />
                 </div>
                 <div className="space-y-1">
-                  <span className="text-[10px] text-slate-400 font-extrabold uppercase tracking-wider block">Active WebSocket Sessions</span>
-                  <span className="text-sm font-extrabold text-slate-800 font-mono block leading-none">
+                  <span className="label mb-0">Active WebSocket Sessions</span>
+                  <span className="text-sm font-extrabold text-text-primary font-mono block leading-none tabular-nums">
                     {systemStatus.socketConnections} Live {systemStatus.socketConnections === 1 ? 'Session' : 'Sessions'}
                   </span>
                 </div>
               </div>
 
               {/* Card 3: SAP Environment Mode */}
-              <div className="p-5 bg-white border border-slate-100 rounded-2xl shadow-sm flex items-center gap-4 relative overflow-hidden transition-all hover:shadow-md">
-                <div className="absolute top-0 left-0 w-full h-1 bg-amber-500/20"></div>
-                <div className="p-3.5 rounded-xl bg-amber-50 text-amber-600">
+              <div className="p-5 card flex items-center gap-4 relative overflow-hidden transition-colors duration-150 hover:border-border-em">
+                <div className="p-3.5 rounded-xl bg-amber-500/10 text-amber-600">
                   <Settings className="size-6" />
                 </div>
                 <div className="space-y-1">
-                  <span className="text-[10px] text-slate-400 font-extrabold uppercase tracking-wider block">RFC Gateway Mode</span>
-                  <span className="text-sm font-extrabold text-slate-800 font-mono block leading-none">
+                  <span className="label mb-0">RFC Gateway Mode</span>
+                  <span className="text-sm font-extrabold text-text-primary font-mono block leading-none">
                     {systemStatus.sapMockMode}
                   </span>
                 </div>
@@ -311,51 +311,26 @@ export default function AdminPage() {
 
             {/* Standard KPI Tiles Grid */}
             <div className="space-y-4">
-              <div className="flex items-center gap-2 border-b border-slate-100 pb-2">
-                <span className="text-[11px] font-extrabold text-slate-500 uppercase tracking-widest">Platform Core Metrics</span>
+              <div className="flex items-center gap-2 border-b border-border pb-2">
+                <span className="text-[11px] font-extrabold text-text-tertiary uppercase tracking-widest">Platform Core Metrics</span>
               </div>
-              
+
               <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-6">
-                
-                <div className="p-5 bg-white border border-slate-100 rounded-2xl shadow-sm hover:border-slate-350 hover:shadow-md transition-all duration-200">
-                  <div className="size-9 rounded-xl bg-emerald-50 text-emerald-600 flex items-center justify-center mb-3">
-                    <Users className="size-5" />
-                  </div>
-                  <span className="text-[10px] text-slate-400 font-extrabold uppercase tracking-wider block">Suppliers Registered</span>
-                  <span className="text-2xl font-extrabold text-slate-800 block mt-1 font-mono">{metrics.totalVendors}</span>
-                </div>
 
-                <div className="p-5 bg-white border border-slate-100 rounded-2xl shadow-sm hover:border-slate-350 hover:shadow-md transition-all duration-200">
-                  <div className="size-9 rounded-xl bg-indigo-550/10 text-indigo-600 flex items-center justify-center mb-3">
-                    <FileText className="size-5" />
-                  </div>
-                  <span className="text-[10px] text-slate-400 font-extrabold uppercase tracking-wider block">Bidding RFQs</span>
-                  <span className="text-2xl font-extrabold text-slate-800 block mt-1 font-mono">{metrics.totalRfqs}</span>
-                </div>
+                <KPICard label="Suppliers Registered" value={<span className="tabular-nums">{metrics.totalVendors}</span>} icon={Users} />
 
-                <div className="p-5 bg-white border border-slate-100 rounded-2xl shadow-sm hover:border-slate-350 hover:shadow-md transition-all duration-200">
-                  <div className="size-9 rounded-xl bg-violet-50 text-violet-600 flex items-center justify-center mb-3">
-                    <FileText className="size-5" />
-                  </div>
-                  <span className="text-[10px] text-slate-400 font-extrabold uppercase tracking-wider block">Purchase Orders</span>
-                  <span className="text-2xl font-extrabold text-slate-800 block mt-1 font-mono">{metrics.totalPOs}</span>
-                </div>
+                <KPICard label="Bidding RFQs" value={<span className="tabular-nums">{metrics.totalRfqs}</span>} icon={FileText} />
 
-                <div className="p-5 bg-white border border-slate-100 rounded-2xl shadow-sm hover:border-slate-350 hover:shadow-md transition-all duration-200">
-                  <div className="size-9 rounded-xl bg-amber-50 text-amber-650 flex items-center justify-center mb-3">
-                    <FileText className="size-5" />
-                  </div>
-                  <span className="text-[10px] text-slate-400 font-extrabold uppercase tracking-wider block">Posted Invoices</span>
-                  <span className="text-2xl font-extrabold text-slate-800 block mt-1 font-mono">{metrics.totalInvoices}</span>
-                </div>
+                <KPICard label="Purchase Orders" value={<span className="tabular-nums">{metrics.totalPOs}</span>} icon={FileText} />
 
-                <div className="p-5 bg-gradient-to-br from-blue-900 to-indigo-950 text-white rounded-2xl shadow-md hover:shadow-lg transition-all duration-200 col-span-1 sm:col-span-2 lg:col-span-1 relative overflow-hidden border border-blue-800/40">
-                  <div className="absolute top-0 right-0 w-24 h-24 bg-white/5 rounded-full blur-xl pointer-events-none"></div>
-                  <div className="size-9 rounded-xl bg-white/10 text-blue-350 flex items-center justify-center mb-3 border border-white/5">
-                    <DollarSign className="size-5" />
+                <KPICard label="Posted Invoices" value={<span className="tabular-nums">{metrics.totalInvoices}</span>} icon={FileText} />
+
+                <div className="metric-panel col-span-1 sm:col-span-2 lg:col-span-1" style={{ backgroundColor: 'rgb(var(--color-emerald-default-rgb))', color: '#fff', borderColor: 'transparent' }}>
+                  <div className="flex items-center justify-between">
+                    <span className="text-[10px] font-bold uppercase tracking-[0.12em] text-white/70">Settled Volume</span>
+                    <DollarSign className="size-4 text-white/70" />
                   </div>
-                  <span className="text-[10px] text-blue-200 font-extrabold uppercase tracking-wider block">Settled Volume</span>
-                  <span className="text-xl font-black text-white block mt-1 font-mono truncate">
+                  <span className="text-xl font-black text-white block mt-1 font-mono truncate tabular-nums">
                     ₹{metrics.totalVolume.toLocaleString('en-IN')}
                   </span>
                 </div>
@@ -364,45 +339,45 @@ export default function AdminPage() {
             </div>
 
             {/* Health Checklist Audit card */}
-            <div className="bg-slate-50 border border-slate-200 rounded-2xl p-6 space-y-5">
-              <div className="flex items-center gap-2 border-b border-slate-200 pb-3">
-                <ShieldAlert className="size-5 text-slate-650" />
-                <h4 className="font-extrabold text-xs text-slate-800 uppercase tracking-widest">Security Hardening Status Report</h4>
+            <div className="card p-6 space-y-5">
+              <div className="flex items-center gap-2 border-b border-border pb-3">
+                <ShieldAlert className="size-5 text-text-secondary" />
+                <h4 className="font-extrabold text-xs text-text-primary uppercase tracking-widest">Security Hardening Status Report</h4>
               </div>
-              
+
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6 text-xs leading-relaxed">
                 <div className="space-y-4">
                   <div className="flex items-start gap-3">
-                    <CheckCircle className="size-5 text-emerald-600 shrink-0 mt-0.5" />
+                    <CheckCircle className="size-5 text-emerald-text shrink-0 mt-0.5" />
                     <div className="space-y-0.5">
-                      <span className="font-extrabold text-slate-800 block">Zod Input Validation Engine</span>
-                      <span className="text-slate-500 text-[11px]">Strict schema constraint validation activated across database records, profile updates, and billing parameters.</span>
+                      <span className="font-extrabold text-text-primary block">Zod Input Validation Engine</span>
+                      <span className="text-text-tertiary text-[11px]">Strict schema constraint validation activated across database records, profile updates, and billing parameters.</span>
                     </div>
                   </div>
 
                   <div className="flex items-start gap-3">
-                    <CheckCircle className="size-5 text-emerald-600 shrink-0 mt-0.5" />
+                    <CheckCircle className="size-5 text-emerald-text shrink-0 mt-0.5" />
                     <div className="space-y-0.5">
-                      <span className="font-extrabold text-slate-800 block">Helmet Middleware Headers</span>
-                      <span className="text-slate-500 text-[11px]">Content Security Policies (CSP), Frame Ancestors block, cross-site scripting guards, and secure cookie headers active.</span>
+                      <span className="font-extrabold text-text-primary block">Helmet Middleware Headers</span>
+                      <span className="text-text-tertiary text-[11px]">Content Security Policies (CSP), Frame Ancestors block, cross-site scripting guards, and secure cookie headers active.</span>
                     </div>
                   </div>
                 </div>
 
                 <div className="space-y-4">
                   <div className="flex items-start gap-3">
-                    <CheckCircle className="size-5 text-emerald-600 shrink-0 mt-0.5" />
+                    <CheckCircle className="size-5 text-emerald-text shrink-0 mt-0.5" />
                     <div className="space-y-0.5">
-                      <span className="font-extrabold text-slate-800 block">Winston Correlation Logging</span>
-                      <span className="text-slate-500 text-[11px]">Structured Winston logging enabled. Request tracing IDs map communication streams with daily auto-rotation log cycles.</span>
+                      <span className="font-extrabold text-text-primary block">Winston Correlation Logging</span>
+                      <span className="text-text-tertiary text-[11px]">Structured Winston logging enabled. Request tracing IDs map communication streams with daily auto-rotation log cycles.</span>
                     </div>
                   </div>
 
                   <div className="flex items-start gap-3">
-                    <CheckCircle className="size-5 text-emerald-600 shrink-0 mt-0.5" />
+                    <CheckCircle className="size-5 text-emerald-text shrink-0 mt-0.5" />
                     <div className="space-y-0.5">
-                      <span className="font-extrabold text-slate-800 block">Environment Assertions Check</span>
-                      <span className="text-slate-500 text-[11px]">Dynamic configuration checks run on server startup to validate Atlas database links and secret signatures.</span>
+                      <span className="font-extrabold text-text-primary block">Environment Assertions Check</span>
+                      <span className="text-text-tertiary text-[11px]">Dynamic configuration checks run on server startup to validate Atlas database links and secret signatures.</span>
                     </div>
                   </div>
                 </div>
@@ -415,90 +390,88 @@ export default function AdminPage() {
         {/* TAB 2: COMPLIANCE ONBOARDING QUEUE */}
         {activeTab === 'queue' && (
           <div className="space-y-6 animate-fade-in">
-            <div className="bg-white border border-slate-100 rounded-2xl shadow-sm p-6 space-y-6">
+            <div className="card p-6 space-y-6">
               <div>
-                <h3 className="font-extrabold text-sm text-slate-800 uppercase tracking-wider">Compliance Approval Queue</h3>
-                <p className="text-slate-500 text-xs mt-1">Review uploaded supplier files, tax parameters, and business registrations. Approval generates an active vendor master code and registers the record in SAP.</p>
+                <h3 className="font-extrabold text-sm text-text-primary uppercase tracking-wider">Compliance Approval Queue</h3>
+                <p className="text-text-tertiary text-xs mt-1">Review uploaded supplier files, tax parameters, and business registrations. Approval generates an active vendor master code and registers the record in SAP.</p>
               </div>
-              
-              <div className="border border-slate-100 rounded-xl overflow-hidden shadow-xs">
-                <table className="w-full text-left text-xs border-collapse">
-                  <thead>
-                    <tr className="bg-slate-50 border-b border-slate-200 text-slate-500 font-extrabold text-[10px] uppercase font-mono tracking-wider">
-                      <th className="py-3.5 px-5">Supplier Details</th>
-                      <th className="py-3.5 px-5">Vendor ID</th>
-                      <th className="py-3.5 px-5">Tax Parameters</th>
-                      <th className="py-3.5 px-5">Email &amp; Contacts</th>
-                      <th className="py-3.5 px-5 text-right pr-8">Audit Action</th>
-                    </tr>
-                  </thead>
-                  <tbody className="divide-y divide-slate-100 text-slate-700 font-sans">
-                    {registrationQueue.map((vendor) => (
-                      <tr key={vendor._id} className="hover:bg-slate-50/50 transition-colors">
-                        <td className="py-4 px-5">
-                          <div className="flex items-center gap-3">
-                            <div className="size-8.5 rounded-lg bg-blue-50 text-blue-800 font-black text-xs flex items-center justify-center border border-blue-100 shadow-sm shrink-0">
-                              {vendor.companyName?.slice(0, 2).toUpperCase()}
-                            </div>
-                            <div>
-                              <span className="font-extrabold text-slate-900 block">{vendor.companyName}</span>
-                              <div className="flex gap-1.5 mt-1">
-                                <span className="text-[8px] bg-blue-50 text-blue-700 border border-blue-100 px-1.5 py-0.5 rounded font-extrabold uppercase font-mono">MSME</span>
-                                <span className="text-[8px] bg-emerald-555/10 text-emerald-700 border border-emerald-200 px-1.5 py-0.5 rounded font-extrabold uppercase font-mono">DOCS UPLOADED</span>
+
+              {registrationQueue.length === 0 ? (
+                <EmptyState
+                  icon={CheckCircle}
+                  title="No pending vendor registrations"
+                  description="No pending vendor registrations awaiting audit."
+                />
+              ) : (
+                <div className="card overflow-x-auto">
+                  <table className="w-full text-left text-xs border-collapse">
+                    <thead>
+                      <tr>
+                        <th>Supplier Details</th>
+                        <th>Vendor ID</th>
+                        <th>Tax Parameters</th>
+                        <th>Email &amp; Contacts</th>
+                        <th className="text-right">Audit Action</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {registrationQueue.map((vendor) => (
+                        <tr key={vendor._id}>
+                          <td>
+                            <div className="flex items-center gap-3">
+                              <div className="size-8.5 rounded-lg bg-surface2 text-text-primary font-black text-xs flex items-center justify-center border border-border shrink-0">
+                                {vendor.companyName?.slice(0, 2).toUpperCase()}
+                              </div>
+                              <div>
+                                <span className="font-extrabold text-text-primary block">{vendor.companyName}</span>
+                                <div className="flex gap-1.5 mt-1">
+                                  <span className="text-[8px] bg-surface2 text-text-secondary border border-border px-1.5 py-0.5 rounded font-extrabold uppercase font-mono">MSME</span>
+                                  <span className="text-[8px] text-emerald-text border border-border px-1.5 py-0.5 rounded font-extrabold uppercase font-mono" style={{ backgroundColor: 'var(--color-emerald-dim)' }}>DOCS UPLOADED</span>
+                                </div>
                               </div>
                             </div>
-                          </div>
-                        </td>
-                        <td className="py-4 px-5">
-                          <span className="font-mono text-xs text-slate-500 font-bold block">{vendor.vendorId}</span>
-                        </td>
-                        <td className="py-4 px-5 font-mono text-[11px] space-y-1">
-                          <div className="flex items-center gap-1.5">
-                            <span className="text-slate-400 font-extrabold w-12">GSTIN:</span>
-                            <span className="text-slate-800 font-extrabold">{vendor.gstin}</span>
-                          </div>
-                          <div className="flex items-center gap-1.5">
-                            <span className="text-slate-400 font-extrabold w-12">PAN:</span>
-                            <span className="text-slate-800 font-extrabold">{vendor.pan}</span>
-                          </div>
-                        </td>
-                        <td className="py-4 px-5">
-                          <span className="block font-bold text-slate-850">{vendor.email}</span>
-                          <span className="text-slate-400 text-[10px] block mt-0.5 font-mono font-bold">{vendor.phone}</span>
-                        </td>
-                        <td className="py-4 px-5 text-right pr-8">
-                          <div className="flex gap-2 justify-end">
-                            <Button 
-                              onClick={() => handleApprove(vendor._id)} 
-                              size="sm" 
-                              className="bg-emerald-600 hover:bg-emerald-700 text-white font-extrabold text-xs h-8.5 px-4 cursor-pointer rounded-xl transition-all shadow-sm active:scale-95 border-none"
-                            >
-                              Approve &amp; Sync
-                            </Button>
-                            <Button 
-                              onClick={() => setRejectModal({ open: true, vendorId: vendor._id, reason: '' })}
-                              size="sm" 
-                              className="bg-rose-50 text-rose-700 border border-rose-200 hover:bg-rose-100 font-extrabold text-xs h-8.5 px-4 cursor-pointer rounded-xl transition-all"
-                            >
-                              Reject
-                            </Button>
-                          </div>
-                        </td>
-                      </tr>
-                    ))}
-                    {registrationQueue.length === 0 && (
-                      <tr>
-                        <td colSpan="5" className="py-16 text-center text-slate-400 text-xs font-semibold select-none bg-slate-50/20">
-                          <div className="flex flex-col items-center justify-center gap-2.5">
-                            <CheckCircle className="size-8 text-slate-300" />
-                            <span className="font-bold text-slate-500">No pending vendor registrations awaiting audit.</span>
-                          </div>
-                        </td>
-                      </tr>
-                    )}
-                  </tbody>
-                </table>
-              </div>
+                          </td>
+                          <td>
+                            <span className="font-mono text-xs text-text-secondary font-bold block">{vendor.vendorId}</span>
+                          </td>
+                          <td className="font-mono text-[11px] space-y-1">
+                            <div className="flex items-center gap-1.5">
+                              <span className="text-text-tertiary font-extrabold w-12">GSTIN:</span>
+                              <span className="text-text-primary font-extrabold">{vendor.gstin}</span>
+                            </div>
+                            <div className="flex items-center gap-1.5">
+                              <span className="text-text-tertiary font-extrabold w-12">PAN:</span>
+                              <span className="text-text-primary font-extrabold">{vendor.pan}</span>
+                            </div>
+                          </td>
+                          <td>
+                            <span className="block font-bold text-text-primary">{vendor.email}</span>
+                            <span className="text-text-tertiary text-[10px] block mt-0.5 font-mono font-bold">{vendor.phone}</span>
+                          </td>
+                          <td className="text-right">
+                            <div className="flex gap-2 justify-end">
+                              <Button
+                                onClick={() => handleApprove(vendor._id)}
+                                size="sm"
+                                variant="default"
+                              >
+                                Approve &amp; Sync
+                              </Button>
+                              <Button
+                                onClick={() => setRejectModal({ open: true, vendorId: vendor._id, reason: '' })}
+                                size="sm"
+                                variant="destructive"
+                              >
+                                Reject
+                              </Button>
+                            </div>
+                          </td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                </div>
+              )}
             </div>
           </div>
         )}
@@ -506,34 +479,34 @@ export default function AdminPage() {
         {/* TAB 3: SAP INTEGRATION AUDIT LOG FEED */}
         {activeTab === 'logs' && (
           <div className="space-y-6 animate-fade-in">
-            <div className="bg-white border border-slate-100 rounded-2xl shadow-sm p-6 space-y-6">
-              
+            <div className="card p-6 space-y-6">
+
               {/* Header and Filter Controls */}
-              <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-4 border-b border-slate-100 pb-5">
+              <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-4 border-b border-border pb-5">
                 <div>
-                  <h3 className="font-extrabold text-sm text-slate-800 uppercase tracking-wider">SAP Interface Transaction Log</h3>
-                  <p className="text-slate-500 text-xs mt-1">Real-time trace logs capturing inbound/outbound communication payloads over RFC, BAPI, and OData channels.</p>
+                  <h3 className="font-extrabold text-sm text-text-primary uppercase tracking-wider">SAP Interface Transaction Log</h3>
+                  <p className="text-text-tertiary text-xs mt-1">Real-time trace logs capturing inbound/outbound communication payloads over RFC, BAPI, and OData channels.</p>
                 </div>
-                
+
                 {/* Audit Filters */}
                 <div className="flex flex-wrap items-center gap-2 text-xs">
                   {/* Text Search */}
                   <div className="relative">
-                    <Search className="size-4 text-slate-400 absolute left-3 top-2.5" />
-                    <input 
+                    <Search className="size-4 text-text-tertiary absolute left-3 top-2.5" />
+                    <input
                       type="text"
                       placeholder="Search Interface or Doc ID..."
                       value={logSearchQuery}
                       onChange={e => setLogSearchQuery(e.target.value)}
-                      className="bg-white border border-slate-200 hover:border-slate-350 rounded-xl pl-9 pr-3 py-2 text-xs text-slate-900 font-bold cursor-text outline-none focus:border-blue-900 focus:ring-1 focus:ring-blue-900 min-w-[220px] transition-all h-[36px]"
+                      className="pl-9 min-w-[220px] font-bold"
                     />
                   </div>
-                  
+
                   {/* Log Type Select */}
-                  <select 
+                  <select
                     value={selectedLogFilter.type}
                     onChange={e => setSelectedLogFilter({ ...selectedLogFilter, type: e.target.value })}
-                    className="bg-white border border-slate-200 hover:border-slate-350 rounded-xl px-3 py-1.5 text-slate-800 font-bold cursor-pointer outline-none hover:bg-slate-50 transition-all h-[36px]"
+                    className="font-bold cursor-pointer"
                   >
                     <option value="">All Interface Types</option>
                     <option value="BAPI">BAPI</option>
@@ -541,12 +514,12 @@ export default function AdminPage() {
                     <option value="OData">OData</option>
                     <option value="IDoc">IDoc</option>
                   </select>
-                  
+
                   {/* Status Select */}
-                  <select 
+                  <select
                     value={selectedLogFilter.status}
                     onChange={e => setSelectedLogFilter({ ...selectedLogFilter, status: e.target.value })}
-                    className="bg-white border border-slate-200 hover:border-slate-350 rounded-xl px-3 py-1.5 text-slate-800 font-bold cursor-pointer outline-none hover:bg-slate-50 transition-all h-[36px]"
+                    className="font-bold cursor-pointer"
                   >
                     <option value="">All Statuses</option>
                     <option value="SUCCESS">SUCCESS</option>
@@ -556,110 +529,103 @@ export default function AdminPage() {
               </div>
 
               {/* Data Table */}
-              <div className="border border-slate-100 rounded-xl overflow-hidden shadow-xs">
-                <table className="w-full text-left text-xs border-collapse">
-                  <thead>
-                    <tr className="bg-slate-50 border-b border-slate-200 text-slate-500 font-extrabold text-[10px] uppercase font-mono tracking-wider">
-                      <th className="py-3 px-4 w-44">Timestamp</th>
-                      <th className="py-3 px-4 w-28">Type</th>
-                      <th className="py-3 px-4 w-48">Name / ID</th>
-                      <th className="py-3 px-4 w-36">Document Ref</th>
-                      <th className="py-3 px-4">Payload Summary</th>
-                      <th className="py-3 px-4 text-center w-24">Status</th>
-                      <th className="py-3 px-4 text-right pr-6 w-28">Action</th>
-                    </tr>
-                  </thead>
-                  <tbody className="divide-y divide-slate-100 text-slate-700 font-sans">
-                    {filteredLogs.map((log) => (
-                      <tr key={log._id} className="hover:bg-slate-50/50 transition-colors">
-                        <td className="py-3 px-4 font-mono text-[10.5px] text-slate-550">
-                          {new Date(log.timestamp).toLocaleString('en-IN')}
-                        </td>
-                        <td className="py-3 px-4">
-                          <span className={`px-2 py-0.5 rounded text-[8px] font-bold border font-mono ${
-                            log.type === 'BAPI' ? 'bg-blue-50 text-blue-700 border-blue-100' :
-                            log.type === 'RFC' ? 'bg-purple-50 text-purple-750 border-purple-100' :
-                            log.type === 'IDoc' ? 'bg-teal-50 text-teal-700 border-teal-100' :
-                            'bg-orange-50 text-orange-755 border-orange-100'
-                          }`}>
-                            {log.type}
-                          </span>
-                          <span className={`text-[8.5px] font-extrabold font-mono ml-2 ${log.direction === 'OUTBOUND' ? 'text-blue-600' : 'text-amber-600'}`}>
-                            {log.direction === 'OUTBOUND' ? '↑ OUT' : '↓ IN'}
-                          </span>
-                        </td>
-                        <td className="py-3 px-4 font-mono font-bold text-[10.5px] text-slate-800 truncate max-w-[190px]" title={log.name}>
-                          {log.name}
-                        </td>
-                        <td className="py-3 px-4 font-mono text-[10.5px] text-slate-500 font-bold">{log.documentRef || '—'}</td>
-                        <td className="py-3 px-4 font-mono text-[10.5px] text-slate-600 truncate max-w-xs" title={log.payload ? JSON.stringify(log.payload) : ''}>
-                          {log.payload ? JSON.stringify(log.payload).slice(0, 80) : '—'}
-                        </td>
-                        <td className="py-3 px-4 text-center">
-                          <span className={`px-2.5 py-0.5 rounded-full text-[8.5px] font-extrabold border font-mono ${
-                            log.status === 'SUCCESS' 
-                              ? 'bg-emerald-555/10 text-emerald-700 border-emerald-200' 
-                              : 'bg-rose-50/50 text-rose-700 border-rose-200 animate-pulse'
-                          }`}>
-                            {log.status}
-                          </span>
-                        </td>
-                        <td className="py-3 px-4 text-right pr-6">
-                          <button
-                            onClick={() => setInspectLogModal({ open: true, log })}
-                            className="text-[10px] font-bold text-blue-900 hover:text-indigo-900 hover:underline flex items-center gap-1.5 ml-auto cursor-pointer"
-                          >
-                            <Eye className="size-3.5" />
-                            <span>Inspect</span>
-                          </button>
-                        </td>
-                      </tr>
-                    ))}
-                    {filteredLogs.length === 0 && (
+              {filteredLogs.length === 0 ? (
+                <div className="card">
+                  <EmptyState
+                    icon={Info}
+                    title="No interface logs found"
+                    description="No interface logs match the search query parameters."
+                  />
+                </div>
+              ) : (
+                <div className="card overflow-x-auto">
+                  <table className="w-full text-left text-xs border-collapse">
+                    <thead>
                       <tr>
-                        <td colSpan="7" className="py-16 text-center text-slate-400 text-xs font-semibold select-none bg-slate-50/20">
-                          <div className="flex flex-col items-center justify-center gap-2">
-                            <Info className="size-8 text-slate-300" />
-                            <span className="font-bold text-slate-500">No interface logs match the search query parameters.</span>
-                          </div>
-                        </td>
+                        <th className="w-44">Timestamp</th>
+                        <th className="w-28">Type</th>
+                        <th className="w-48">Name / ID</th>
+                        <th className="w-36">Document Ref</th>
+                        <th>Payload Summary</th>
+                        <th className="text-center w-24">Status</th>
+                        <th className="text-right w-28">Action</th>
                       </tr>
-                    )}
-                  </tbody>
-                </table>
-              </div>
+                    </thead>
+                    <tbody>
+                      {filteredLogs.map((log) => (
+                        <tr key={log._id}>
+                          <td className="font-mono text-[10.5px] tabular-nums">
+                            {new Date(log.timestamp).toLocaleString('en-IN')}
+                          </td>
+                          <td>
+                            <span className={`px-2 py-0.5 rounded text-[8px] font-bold border font-mono ${
+                              log.type === 'BAPI' ? 'bg-blue-500/10 text-blue-700 border-blue-200' :
+                              log.type === 'RFC' ? 'bg-purple-500/10 text-purple-700 border-purple-200' :
+                              log.type === 'IDoc' ? 'bg-teal-500/10 text-teal-700 border-teal-200' :
+                              'bg-orange-500/10 text-orange-700 border-orange-200'
+                            }`}>
+                              {log.type}
+                            </span>
+                            <span className={`text-[8.5px] font-extrabold font-mono ml-2 ${log.direction === 'OUTBOUND' ? 'text-blue-600' : 'text-amber-600'}`}>
+                              {log.direction === 'OUTBOUND' ? '↑ OUT' : '↓ IN'}
+                            </span>
+                          </td>
+                          <td className="font-mono font-bold text-[10.5px] text-text-primary truncate max-w-[190px]" title={log.name}>
+                            {log.name}
+                          </td>
+                          <td className="font-mono text-[10.5px] text-text-secondary font-bold">{log.documentRef || '—'}</td>
+                          <td className="font-mono text-[10.5px] truncate max-w-xs" title={log.payload ? JSON.stringify(log.payload) : ''}>
+                            {log.payload ? JSON.stringify(log.payload).slice(0, 80) : '—'}
+                          </td>
+                          <td className="text-center">
+                            <StatusBadge label={log.status} variant={log.status === 'SUCCESS' ? 'active' : 'suspended'} />
+                          </td>
+                          <td className="text-right">
+                            <button
+                              onClick={() => setInspectLogModal({ open: true, log })}
+                              className="text-[10px] font-bold text-text-secondary hover:text-text-primary hover:underline flex items-center gap-1.5 ml-auto cursor-pointer transition-colors duration-150"
+                            >
+                              <Eye className="size-3.5" />
+                              <span>Inspect</span>
+                            </button>
+                          </td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                </div>
+              )}
             </div>
           </div>
         )}
 
         {/* DIALOG 1: COMPLIANCE REJECTION REASON DRAWER */}
         {rejectModal.open && (
-          <div className="fixed inset-0 bg-slate-900/60 flex items-center justify-center z-50 p-4 animate-fade-in backdrop-blur-sm">
-            <div className="bg-white border border-slate-100 rounded-2xl shadow-2xl p-6 max-w-md w-full space-y-5 animate-scale-up">
+          <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4 animate-fade-in">
+            <div className="card p-6 max-w-md w-full space-y-5">
               <div>
-                <h4 className="font-extrabold text-sm text-slate-855 uppercase tracking-wider">Reject Supplier Audit</h4>
-                <p className="text-slate-500 text-xs mt-1">Please provide a specific reason for rejection. This reason will show on the vendor's dashboard.</p>
+                <h4 className="font-extrabold text-sm text-text-primary uppercase tracking-wider">Reject Supplier Audit</h4>
+                <p className="text-text-tertiary text-xs mt-1">Please provide a specific reason for rejection. This reason will show on the vendor's dashboard.</p>
               </div>
               <textarea
                 value={rejectModal.reason}
                 onChange={e => setRejectModal({ ...rejectModal, reason: e.target.value })}
                 placeholder="e.g. GST registration certificate upload is blurry or invalid. Please re-upload legible documentation."
                 rows="4"
-                className="w-full bg-white border border-slate-200 focus:border-blue-900 focus:ring-1 focus:ring-blue-900 rounded-xl p-3 text-xs outline-none text-slate-950 font-bold transition-all"
+                className="w-full font-bold"
               />
               <div className="flex justify-end gap-3 pt-2">
-                <Button 
-                  onClick={() => setRejectModal({ open: false, vendorId: null, reason: '' })} 
-                  variant="outline" 
-                  size="sm" 
-                  className="border-slate-200 text-slate-700 hover:bg-slate-50 font-bold text-xs h-9.5 px-4.5 cursor-pointer rounded-xl"
+                <Button
+                  onClick={() => setRejectModal({ open: false, vendorId: null, reason: '' })}
+                  variant="outline"
+                  size="sm"
                 >
                   Cancel
                 </Button>
-                <Button 
-                  onClick={handleRejectSubmit} 
-                  size="sm" 
-                  className="bg-rose-600 hover:bg-rose-700 text-white font-extrabold text-xs h-9.5 px-6 cursor-pointer border-none rounded-xl shadow-md active:bg-rose-800"
+                <Button
+                  onClick={handleRejectSubmit}
+                  size="sm"
+                  variant="destructive"
                 >
                   Confirm Rejection
                 </Button>
@@ -670,63 +636,59 @@ export default function AdminPage() {
 
         {/* DIALOG 2: SAP PAYLOAD INSPECTOR DRAWER */}
         {inspectLogModal.open && inspectLogModal.log && (
-          <div className="fixed inset-0 bg-slate-900/60 flex items-center justify-center z-50 p-4 animate-fade-in backdrop-blur-sm">
-            <div className="bg-white border border-slate-100 rounded-2xl shadow-2xl p-6 max-w-3xl w-full space-y-5 animate-scale-up">
-              
+          <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4 animate-fade-in">
+            <div className="card p-6 max-w-3xl w-full space-y-5">
+
               {/* Modal Header */}
-              <div className="flex justify-between items-start border-b border-slate-100 pb-4">
+              <div className="flex justify-between items-start border-b border-border pb-4">
                 <div className="space-y-1">
                   <div className="flex items-center gap-2">
-                    <span className="text-[9px] bg-slate-100 text-slate-600 border border-slate-200 px-2 py-0.5 rounded font-extrabold font-mono uppercase tracking-wide">
+                    <span className="text-[9px] bg-surface2 text-text-secondary border border-border px-2 py-0.5 rounded font-extrabold font-mono uppercase tracking-wide">
                       {inspectLogModal.log.type} Transaction
                     </span>
                     <span className={`text-[9px] font-extrabold font-mono ${inspectLogModal.log.direction === 'OUTBOUND' ? 'text-blue-600' : 'text-amber-600'}`}>
                       {inspectLogModal.log.direction === 'OUTBOUND' ? '↑ OUTBOUND' : '↓ INBOUND'}
                     </span>
                   </div>
-                  <h4 className="font-mono font-black text-base text-slate-900 mt-1.5">{inspectLogModal.log.name}</h4>
+                  <h4 className="font-mono font-black text-base text-text-primary mt-1.5">{inspectLogModal.log.name}</h4>
                 </div>
-                <button 
+                <button
                   onClick={() => setInspectLogModal({ open: false, log: null })}
-                  className="text-slate-400 hover:text-slate-700 font-bold text-sm cursor-pointer select-none"
+                  className="text-text-tertiary hover:text-text-primary font-bold text-sm cursor-pointer select-none transition-colors duration-150"
                 >
                   ✕
                 </button>
               </div>
 
               {/* Log Metadata Grid */}
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 bg-slate-50 border border-slate-200/60 p-4 rounded-xl text-xs font-bold leading-normal">
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 bg-surface2/40 border border-border p-4 rounded-xl text-xs font-bold leading-normal">
                 <div className="space-y-2">
                   <div className="flex items-center gap-2">
-                    <span className="text-slate-400 w-24">Log Timestamp:</span>
-                    <span className="text-slate-800 font-mono">{new Date(inspectLogModal.log.timestamp).toLocaleString('en-IN')}</span>
+                    <span className="text-text-tertiary w-24">Log Timestamp:</span>
+                    <span className="text-text-primary font-mono tabular-nums">{new Date(inspectLogModal.log.timestamp).toLocaleString('en-IN')}</span>
                   </div>
                   <div className="flex items-center gap-2">
-                    <span className="text-slate-800 font-mono">{inspectLogModal.log.documentRef || '—'}</span>
+                    <span className="text-text-primary font-mono">{inspectLogModal.log.documentRef || '—'}</span>
                   </div>
                 </div>
                 <div className="space-y-2">
                   <div className="flex items-center gap-2">
-                    <span className="text-slate-400 w-20">Vendor Link:</span>
-                    <span className="text-slate-800 font-mono truncate max-w-[170px]" title={inspectLogModal.log.vendorId}>
+                    <span className="text-text-tertiary w-20">Vendor Link:</span>
+                    <span className="text-text-primary font-mono truncate max-w-[170px]" title={inspectLogModal.log.vendorId}>
                       {inspectLogModal.log.vendorId || '—'}
                     </span>
                   </div>
                   <div className="flex items-center gap-2">
-                    <span className="text-slate-400 w-20">Audit Status:</span>
-                    <span className={`px-2.5 py-0.5 rounded-full text-[9px] font-extrabold border font-mono ${
-                      inspectLogModal.log.status === 'SUCCESS' ? 'bg-emerald-555/10 text-emerald-700 border-emerald-200' : 'bg-rose-50/50 text-rose-700 border-rose-200'
-                    }`}>
-                      {inspectLogModal.log.status}
-                    </span>
+                    <span className="text-text-tertiary w-20">Audit Status:</span>
+                    <StatusBadge label={inspectLogModal.log.status} variant={inspectLogModal.log.status === 'SUCCESS' ? 'active' : 'suspended'} />
                   </div>
                 </div>
               </div>
 
               {/* JSON Payload Inspector */}
               <div className="space-y-2">
-                <span className="text-[10px] text-slate-450 uppercase font-extrabold tracking-widest block">Raw JSON Data Payload</span>
-                <div className="bg-slate-950 border border-slate-900 text-emerald-400 font-mono text-[11px] p-5 rounded-xl overflow-y-auto max-h-80 select-text leading-relaxed shadow-inner">
+                <span className="label mb-0">Raw JSON Data Payload</span>
+                <div className="bg-base border border-border-em text-emerald-text font-mono text-[11px] p-5 rounded-xl overflow-y-auto max-h-80 select-text leading-relaxed">
                   <pre className="whitespace-pre-wrap word-break">
                     {JSON.stringify(inspectLogModal.log.payload, null, 2)}
                   </pre>
@@ -734,10 +696,10 @@ export default function AdminPage() {
               </div>
 
               {/* Modal Footer */}
-              <div className="flex justify-end border-t border-slate-100 pt-4">
-                <Button 
-                  onClick={() => setInspectLogModal({ open: false, log: null })} 
-                  className="bg-blue-900 hover:bg-indigo-955 text-white font-extrabold text-xs h-10 px-6 cursor-pointer border-none rounded-xl shadow-md active:scale-95"
+              <div className="flex justify-end border-t border-border pt-4">
+                <Button
+                  onClick={() => setInspectLogModal({ open: false, log: null })}
+                  variant="default"
                 >
                   Close Inspector
                 </Button>

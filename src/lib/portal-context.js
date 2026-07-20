@@ -140,7 +140,7 @@ export function PortalProvider({ children }) {
   };
 
   const [consoleOpen, setConsoleOpen] = useState(true);
-  const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
+  const [sidebarCollapsed, setSidebarCollapsed] = useState(true);
   const [selectedRfqId, setSelectedRfqId] = useState(null);
   const [selectedPoId, setSelectedPoId] = useState(null);
   const [selectedGrnId, setSelectedGrnId] = useState(null);

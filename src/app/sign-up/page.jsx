@@ -50,8 +50,8 @@ export default function SignUpPage() {
     setLoading(true);
 
     try {
-      const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000';
-      const response = await fetch(`${apiUrl}/api/auth/register`, {
+      const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000/api';
+      const response = await fetch(`${apiUrl}/auth/register`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
@@ -85,21 +85,21 @@ export default function SignUpPage() {
   };
 
   return (
-    <div className="w-full max-w-[460px] p-8 rounded-xl border border-stone-800 bg-stone-900/60 backdrop-blur-xl shadow-2xl animate-fade-in my-8">
+    <div className="w-full max-w-[460px] p-8 card animate-fadeUp my-8">
       {/* Brand Header */}
       <div className="flex flex-col items-center mb-6">
-        <div className="size-12 rounded-lg bg-blue-600 flex items-center justify-center text-white mb-3 shadow-lg border border-blue-500/25">
+        <div className="size-12 rounded-none flex items-center justify-center text-white mb-3 shrink-0" style={{ backgroundColor: 'rgb(var(--color-emerald-default-rgb))' }}>
           <Building2 className="size-6" />
         </div>
-        <h2 className="text-xl font-bold text-stone-100 tracking-wide font-sans">Register Vendor Partner</h2>
-        <p className="text-[10px] text-stone-400 font-mono tracking-wider uppercase mt-1">
+        <h2 className="text-xl font-bold text-text-primary tracking-wide font-sans">Register Vendor Partner</h2>
+        <p className="text-[10px] text-text-tertiary font-mono tracking-wider uppercase mt-1">
           ONBOARDING WIZARD &bull; ERP SYNCHRONIZED
         </p>
       </div>
 
       {/* Error Output */}
       {error && (
-        <div className="p-3 mb-4 rounded bg-red-950/40 border border-red-800/50 flex items-start gap-2.5 text-xs text-red-400">
+        <div className="p-3 mb-4 rounded-none bg-rose-900/20 border border-rose-900/50 flex items-start gap-2.5 text-xs text-rose-400">
           <AlertCircle className="size-4 shrink-0 mt-0.5" />
           <span>{error}</span>
         </div>
@@ -111,13 +111,13 @@ export default function SignUpPage() {
           {/* Vendor ID Field */}
           <div>
             <div className="flex justify-between items-center mb-1">
-              <label className="text-[9px] font-mono tracking-wider text-stone-400 uppercase font-semibold">
+              <label className="label mb-0">
                 Suggested Vendor ID
               </label>
               <button
                 type="button"
                 onClick={generateNewId}
-                className="text-[9px] font-semibold text-blue-500 hover:text-blue-400 flex items-center gap-0.5 cursor-pointer"
+                className="text-[9px] font-semibold text-emerald-400 hover:opacity-80 flex items-center gap-0.5 cursor-pointer transition-opacity duration-150"
               >
                 <Sparkles className="size-2.5" />
                 <span>Re-generate</span>
@@ -129,13 +129,13 @@ export default function SignUpPage() {
               disabled={loading}
               value={vendorId}
               onChange={(e) => setVendorId(e.target.value)}
-              className="w-full h-9 px-3 rounded border border-stone-800 bg-stone-950 text-stone-200 text-xs focus:outline-none focus:border-blue-600 focus:ring-1 focus:ring-blue-600/50 transition-all disabled:opacity-55"
+              className="disabled:opacity-55"
             />
           </div>
 
           {/* Company Name */}
           <div>
-            <label className="block text-[9px] font-mono tracking-wider text-stone-400 uppercase mb-1 font-semibold">
+            <label className="label">
               Company Registered Name
             </label>
             <div className="relative">
@@ -146,15 +146,15 @@ export default function SignUpPage() {
                 placeholder="e.g. Acme Manufacturing Ltd"
                 value={companyName}
                 onChange={(e) => setCompanyName(e.target.value)}
-                className="w-full h-9 px-3 pl-8.5 rounded border border-stone-800 bg-stone-950 text-stone-200 text-xs focus:outline-none focus:border-blue-600 focus:ring-1 focus:ring-blue-600/50 transition-all"
+                className="pl-8.5"
               />
-              <Building2 className="absolute left-2.5 top-2.5 size-3.5 text-stone-600" />
+              <Building2 className="absolute left-2.5 top-1/2 -translate-y-1/2 size-3.5 text-text-tertiary" />
             </div>
           </div>
 
           {/* Email */}
           <div>
-            <label className="block text-[9px] font-mono tracking-wider text-stone-400 uppercase mb-1 font-semibold">
+            <label className="label">
               Corporate Contact Email
             </label>
             <div className="relative">
@@ -165,15 +165,15 @@ export default function SignUpPage() {
                 placeholder="partner@domain.com"
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
-                className="w-full h-9 px-3 pl-8.5 rounded border border-stone-800 bg-stone-950 text-stone-200 text-xs focus:outline-none focus:border-blue-600 focus:ring-1 focus:ring-blue-600/50 transition-all"
+                className="pl-8.5"
               />
-              <Mail className="absolute left-2.5 top-2.5 size-3.5 text-stone-600" />
+              <Mail className="absolute left-2.5 top-1/2 -translate-y-1/2 size-3.5 text-text-tertiary" />
             </div>
           </div>
 
           {/* Password */}
           <div>
-            <label className="block text-[9px] font-mono tracking-wider text-stone-400 uppercase mb-1 font-semibold">
+            <label className="label">
               Create Password
             </label>
             <div className="relative">
@@ -184,16 +184,16 @@ export default function SignUpPage() {
                 placeholder="Min 6 characters"
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
-                className="w-full h-9 px-3 pl-8.5 rounded border border-stone-800 bg-stone-950 text-stone-200 text-xs focus:outline-none focus:border-blue-600 focus:ring-1 focus:ring-blue-600/50 transition-all"
+                className="pl-8.5"
               />
-              <KeyRound className="absolute left-2.5 top-2.5 size-3.5 text-stone-600" />
+              <KeyRound className="absolute left-2.5 top-1/2 -translate-y-1/2 size-3.5 text-text-tertiary" />
             </div>
           </div>
 
           {/* GSTIN & PAN Grid */}
           <div className="grid grid-cols-2 gap-3">
             <div>
-              <label className="block text-[9px] font-mono tracking-wider text-stone-400 uppercase mb-1 font-semibold">
+              <label className="label">
                 GSTIN Number (India)
               </label>
               <input
@@ -203,11 +203,11 @@ export default function SignUpPage() {
                 placeholder="27AAAAA1111A1Z1"
                 value={gstin}
                 onChange={(e) => setGstin(e.target.value)}
-                className="w-full h-9 px-3 rounded border border-stone-800 bg-stone-950 text-stone-200 text-xs focus:outline-none focus:border-blue-600 uppercase transition-all"
+                className="uppercase"
               />
             </div>
             <div>
-              <label className="block text-[9px] font-mono tracking-wider text-stone-400 uppercase mb-1 font-semibold">
+              <label className="label">
                 PAN Number
               </label>
               <input
@@ -217,7 +217,7 @@ export default function SignUpPage() {
                 placeholder="AAAAA1111A"
                 value={pan}
                 onChange={(e) => setPan(e.target.value)}
-                className="w-full h-9 px-3 rounded border border-stone-800 bg-stone-950 text-stone-200 text-xs focus:outline-none focus:border-blue-600 uppercase transition-all"
+                className="uppercase"
               />
             </div>
           </div>
@@ -226,7 +226,7 @@ export default function SignUpPage() {
         <button
           type="submit"
           disabled={loading}
-          className="w-full h-9 bg-blue-600 hover:bg-blue-700 active:bg-blue-800 text-white text-xs font-semibold rounded flex items-center justify-center gap-1.5 transition-colors cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed shadow-md shadow-blue-900/20 mt-2"
+          className="btn btn-v w-full h-9 justify-center disabled:opacity-50 disabled:cursor-not-allowed mt-2"
         >
           {loading ? (
             <>
@@ -243,12 +243,12 @@ export default function SignUpPage() {
       </form>
 
       {/* Footer login redirect */}
-      <div className="mt-6 pt-5 border-t border-stone-800/85 text-center">
-        <p className="text-[11px] text-stone-500">
+      <div className="mt-6 pt-5 border-t border-border text-center">
+        <p className="text-[11px] text-text-tertiary">
           Already registered?{' '}
           <Link
             href="/sign-in"
-            className="text-blue-500 hover:text-blue-400 hover:underline transition-colors font-medium ml-1"
+            className="text-emerald-400 hover:underline transition-colors duration-150 font-medium ml-1"
           >
             Sign In here
           </Link>

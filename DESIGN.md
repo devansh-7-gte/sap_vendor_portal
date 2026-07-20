@@ -1,144 +1,148 @@
 ---
-name: VendorConnect Design System
-description: Industrial-strength SAP self-service portal style guide
+name: Kinetic Industrial Console
+description: High-density, high-contrast industrial SAP self-service portal style guide
 colors:
-  primary: "#004080"
-  secondary: "#e1ebf4"
-  accent: "#0a6ed1"
-  neutral-bg: "#f0f4f8"
-  neutral-fg: "#1c1c1c"
-  card-bg: "#ffffff"
-  border: "#d2d5d8"
-  destructive: "#bb0000"
-  sidebar-bg: "#eff3f8"
-  amber-hover: "#f59e0b"
+  primary: "#059669"
+  secondary: "#c8c6c9"
+  accent: "#059669"
+  neutral-bg: "#09090b"
+  neutral-fg: "#fafafa"
+  card-bg: "#131315"
+  border: "#27272a"
+  border-em: "#3f3f46"
+  destructive: "#e11d48"
+  warning: "#d97706"
+  sidebar-bg: "#0e0e10"
+  muted-fg: "#71717a"
 typography:
   display:
-    fontFamily: "-apple-system, BlinkMacSystemFont, \"Segoe UI\", Roboto, Helvetica, Arial, sans-serif"
-    fontSize: "1.75rem"
-    fontWeight: 700
-    lineHeight: 1.2
-    letterSpacing: "tight"
+    fontFamily: "Inter, sans-serif"
+    fontSize: "1.5rem"
+    fontWeight: 600
+    lineHeight: 1.3
+    letterSpacing: "-0.02em"
   body:
-    fontFamily: "-apple-system, BlinkMacSystemFont, \"Segoe UI\", Roboto, Helvetica, Arial, sans-serif"
-    fontSize: "0.95rem"
+    fontFamily: "Inter, sans-serif"
+    fontSize: "0.875rem"
     fontWeight: 400
-    lineHeight: 1.5
+    lineHeight: 1.4
     letterSpacing: "normal"
+  mono:
+    fontFamily: "'JetBrains Mono', monospace"
+    fontSize: "0.8125rem"
+    fontWeight: 500
 rounded:
-  sm: "2.4px"
-  md: "3.2px"
-  lg: "4px"
-  xl: "5.6px"
+  sm: "0px"
+  md: "0px"
+  lg: "0px"
+  xl: "0px"
 spacing:
   xs: "4px"
   sm: "8px"
-  md: "16px"
-  lg: "24px"
-  xl: "32px"
+  md: "12px"
+  lg: "16px"
+  xl: "24px"
 components:
   button-primary:
     backgroundColor: "{colors.primary}"
-    textColor: "#ffffff"
-    rounded: "{rounded.lg}"
+    textColor: "#000000"
+    rounded: "0px"
     padding: "8px 16px"
   button-primary-hover:
-    backgroundColor: "{colors.accent}"
+    backgroundColor: "#047857"
   input-field:
-    backgroundColor: "#ffffff"
+    backgroundColor: "{colors.neutral-bg}"
     textColor: "{colors.neutral-fg}"
-    rounded: "{rounded.sm}"
-    padding: "4px 8px"
+    rounded: "0px"
+    border: "1px solid {colors.border-em}"
+    padding: "6px 12px"
 ---
 
 # Design System: VendorConnect Portal
 
 ## 1. Overview
 
-**Creative North Star: "The Steel Scaffold"**
+**Creative North Star: "Kinetic Industrial Console"**
 
-VendorConnect is an industrial-strength self-service portal for Indian manufacturing procurement. Its visual system reflects structural reliability, operational transparency, and high efficiency. Rejecting the overly rounded, low-contrast, soft-shadow conventions of standard SaaS tools, VendorConnect utilizes crisp grid lines, high-contrast typography, and a compact layout density inspired by classic enterprise SAP Fiori screens but reimagined for a modern React environment.
+VendorConnect is an industrial-strength self-service portal for Indian manufacturing procurement. Its visual system reflects precision, high data density, and operational focus. Rejecting both the soft, low-contrast SaaS aesthetic and the dated SAP Fiori look, the Kinetic Industrial Console utilizes a pure black foundation, stark zinc borders, and an electric green accent to maximize legibility and minimize eye strain under harsh factory lighting.
 
-The system is designed to convey confidence and clarity to suppliers and procurement officers alike, especially under various factory-floor screen conditions.
+The system conveys authority and speed, operating more like a high-end technical terminal or a Bloomberg console than a standard web app.
 
 **Key Characteristics:**
-- Crisp borders and sharp corners (4px standard radius) instead of heavy pill rounded elements.
-- Clean grid lines and high contrast (≥4.5:1 text contrast) for readability.
-- Clear BAPI/RFC payload representation to enforce transparency.
-- A restrained, steel-blue color foundation offset by purposeful status highlights.
+- **Zero-Radius Corners:** All elements have 0px border-radius to enforce a sharp, precise, structural aesthetic.
+- **High-Contrast Dark Mode:** True black (#09090b) backgrounds with near-white text to cut through screen glare.
+- **Density:** Highly compact layouts, reduced padding (based on a strict 4px grid), and reduced row heights (32px - 40px) to maximize data per square inch.
+- **Dual-Font System:** Inter for UI chrome; JetBrains Mono for all tabular data, compliance statuses (GST/TDS/MSME), and BAPI payloads.
 
 ## 2. Colors
 
-A restrained enterprise palette that prioritizes visibility and status clarity over decorative tints.
+A strictly functional palette leveraging high-contrast ratios. 
 
-### Primary
-- **Classic SAP Steel Blue** (#004080): Used for primary branding elements, headers, and major primary action triggers.
+### Foundation
+- **Base Background:** Pure Black (`#09090b`). Used for the app canvas and input fields.
+- **Surface Background:** Dark Zinc (`#131315` to `#18181b`). Used for cards, tables, and sidebars to slightly offset them from the base.
 
-### Secondary
-- **Light Fiori Blue** (#e1ebf4): Used as a subtle background tint for active states, highlighted list rows, and secondary layout anchors.
+### Borders
+- **Standard Border:** Zinc (`#27272a`). The structural skeleton of the UI.
+- **Emphasis Border:** Lighter Zinc (`#3f3f46`). Used for interactive elements (inputs) or active states.
 
-### Neutral
-- **High-Contrast Gray** (#1c1c1c): Canonical color for body copy, headings, and functional UI icons.
-- **Soft Slate-Blue Background** (#f0f4f8): The canvas color across all portal dashboards.
-- **Grid Border Slate** (#d2d5d8): The distinct grid border color used to structure data tables and layout boundaries.
-- **Sidebar Ice** (#eff3f8): Tinted sidebar neutral separating portal navigation from main content.
-
-### Named Rules
-**The Steel Border Rule.** Grid lines and division borders are explicit and visible (1px, #d2d5d8). Never use shadows to suggest boundary divisions; use concrete lines to structure layout cells.
-**The Amber Highlight Rule.** Mapped black hover interactions and borders must transition cleanly to Amber-500 (#f59e0b) to provide high-visibility state signals.
+### Accents & Typography
+- **Primary Accent / Success:** Electric Green (`#059669`). Used sparingly for primary actions, active status pulses, and success indicators.
+- **Primary Text:** Near-White (`#fafafa`).
+- **Secondary Text / Labels:** Muted Zinc (`#71717a`).
+- **Critical Error:** Crimson (`#e11d48`).
+- **Warning / Pending:** Amber (`#d97706`).
 
 ## 3. Typography
 
-**Display Font:** System Sans-Serif (-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif)
-**Body Font:** System Sans-Serif (-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif)
+**Chrome/UI Font:** Inter, sans-serif
+**Data/Console Font:** JetBrains Mono, monospace
 
-**Character:** Highly legible, clean, and optimized for dense tabular layout structures.
+**Character:** Highly legible, dense, and technically rigorous.
 
 ### Hierarchy
-- **Display** (Bold (700), 1.75rem, 1.2): Used sparingly for high-level module landing headers.
-- **Headline** (Semibold (600), 1.25rem, 1.3): Section-level titles and modal headers.
-- **Title** (Semibold (600), 1rem, 1.4): Table headers, card sub-headers, and major field labels.
-- **Body** (Regular (400), 0.95rem, 1.5): Standard descriptive prose, cell text, and input content (max length ~75ch).
-- **Label** (Medium (500), 0.75rem, 1.2, uppercase where applicable): Badges, BAPI log logs, and micro-actions.
-
-### Named Rules
-**The Content Constraint Rule.** To maintain legibility in long descriptions or onboarding notes, body copy must never exceed a maximum line length of 75 characters (75ch).
+- **Headline** (Semibold (600), 1.5rem, 1.3): Page titles. Capped at 24px to preserve vertical density.
+- **Title** (Semibold (600), 1.125rem, 1.4): Section headers, card titles.
+- **Body** (Regular (400), 0.875rem (14px), 1.4): Standard prose and general text.
+- **Data Mono** (Medium (500), 0.8125rem (13px), 1.2): ALL tabular data, numeric values, IDs, and compliance codes. `tabular-nums` must be enabled.
+- **Label Caps** (Bold (700), 0.625rem (10px), uppercase, tracking 0.05em): Table headers, micro-labels, and tiny metadata.
 
 ## 4. Elevation
 
-The visual layout is flat-by-default to reflect the structural precision of "The Steel Scaffold". Depth is conveyed through background color contrast and explicit borders rather than depth blur or dropshadows.
-
-### Named Rules
-**The Flat Canvas Rule.** Surfaces must remain flat and flush against the background (#f0f4f8) at rest. Drop shadows must only be utilized for transient UI layers (e.g. active dropdown menus, absolute payload consoles) to indicate modal layering.
+**The Flat Terminal Rule.** There are NO shadows in this design system. Depth is conveyed exclusively through tonal background shifts and explicit 1px borders. When a modal or popover opens, it relies on a stark border and a slightly lighter surface color (`#18181b`) rather than a dropshadow.
 
 ## 5. Components
 
-### Buttons
-- **Shape:** Crisp corners (4px radius).
-- **Primary:** Classic SAP Steel Blue (#004080) background with bold white text. Padding is exactly 8px top/bottom and 16px left/right.
-- **Hover / Focus:** Transitions to Standard Blue Accent (#0a6ed1) with standard CSS animations.
-- **Secondary / Secondary-Hover:** Soft light Fiori blue (#e1ebf4) background transitioning to a slightly deeper blue tint on hover.
+### Data Tables
+- **Borders:** 1px solid bottom borders (`#27272a`) on rows. No vertical dividers inside the row, but the table itself is boxed in a 1px border.
+- **Row Hover:** Shift background to `#18181b`.
+- **Text:** All cell data uses the `Data Mono` typography style.
 
-### Cards / Containers
-- **Corner Style:** Sharp 4px borders.
-- **Background:** Solid white (#ffffff) to stand out clearly from the gray-blue slate background.
-- **Border:** Bound by a distinct 1px border (#d2d5d8). No shadows.
+### Buttons
+- **Shape:** 0px radius (sharp corners).
+- **Primary:** Electric Green (`#059669`) background with Black (`#000000`) text. Bold.
+- **Secondary:** Transparent background, 1px Zinc (`#3f3f46`) border, near-white text. Hover shifts background to `#18181b`.
+- **Ghost:** No border, muted text, turns near-white on hover.
+
+### Status Badges (GST, TDS, MSME)
+- **Style:** Compact, rectangular tags (`0px` radius).
+- **Text:** `Data Mono` or `Label Caps`.
+- **Colors:** Dark background (`#131315`), with a 1px border matching the semantic color (Green for active/success, Amber for pending/warning, Red for error, Zinc for neutral/not applicable).
 
 ### Inputs / Fields
-- **Style:** Pure white (#ffffff) background, sharp 2px corners, and Grid Border Slate (#d2d5d8) boundaries. Height is exactly 2rem.
-- **Focus:** Transitions border color to Standard Blue Accent (#0a6ed1) with a matching subtle focus ring.
-
-### Navigation
-- **Style:** Sidebar navigation uses Ice Slate (#eff3f8) background. Active links are marked with Classic Steel Blue (#004080) text indicators and a Light Fiori Blue (#e1ebf4) background fill.
+- **Style:** Pure Black (`#09090b`) background, `0px` corners, 1px Emphasis border (`#3f3f46`). 
+- **Focus:** Border snaps to Electric Green (`#059669`) or pure white (`#ffffff`). No blurry focus rings.
 
 ## 6. Do's and Don'ts
 
 ### Do:
-- **Do** use explicit 1px borders (#d2d5d8) to separate table cells, headers, and dashboard blocks.
-- **Do** ensure all input fields maintain standard 2rem heights and sharp corners for fast keyboard navigation.
-- **Do** label BAPI log capsules with distinct semantic color badges (Emerald for Success, Red for Failure).
+- **Do** use `JetBrains Mono` for ALL numbers, amounts, IDs, and dates to ensure vertical alignment.
+- **Do** rely on explicit 1px borders for structure.
+- **Do** make primary actions pop with Electric Green against the black canvas.
+- **Do** keep padding extremely tight (e.g., 4px/8px) to maximize data density.
 
 ### Don't:
-- **Don't** use decorative purple/violet gradients or neon accents.
-- **Don't** use card shadows at rest; keep layouts flat to align with Fiori density principles.
-- **Don't** use fuzzy low-contrast light gray typography; keep text colors at High-Contrast Gray (#1c1c1c) or higher.
+- **Don't** use border-radius. Ever. 0px everywhere.
+- **Don't** use drop shadows. Use border colors and background tints to show elevation.
+- **Don't** use soft grays or low-contrast text. Maintain high contrast.
+- **Don't** clutter with icons unless absolutely necessary; let the monospaced data speak for itself.
