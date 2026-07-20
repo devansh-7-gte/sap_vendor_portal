@@ -1,8 +1,5 @@
 import React, { useState, useEffect, useRef } from 'react';
 import {
-  Building2,
-  Truck,
-  CreditCard,
   Clock,
   CheckCircle2,
   AlertTriangle,
@@ -66,13 +63,27 @@ const INDIAN_STATES = [
 // --- STATIC SUBCOMPONENTS ---
 
 // 1. Section Header Component
-function SectionHeader({ title, icon: Icon }) {
+function SectionHeader({ title, number }) {
   return (
-    <div className="col-span-full mb-1 mt-4 first:mt-0 select-none">
-      <h3 className="text-xs font-bold text-text-primary tracking-wider uppercase border-b-2 border-primary/30 pb-1.5 flex items-center gap-2">
-        {Icon && <Icon className="size-4 text-primary shrink-0" />}
-        <span>{title}</span>
-      </h3>
+    <div className="flex items-center gap-2.5 px-5 py-3 border-b border-border select-none">
+      {number && (
+        <span className="inline-flex items-center justify-center text-[11px] font-bold font-mono text-primary bg-primary/10 rounded px-2 py-1 tabular-nums shrink-0">
+          {number}
+        </span>
+      )}
+      <h3 className="text-[15px] font-bold text-text-primary">{title}</h3>
+    </div>
+  );
+}
+
+// 2. Card wrapper for a bordered, numbered form section
+function FormSection({ number, title, children }) {
+  return (
+    <div className="bg-surface border border-border rounded-xl shadow-xs overflow-hidden">
+      <SectionHeader number={number} title={title} />
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-x-6 gap-y-4 p-4">
+        {children}
+      </div>
     </div>
   );
 }
@@ -82,16 +93,21 @@ function SAPFieldMapping() {
   return null;
 }
 
-function EnterpriseFieldCard({ label, required, error, children }) {
+const FIELD_INPUT_OVERRIDES = "[&_input]:!rounded-md [&_input]:!border [&_input]:!border-border [&_input]:!bg-surface [&_input]:!px-2.5 [&_input]:!py-1.5 [&_input]:!text-[13px] [&_input]:placeholder:!text-text-tertiary/50 [&_input:focus]:!border-primary [&_input:focus]:!bg-surface [&_input:focus]:!outline-none [&_select]:!rounded-md [&_select]:!border [&_select]:!border-border [&_select]:!bg-surface [&_select]:!px-2.5 [&_select]:!py-1.5 [&_select]:!text-[13px] [&_select:focus]:!border-primary [&_select:focus]:!bg-surface [&_select:focus]:!outline-none [&_textarea]:!rounded-md [&_textarea]:!border [&_textarea]:!border-border [&_textarea]:!bg-surface [&_textarea]:!px-2.5 [&_textarea]:!py-1.5 [&_textarea]:!text-[13px] [&_textarea]:placeholder:!text-text-tertiary/50 [&_textarea:focus]:!border-primary [&_textarea:focus]:!bg-surface [&_textarea:focus]:!outline-none";
+
+function EnterpriseFieldCard({ label, required, error, hint, children }) {
   return (
-    <div className={`flex flex-col gap-1.5 select-none w-full`}>
-      <label className={`text-[11px] font-bold text-text-secondary uppercase tracking-wider block`} title={label}>
+    <div className={`flex items-start gap-1.5 select-none w-full ${FIELD_INPUT_OVERRIDES}`}>
+      <label className="text-[13px] font-semibold text-text-secondary shrink-0 w-28 pt-1.5" title={label}>
         {label} {required && <span className="text-rose-500 font-bold ml-0.5">*</span>}
       </label>
-      <div className="w-full flex flex-col">
+      <div className="flex-1 flex flex-col min-w-0">
         {children}
+        {hint && !error && (
+          <span className="text-[11px] text-text-tertiary mt-1">{hint}</span>
+        )}
         {error && (
-          <span className="text-[10px] font-bold text-rose-500 mt-1">{error}</span>
+          <span className="text-[11px] font-bold text-rose-500 mt-1">{error}</span>
         )}
       </div>
     </div>
@@ -129,7 +145,7 @@ function SearchableSelect({ value, onChange, options, placeholder, error }) {
           setIsOpen(!isOpen);
           setSearch('');
         }}
-        className="w-full flex items-center justify-between bg-base border border-border rounded-none py-1.5 px-3 text-xs outline-none text-text-primary text-left h-9 transition-[border-color] duration-150"
+        className="w-full flex items-center justify-between bg-surface border border-border rounded-md py-1.5 px-2.5 text-[13px] outline-none text-text-primary text-left transition-colors duration-150"
         aria-haspopup="listbox"
         aria-expanded={isOpen}
       >
@@ -263,7 +279,7 @@ function CustomDatePicker({ value, onChange, placeholder }) {
       <button
         type="button"
         onClick={() => setIsOpen(!isOpen)}
-        className="w-full flex items-center justify-between bg-base border border-border rounded-none py-1.5 px-3 text-xs outline-none text-text-primary text-left h-9 transition-[border-color] duration-150"
+        className="w-full flex items-center justify-between bg-surface border border-border rounded-md py-1.5 px-2.5 text-[13px] outline-none text-text-primary text-left transition-colors duration-150"
       >
         <span className={value ? 'text-text-primary font-medium' : 'text-text-tertiary'}>
           {value ? value : placeholder}
@@ -673,7 +689,7 @@ export default function RegistrationView({
   const currentSectionsCount = currentStepConfig.sections.length;
 
   return (
-    <div className="space-y-6 max-w-full pb-12 animate-fade-in relative">
+    <div className="space-y-4 max-w-full pb-8 animate-fade-in relative">
       {/* 1. TOAST NOTIFICATION FOR SAVE DRAFT */}
       {showSaveToast && (
         <div className="fixed top-4 right-4 z-50 flex items-center gap-2 bg-surface2 border border-border-em text-text-primary text-xs px-4 py-2.5 rounded-none shadow-[0_1px_4px_rgba(10,15,46,0.08)] animate-slide-down">
@@ -712,7 +728,7 @@ export default function RegistrationView({
 
       {/* 5. DRAFT STATE: 4-STEP WIZARD BODY */}
       {isDraft && (
-        <form onSubmit={handleFinalSubmit} className="space-y-6">
+        <form onSubmit={handleFinalSubmit} className="space-y-4">
           {state.profile.status === 'Rejected' && (
             <div className="p-4.5 rounded-none border border-rose-900/50 bg-rose-900/20 text-rose-400 flex items-start gap-3 shadow-sm select-none">
               <AlertTriangle className="size-5 shrink-0 mt-0.5 text-rose-400" />
@@ -730,69 +746,59 @@ export default function RegistrationView({
 
           {/* STEP 1: COMPANY INFORMATION */}
           {currentStep === 1 && (
-            <div className="space-y-6">
-              <div>
-                <SectionHeader title="COMPANY IDENTITY" icon={Building2} />
-                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-x-6 gap-y-8 pt-4 pb-8">
-                  <div className="lg:col-span-3">
-                    <EnterpriseFieldCard label="Legal Entity Name" required error={validationErrors[1]?.companyName}>
-                      <input type="text" value={companyForm.companyName} onChange={e => handleFieldChange('companyName', e.target.value)} placeholder="e.g. Bharat Steel Alloys Pvt. Ltd." />
-                    </EnterpriseFieldCard>
-                  </div>
-                  <EnterpriseFieldCard label="Trade / Brand Name" error={validationErrors[1]?.tradeName}>
-                    <input type="text" value={companyForm.tradeName} onChange={e => handleFieldChange('tradeName', e.target.value)} placeholder="e.g. Bharat Steel" />
-                  </EnterpriseFieldCard>
-                  <EnterpriseFieldCard label="Business Type" required error={validationErrors[1]?.businessType}>
-                    <select value={companyForm.businessType} onChange={e => handleFieldChange('businessType', e.target.value)}>
-                      <option value="" disabled className="text-text-tertiary">Select Business Type</option>
-                      <option value="MFGR">Manufacturer (MFGR)</option>
-                      <option value="TRDR">Trader / Distributor (TRDR)</option>
-                      <option value="SRVC">Service Provider (SRVC)</option>
-                      <option value="MSME">Micro Enterprise (MSME)</option>
-                    </select>
-                  </EnterpriseFieldCard>
-                  <EnterpriseFieldCard label="Incorporation Date" error={validationErrors[1]?.incorporationDate}>
-                    <input type="date" value={companyForm.incorporationDate || ''} onChange={e => handleFieldChange('incorporationDate', e.target.value)} />
-                  </EnterpriseFieldCard>
-                </div>
-              </div>
+            <div className="space-y-4">
+              <FormSection number="01" title="Company identity">
+                <EnterpriseFieldCard label="Legal entity name" required error={validationErrors[1]?.companyName}>
+                  <input type="text" maxLength={35} value={companyForm.companyName} onChange={e => handleFieldChange('companyName', e.target.value)} placeholder="Bharat Steel Alloys Pvt. Ltd." className="w-[39ch] max-w-full" />
+                </EnterpriseFieldCard>
+                <EnterpriseFieldCard label="Trade / brand name" error={validationErrors[1]?.tradeName}>
+                  <input type="text" maxLength={35} value={companyForm.tradeName} onChange={e => handleFieldChange('tradeName', e.target.value)} placeholder="Bharat Steel" className="w-[39ch] max-w-full" />
+                </EnterpriseFieldCard>
+                <EnterpriseFieldCard label="Business type" required error={validationErrors[1]?.businessType}>
+                  <select value={companyForm.businessType} onChange={e => handleFieldChange('businessType', e.target.value)} className="w-[25ch] max-w-full">
+                    <option value="" disabled className="text-text-tertiary">Select Business Type</option>
+                    <option value="MFGR">Manufacturer (MFGR)</option>
+                    <option value="TRDR">Trader / Distributor (TRDR)</option>
+                    <option value="SRVC">Service Provider (SRVC)</option>
+                    <option value="MSME">Micro Enterprise (MSME)</option>
+                  </select>
+                </EnterpriseFieldCard>
+                <EnterpriseFieldCard label="Incorporation date" error={validationErrors[1]?.incorporationDate}>
+                  <input type="date" value={companyForm.incorporationDate || ''} onChange={e => handleFieldChange('incorporationDate', e.target.value)} className="w-full" />
+                </EnterpriseFieldCard>
+              </FormSection>
 
-              <div>
-                <SectionHeader title="REGISTERED ADDRESS" icon={Truck} />
-                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-x-6 gap-y-8 pt-4 pb-8">
-                  <div className="lg:col-span-3">
-                    <EnterpriseFieldCard label="Street / Area" required error={validationErrors[1]?.address}>
-                      <input type="text" value={companyForm.address} onChange={e => handleFieldChange('address', e.target.value)} placeholder="e.g. 102, Mittal Chambers, Nariman Point" />
-                    </EnterpriseFieldCard>
-                  </div>
-                  <EnterpriseFieldCard label="City" required error={validationErrors[1]?.city}>
-                    <input type="text" value={companyForm.city} onChange={e => handleFieldChange('city', e.target.value)} placeholder="e.g. Mumbai" />
-                  </EnterpriseFieldCard>
-                  <EnterpriseFieldCard label="State" required error={validationErrors[1]?.state}>
+              <FormSection number="02" title="Registered address">
+                <EnterpriseFieldCard label="Street / area" required error={validationErrors[1]?.address}>
+                  <input type="text" maxLength={35} value={companyForm.address} onChange={e => handleFieldChange('address', e.target.value)} placeholder="102, Mittal Chambers, Nariman Point" className="w-[39ch] max-w-full" />
+                </EnterpriseFieldCard>
+                <EnterpriseFieldCard label="City" required error={validationErrors[1]?.city}>
+                  <input type="text" maxLength={35} value={companyForm.city} onChange={e => handleFieldChange('city', e.target.value)} placeholder="Mumbai" className="w-[39ch] max-w-full" />
+                </EnterpriseFieldCard>
+                <EnterpriseFieldCard label="State" required error={validationErrors[1]?.state}>
+                  <div className="w-[25ch] max-w-full">
                     <SearchableSelect value={companyForm.state} onChange={val => handleFieldChange('state', val)} options={INDIAN_STATES} placeholder="Select State" />
-                  </EnterpriseFieldCard>
-                  <EnterpriseFieldCard label="PIN Code" required error={validationErrors[1]?.postalCode}>
-                    <input type="text" maxLength={6} value={companyForm.postalCode} onChange={e => handleFieldChange('postalCode', e.target.value.replace(/\D/g, ''))} placeholder="e.g. 400021" className="font-mono" />
-                  </EnterpriseFieldCard>
-                  <EnterpriseFieldCard label="Contact Email" required error={validationErrors[1]?.email}>
-                    <input type="email" value={companyForm.email} onChange={e => handleFieldChange('email', e.target.value)} placeholder="e.g. billing@company.com" />
-                  </EnterpriseFieldCard>
-                  <EnterpriseFieldCard label="Mobile / Phone" required error={validationErrors[1]?.phone}>
-                    <input type="tel" value={companyForm.phone} onChange={e => handleFieldChange('phone', e.target.value)} placeholder="e.g. +91 22 2345 6789" />
-                  </EnterpriseFieldCard>
-                </div>
-              </div>
+                  </div>
+                </EnterpriseFieldCard>
+                <EnterpriseFieldCard label="PIN code" required error={validationErrors[1]?.postalCode}>
+                  <input type="text" maxLength={6} value={companyForm.postalCode} onChange={e => handleFieldChange('postalCode', e.target.value.replace(/\D/g, ''))} placeholder="400021" className="font-mono w-[10ch] max-w-full" />
+                </EnterpriseFieldCard>
+                <EnterpriseFieldCard label="Contact email" required error={validationErrors[1]?.email}>
+                  <input type="email" maxLength={241} value={companyForm.email} onChange={e => handleFieldChange('email', e.target.value)} placeholder="billing@company.com" />
+                </EnterpriseFieldCard>
+                <EnterpriseFieldCard label="Mobile / phone" required error={validationErrors[1]?.phone}>
+                  <input type="tel" maxLength={16} value={companyForm.phone} onChange={e => handleFieldChange('phone', e.target.value)} placeholder="+91 22 2345 6789" className="w-[20ch] max-w-full" />
+                </EnterpriseFieldCard>
+              </FormSection>
             </div>
           )}
 
           {/* STEP 2: TAX & REGULATORY */}
           {currentStep === 2 && (
-            <div className="space-y-6">
-              <div>
-                <SectionHeader title="INDIAN TAX IDS" icon={Building2} />
-                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-x-6 gap-y-8 pt-4 pb-8">
+            <div className="space-y-4">
+              <FormSection number="01" title="Indian tax IDs">
                   <EnterpriseFieldCard
-                    label="PAN Number"
+                    label="PAN number"
                     required
                     mappingCode="LFA1-STCD2"
                     isSapView={isSapView}
@@ -803,28 +809,26 @@ export default function RegistrationView({
                       maxLength={10}
                       value={companyForm.pan}
                       onChange={e => handleFieldChange('pan', e.target.value.toUpperCase())}
-                      placeholder="e.g. AABCB1234F"
-                      className="uppercase font-mono"
+                      placeholder="AABCB1234F"
+                      className="uppercase font-mono w-[14ch] max-w-full"
                     />
                   </EnterpriseFieldCard>
-                  <div className="md:col-span-1 lg:col-span-2">
-                    <EnterpriseFieldCard
-                      label="GSTIN"
-                      required
-                      mappingCode="LFB1-STCEG"
-                      isSapView={isSapView}
-                      error={validationErrors[2]?.gstin}
-                    >
-                      <input
-                        type="text"
-                        maxLength={15}
-                        value={companyForm.gstin}
-                        onChange={e => handleFieldChange('gstin', e.target.value.toUpperCase())}
-                        placeholder="e.g. 27AABCB1234F1Z5"
-                        className="uppercase font-mono"
-                      />
-                    </EnterpriseFieldCard>
-                  </div>
+                  <EnterpriseFieldCard
+                    label="GSTIN"
+                    required
+                    mappingCode="LFB1-STCEG"
+                    isSapView={isSapView}
+                    error={validationErrors[2]?.gstin}
+                  >
+                    <input
+                      type="text"
+                      maxLength={15}
+                      value={companyForm.gstin}
+                      onChange={e => handleFieldChange('gstin', e.target.value.toUpperCase())}
+                      placeholder="27AABCB1234F1Z5"
+                      className="uppercase font-mono w-[19ch] max-w-full"
+                    />
+                  </EnterpriseFieldCard>
                   <EnterpriseFieldCard
                     label="GST Registration Type"
                     required
@@ -835,6 +839,7 @@ export default function RegistrationView({
                     <select
                       value={companyForm.gstType}
                       onChange={e => handleFieldChange('gstType', e.target.value)}
+                      className="w-[25ch] max-w-full"
                     >
                       <option value="" disabled className="text-text-tertiary">Select Type</option>
                       <option value="01">Regular Taxpayer (01)</option>
@@ -843,23 +848,21 @@ export default function RegistrationView({
                       <option value="04">Exempt / Unregistered (04)</option>
                     </select>
                   </EnterpriseFieldCard>
-                  <div className="md:col-span-1 lg:col-span-2">
-                    <EnterpriseFieldCard
-                      label="CIN Number"
-                      mappingCode="LFA1-CIN_NO"
-                      isSapView={isSapView}
-                      error={validationErrors[2]?.cin}
-                    >
-                      <input
-                        type="text"
-                        maxLength={21}
-                        value={companyForm.cin}
-                        onChange={e => handleFieldChange('cin', e.target.value.toUpperCase())}
-                        placeholder="e.g. L01500MH1995PLC094858"
-                        className="uppercase font-mono"
-                      />
-                    </EnterpriseFieldCard>
-                  </div>
+                  <EnterpriseFieldCard
+                    label="CIN Number"
+                    mappingCode="LFA1-CIN_NO"
+                    isSapView={isSapView}
+                    error={validationErrors[2]?.cin}
+                  >
+                    <input
+                      type="text"
+                      maxLength={21}
+                      value={companyForm.cin}
+                      onChange={e => handleFieldChange('cin', e.target.value.toUpperCase())}
+                      placeholder="L01500MH1995PLC094858"
+                      className="uppercase font-mono w-[25ch] max-w-full"
+                    />
+                  </EnterpriseFieldCard>
                   <EnterpriseFieldCard
                     label="MSME / Udyam Number"
                     mappingCode="LFA1-MSME_NO"
@@ -868,91 +871,85 @@ export default function RegistrationView({
                   >
                     <input
                       type="text"
-                      maxLength={19}
+                      maxLength={20}
                       value={companyForm.msmeNumber}
                       onChange={e => handleFieldChange('msmeNumber', e.target.value.toUpperCase())}
-                      placeholder="e.g. UDYAM-MH-12-0012345"
-                      className="uppercase font-mono"
+                      placeholder="UDYAM-MH-12-0012345"
+                      className="uppercase font-mono w-[24ch] max-w-full"
                     />
                   </EnterpriseFieldCard>
-                  <div className="md:col-span-1 lg:col-span-2">
-                    <EnterpriseFieldCard
-                      label="TDS Section"
-                      required
-                      mappingCode="LFBW-WITHT"
-                      isSapView={isSapView}
-                      error={validationErrors[2]?.tdsSection}
+                  <EnterpriseFieldCard
+                    label="TDS Section"
+                    required
+                    mappingCode="LFBW-WITHT"
+                    isSapView={isSapView}
+                    error={validationErrors[2]?.tdsSection}
+                  >
+                    <select
+                      value={companyForm.tdsSection}
+                      onChange={e => handleFieldChange('tdsSection', e.target.value)}
+                      className="w-[25ch] max-w-full"
                     >
-                      <select
-                        value={companyForm.tdsSection}
-                        onChange={e => handleFieldChange('tdsSection', e.target.value)}
-                      >
-                        <option value="" disabled className="text-text-tertiary">Select TDS mapping</option>
-                        <option value="194C">194C - Contractor Payments</option>
-                        <option value="194J">194J - Professional Service Fees</option>
-                        <option value="194I">194I - Renting Clearances</option>
-                        <option value="194Q">194Q - Goods Purchase Credits</option>
-                        <option value="EXMP">EXMP - TDS Exempt status</option>
-                      </select>
-                    </EnterpriseFieldCard>
-                  </div>
-                </div>
-              </div>
+                      <option value="" disabled className="text-text-tertiary">Select TDS mapping</option>
+                      <option value="194C">194C - Contractor Payments</option>
+                      <option value="194J">194J - Professional Service Fees</option>
+                      <option value="194I">194I - Renting Clearances</option>
+                      <option value="194Q">194Q - Goods Purchase Credits</option>
+                      <option value="EXMP">EXMP - TDS Exempt status</option>
+                    </select>
+                  </EnterpriseFieldCard>
+              </FormSection>
             </div>
           )}
 
           {/* STEP 3: BANK DETAILS */}
           {currentStep === 3 && (
-            <div className="space-y-6">
-              <div>
-                <SectionHeader title="BANK ACCOUNT" icon={CreditCard} />
-                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-x-6 gap-y-8 pt-4 pb-8">
-                  <div className="lg:col-span-3">
-                    <EnterpriseFieldCard
-                      label="Account Holder Name"
-                      required
-                      mappingCode="LFBK-KOINH"
-                      isSapView={isSapView}
-                      error={validationErrors[3]?.accountName}
-                    >
-                      <input
-                        type="text"
-                        value={companyForm.accountName}
-                        onChange={e => handleFieldChange('accountName', e.target.value)}
-                        placeholder="e.g. Bharat Steel Alloys Pvt. Ltd."
-                      />
-                    </EnterpriseFieldCard>
-                  </div>
-
-                  <div className="md:col-span-1 lg:col-span-2">
-                    <EnterpriseFieldCard
-                      label="Bank Account Number"
-                      required
-                      mappingCode="LFBK-BANKN"
-                      isSapView={isSapView}
-                      error={validationErrors[3]?.accountNumber}
-                    >
-                      <div className="relative w-full">
-                        <input
-                          type={passVisible ? 'text' : 'password'}
-                          maxLength={18}
-                          value={companyForm.accountNumber}
-                          onChange={e => handleFieldChange('accountNumber', e.target.value.replace(/\D/g, ''))}
-                          placeholder="Enter Bank Account Number"
-                          className="font-mono pr-8"
-                        />
-                        <button
-                          type="button"
-                          onClick={() => setPassVisible(!passVisible)}
-                          className="absolute right-2 top-[7px] hover:bg-surface2 rounded text-text-tertiary hover:text-text-primary transition-colors duration-150"
-                        >
-                          {passVisible ? <EyeOff className="size-4" /> : <Eye className="size-4" />}
-                        </button>
-                      </div>
-                    </EnterpriseFieldCard>
-                  </div>
+            <div className="space-y-4">
+              <FormSection number="01" title="Bank account">
                   <EnterpriseFieldCard
-                    label="IFSC Code"
+                    label="Account holder name"
+                    required
+                    mappingCode="LFBK-KOINH"
+                    isSapView={isSapView}
+                    error={validationErrors[3]?.accountName}
+                  >
+                    <input
+                      type="text"
+                      maxLength={60}
+                      value={companyForm.accountName}
+                      onChange={e => handleFieldChange('accountName', e.target.value)}
+                      placeholder="Bharat Steel Alloys Pvt. Ltd."
+                      className="w-[64ch] max-w-full"
+                    />
+                  </EnterpriseFieldCard>
+
+                  <EnterpriseFieldCard
+                    label="Bank account number"
+                    required
+                    mappingCode="LFBK-BANKN"
+                    isSapView={isSapView}
+                    error={validationErrors[3]?.accountNumber}
+                  >
+                    <div className="relative w-[25ch] max-w-full">
+                      <input
+                        type={passVisible ? 'text' : 'password'}
+                        maxLength={18}
+                        value={companyForm.accountNumber}
+                        onChange={e => handleFieldChange('accountNumber', e.target.value.replace(/\D/g, ''))}
+                        placeholder="Enter Bank Account Number"
+                        className="font-mono pr-8 w-full"
+                      />
+                      <button
+                        type="button"
+                        onClick={() => setPassVisible(!passVisible)}
+                        className="absolute right-2 top-[7px] hover:bg-surface2 rounded text-text-tertiary hover:text-text-primary transition-colors duration-150"
+                      >
+                        {passVisible ? <EyeOff className="size-4" /> : <Eye className="size-4" />}
+                      </button>
+                    </div>
+                  </EnterpriseFieldCard>
+                  <EnterpriseFieldCard
+                    label="IFSC code"
                     required
                     mappingCode="LFBK-SWIFT"
                     isSapView={isSapView}
@@ -963,40 +960,39 @@ export default function RegistrationView({
                       maxLength={11}
                       value={companyForm.ifscCode}
                       onChange={e => handleFieldChange('ifscCode', e.target.value.toUpperCase())}
-                      placeholder="e.g. HDFC0000060"
-                      className="uppercase font-mono"
+                      placeholder="HDFC0000060"
+                      className="uppercase font-mono w-[15ch] max-w-full"
                     />
                   </EnterpriseFieldCard>
 
-                  <div className="md:col-span-1 lg:col-span-2">
-                    <EnterpriseFieldCard
-                      label="Bank Name (Auto-fetched)"
-                      mappingCode="LFBK-BANKA"
-                      isSapView={isSapView}
-                      error={validationErrors[3]?.bankName}
-                    >
-                      <input
-                        type="text"
-                        value={companyForm.bankName}
-                        readOnly
-                        placeholder="Auto-populated from IFSC"
-                        className="bg-surface2 text-text-secondary select-none"
-                      />
-                    </EnterpriseFieldCard>
-                  </div>
                   <EnterpriseFieldCard
-                    label="Account Currency"
+                    label="Bank name (auto-fetched)"
+                    mappingCode="LFBK-BANKA"
+                    isSapView={isSapView}
+                    error={validationErrors[3]?.bankName}
+                  >
+                    <input
+                      type="text"
+                      maxLength={60}
+                      value={companyForm.bankName}
+                      readOnly
+                      placeholder="Auto-populated from IFSC"
+                      className="bg-surface2 text-text-secondary select-none w-[64ch] max-w-full"
+                    />
+                  </EnterpriseFieldCard>
+                  <EnterpriseFieldCard
+                    label="Account currency"
                     mappingCode="LFBK-WAERS"
                     isSapView={isSapView}
                   >
-                    <select disabled className="bg-surface2 text-text-secondary cursor-not-allowed">
+                    <select disabled className="bg-surface2 text-text-secondary cursor-not-allowed w-[25ch] max-w-full">
                       <option value="INR">INR - Indian Rupee</option>
                     </select>
                   </EnterpriseFieldCard>
 
                   <div className="lg:col-span-3 mt-2">
                     <EnterpriseFieldCard
-                      label="Cancelled Cheque Copy"
+                      label="Cancelled cheque copy"
                       required
                       mappingCode="LFBK-CHQ_DOC"
                       isSapView={isSapView}
@@ -1010,8 +1006,7 @@ export default function RegistrationView({
                       />
                     </EnterpriseFieldCard>
                   </div>
-                </div>
-              </div>
+              </FormSection>
             </div>
           )}
 

@@ -91,7 +91,7 @@ export default function SignInPage() {
               type="text"
               required
               disabled={loading}
-              placeholder="e.g. VND-40012 or partner@domain.com"
+              placeholder="VND-40012 or partner@domain.com"
               value={vendorIdOrEmail}
               onChange={(e) => setVendorIdOrEmail(e.target.value)}
               className="pl-9 disabled:opacity-55"

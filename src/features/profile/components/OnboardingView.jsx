@@ -80,34 +80,35 @@ export default function OnboardingView({ state, companyForm, setCompanyForm, han
               <div className="space-y-1">
                 <label className="label">Company Legal Name *</label>
                 <input
-                  type="text" required value={companyForm.companyName}
+                  type="text" required maxLength={35} value={companyForm.companyName}
                   onChange={e => setCompanyForm({ ...companyForm, companyName: e.target.value })}
-                  placeholder="e.g. Enterprise Solutions Pvt Ltd"
+                  placeholder="Enterprise Solutions Pvt Ltd"
+                  className="w-[39ch]"
                 />
               </div>
               <div className="space-y-1">
                 <label className="label">GSTIN / Tax ID *</label>
                 <input
-                  type="text" required value={companyForm.gstin}
+                  type="text" required maxLength={15} value={companyForm.gstin}
                   onChange={e => setCompanyForm({ ...companyForm, gstin: e.target.value })}
-                  placeholder="e.g. 07AAAAA1111A1Z1"
-                  className="uppercase font-mono"
+                  placeholder="07AAAAA1111A1Z1"
+                  className="uppercase font-mono w-[19ch]"
                 />
               </div>
               <div className="space-y-1">
                 <label className="label">PAN (Income Tax Identifier)</label>
                 <input
-                  type="text" value={companyForm.pan}
+                  type="text" maxLength={10} value={companyForm.pan}
                   onChange={e => setCompanyForm({ ...companyForm, pan: e.target.value })}
-                  placeholder="e.g. ABCDE1234F"
-                  className="uppercase font-mono"
+                  placeholder="ABCDE1234F"
+                  className="uppercase font-mono w-[14ch]"
                 />
               </div>
               <div className="grid grid-cols-2 gap-3">
                 <div className="space-y-1">
                   <label className="label">Email Address *</label>
                   <input
-                    type="email" required value={companyForm.email}
+                    type="email" required maxLength={241} value={companyForm.email}
                     onChange={e => setCompanyForm({ ...companyForm, email: e.target.value })}
                     placeholder="sales@company.com"
                   />
@@ -115,9 +116,10 @@ export default function OnboardingView({ state, companyForm, setCompanyForm, han
                 <div className="space-y-1">
                   <label className="label">Phone Endpoint</label>
                   <input
-                    type="text" value={companyForm.phone}
+                    type="text" maxLength={16} value={companyForm.phone}
                     onChange={e => setCompanyForm({ ...companyForm, phone: e.target.value })}
                     placeholder="+91 98765 43210"
+                    className="w-[20ch]"
                   />
                 </div>
               </div>
@@ -132,18 +134,20 @@ export default function OnboardingView({ state, companyForm, setCompanyForm, han
             <div className="space-y-1.5">
               <label className="label">Street Address</label>
               <input
-                type="text" value={companyForm.address}
+                type="text" maxLength={35} value={companyForm.address}
                 onChange={e => setCompanyForm({ ...companyForm, address: e.target.value })}
                 placeholder="Plot 42, Phase 1, Industrial Area"
+                className="w-[39ch]"
               />
             </div>
             <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
               <div className="space-y-1">
                 <label className="label">City</label>
                 <input
-                  type="text" value={companyForm.city}
+                  type="text" maxLength={35} value={companyForm.city}
                   onChange={e => setCompanyForm({ ...companyForm, city: e.target.value })}
                   placeholder="New Delhi"
+                  className="w-[39ch]"
                 />
               </div>
               <div className="space-y-1">
@@ -157,9 +161,10 @@ export default function OnboardingView({ state, companyForm, setCompanyForm, han
               <div className="space-y-1">
                 <label className="label">Postal Code</label>
                 <input
-                  type="text" value={companyForm.postalCode}
+                  type="text" maxLength={6} value={companyForm.postalCode}
                   onChange={e => setCompanyForm({ ...companyForm, postalCode: e.target.value })}
                   placeholder="110001"
+                  className="font-mono w-[14ch]"
                 />
               </div>
             </div>
@@ -174,7 +179,7 @@ export default function OnboardingView({ state, companyForm, setCompanyForm, han
               <div className="space-y-1">
                 <label className="label">Bank Institution Name</label>
                 <input
-                  type="text" value={companyForm.bankName}
+                  type="text" maxLength={60} value={companyForm.bankName}
                   onChange={e => setCompanyForm({ ...companyForm, bankName: e.target.value })}
                   placeholder="State Bank of India"
                 />
@@ -182,27 +187,27 @@ export default function OnboardingView({ state, companyForm, setCompanyForm, han
               <div className="space-y-1">
                 <label className="label">Account Name / Beneficiary</label>
                 <input
-                  type="text" value={companyForm.accountName}
+                  type="text" maxLength={60} value={companyForm.accountName}
                   onChange={e => setCompanyForm({ ...companyForm, accountName: e.target.value })}
-                  placeholder="e.g. Enterprise Solutions Account"
+                  placeholder="Enterprise Solutions Account"
                 />
               </div>
               <div className="space-y-1">
                 <label className="label">Account Number</label>
                 <input
-                  type="password" value={companyForm.accountNumber}
+                  type="password" maxLength={18} value={companyForm.accountNumber}
                   onChange={e => setCompanyForm({ ...companyForm, accountNumber: e.target.value })}
                   placeholder="••••••••••••••"
-                  className="font-mono"
+                  className="font-mono w-[22ch]"
                 />
               </div>
               <div className="space-y-1">
                 <label className="label">IFSC / Routing Code</label>
                 <input
-                  type="text" value={companyForm.ifscCode}
+                  type="text" maxLength={11} value={companyForm.ifscCode}
                   onChange={e => setCompanyForm({ ...companyForm, ifscCode: e.target.value })}
                   placeholder="SBIN0001234"
-                  className="uppercase font-mono"
+                  className="uppercase font-mono w-[15ch]"
                 />
               </div>
             </div>

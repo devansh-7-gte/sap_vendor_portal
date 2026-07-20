@@ -36,11 +36,11 @@ function EnterpriseFieldCard({ label, required, error, children, icon: Icon }) {
   );
 }
 
-// Vertical stack: label on top, value box below — ensures all value boxes start at same x in grid
+// Side-by-side: label on left, value box on right
 function SapReadOnlyField({ label, value, isFile, isMonospace = true, valueClassName = '', containerClassName = '', icon: Icon }) {
   return (
-    <div className="flex flex-col gap-1 select-none focus-within:outline-none">
-      <span className="text-[9px] font-extrabold text-text-secondary uppercase tracking-wider flex items-center gap-1 leading-none" title={label}>
+    <div className="flex items-center justify-between gap-2 select-none focus-within:outline-none w-full px-8">
+      <span className="text-[11px] font-extrabold text-text-secondary uppercase tracking-wider flex items-center gap-1.5 leading-none shrink-0" title={label}>
         {Icon && <Icon className="size-3 text-text-tertiary shrink-0" />}
         <span>{label}</span>
       </span>
@@ -1115,21 +1115,18 @@ export default function PurchaseOrdersView({
                     return (
                       <React.Fragment key={step.key}>
                         <div className="flex flex-col items-center gap-1 flex-shrink-0">
-                          <div className={`size-7 rounded-full flex items-center justify-center border-2 transition-all duration-150 ${
-                            isPast ? 'border-green-500 bg-green-500 text-white' :
+                          <div className={`size-7 rounded-full flex items-center justify-center border-2 transition-all duration-150 ${isPast ? 'border-green-500 bg-green-500 text-white' :
                             isActive ? `${c.ring} shadow-sm` :
-                            'border-border bg-base text-text-tertiary'
-                          }`}>
+                              'border-border bg-base text-text-tertiary'
+                            }`}>
                             {isPast ? <Check className="size-3.5" /> : <StepIcon className="size-3.5" />}
                           </div>
-                          <span className={`text-[8px] font-extrabold uppercase tracking-wider whitespace-nowrap ${
-                            isPast ? 'text-green-600' : isActive ? c.text : 'text-text-tertiary'
-                          }`}>{step.label}</span>
+                          <span className={`text-[8px] font-extrabold uppercase tracking-wider whitespace-nowrap ${isPast ? 'text-green-600' : isActive ? c.text : 'text-text-tertiary'
+                            }`}>{step.label}</span>
                         </div>
                         {idx < steps.length - 1 && (
-                          <div className={`h-0.5 flex-1 min-w-6 mx-1 mb-3.5 rounded-full transition-all duration-150 ${
-                            isPast ? 'bg-green-400' : 'bg-border'
-                          }`} />
+                          <div className={`h-0.5 flex-1 min-w-6 mx-1 mb-3.5 rounded-full transition-all duration-150 ${isPast ? 'bg-green-400' : 'bg-border'
+                            }`} />
                         )}
                       </React.Fragment>
                     );
@@ -1149,8 +1146,8 @@ export default function PurchaseOrdersView({
                   key={t.id}
                   onClick={() => setDetailTab(t.id)}
                   className={`pb-2.5 text-xs font-bold border-b-2 transition-all duration-150 cursor-pointer focus-visible:outline-none ${detailTab === t.id
-                      ? 'border-text-primary text-text-primary'
-                      : 'border-transparent text-text-tertiary hover:text-text-secondary'
+                    ? 'border-text-primary text-text-primary'
+                    : 'border-transparent text-text-tertiary hover:text-text-secondary'
                     }`}
                 >
                   {t.label}
@@ -1163,13 +1160,13 @@ export default function PurchaseOrdersView({
               {/* TAB 1: PO Detail View */}
               {detailTab === 'po_detail' && (
                 <div className="space-y-6 animate-fade-in">
-                  {/* PO Header Fields — 3-column grid, each cell has label-on-top + full-width value box */}
+                  {/* PO Header Fields */}
                   <div className="card overflow-hidden">
                     <div className="flex items-center gap-2 px-5 py-3 border-b border-border bg-surface2/40">
                       <div className="size-1.5 rounded-full bg-blue-500"></div>
                       <span className="text-[10px] font-extrabold text-text-secondary uppercase tracking-widest">Purchase Order Header Data</span>
                     </div>
-                    <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-4 p-5">
+                    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-x-8 gap-y-4 p-5">
                       <SapReadOnlyField
                         label="PO Number"
                         value={activePo.id}
@@ -1190,8 +1187,8 @@ export default function PurchaseOrdersView({
                           activePo.status === 'Acknowledged'
                             ? 'bg-emerald-50 text-emerald-800 border-emerald-200'
                             : activePo.status === 'Open'
-                            ? 'bg-amber-50 text-amber-700 border-amber-200'
-                            : 'bg-surface2 text-text-secondary border-border'
+                              ? 'bg-amber-50 text-amber-700 border-amber-200'
+                              : 'bg-surface2 text-text-secondary border-border'
                         }
                       />
                       <SapReadOnlyField
@@ -1211,23 +1208,6 @@ export default function PurchaseOrdersView({
                         isMonospace={false}
                         icon={MapPin}
                         containerClassName="bg-blue-50 text-blue-700 border-blue-200 hover:bg-blue-100 cursor-pointer"
-                      />
-                      <SapReadOnlyField
-                        label="Payment Terms"
-                        value={activePo.paymentTerms || 'NET 30 Days'}
-                        isMonospace={false}
-                        icon={CreditCard}
-                      />
-                      <SapReadOnlyField
-                        label="Incoterms"
-                        value={activePo.incoterms || 'EXW'}
-                        isMonospace={false}
-                        icon={Truck}
-                      />
-                      <SapReadOnlyField
-                        label="Currency"
-                        value={activePo.currency || 'INR'}
-                        icon={TrendingUp}
                       />
                     </div>
                   </div>
@@ -1312,8 +1292,8 @@ export default function PurchaseOrdersView({
                                 type="button"
                                 onClick={() => setActiveLineIdx(dotIdx)}
                                 className={`size-2 rounded-full transition-all duration-150 cursor-pointer ${activeLineIdx === dotIdx
-                                    ? 'bg-text-primary w-4.5'
-                                    : 'bg-border-em hover:bg-text-tertiary'
+                                  ? 'bg-text-primary w-4.5'
+                                  : 'bg-border-em hover:bg-text-tertiary'
                                   }`}
                                 title={`Go to page ${dotIdx + 1}`}
                               />
@@ -1397,20 +1377,22 @@ export default function PurchaseOrdersView({
                             <input
                               type="text"
                               required
+                              maxLength={10}
                               value={asnForm.carrierName}
                               onChange={e => setAsnForm({ ...asnForm, carrierName: e.target.value })}
-                              placeholder="e.g. DHL Express"
-                              className="w-48 bg-surface border border-border focus:border-[rgb(var(--color-emerald-default-rgb))] rounded-[3px] px-2.5 h-6.5 text-xs outline-none text-text-primary font-bold transition-all duration-150"
+                              placeholder="DHL Express"
+                              className="w-[14ch] bg-surface border border-border focus:border-[rgb(var(--color-emerald-default-rgb))] rounded-[3px] px-2.5 h-6.5 text-xs outline-none text-text-primary font-bold transition-all duration-150"
                             />
                           </SapInputField>
 
                           <SapInputField label="Vehicle / Tracking No." icon={Truck}>
                             <input
                               type="text"
+                              maxLength={20}
                               value={asnForm.vehicleNumber}
                               onChange={e => setAsnForm({ ...asnForm, vehicleNumber: e.target.value })}
-                              placeholder="e.g. MH-12-XY-4321"
-                              className="w-40 bg-surface border border-border focus:border-[rgb(var(--color-emerald-default-rgb))] rounded-[3px] px-2.5 h-6.5 text-xs outline-none text-text-primary font-mono font-bold uppercase transition-all duration-150"
+                              placeholder="MH-12-XY-4321"
+                              className="w-[24ch] bg-surface border border-border focus:border-[rgb(var(--color-emerald-default-rgb))] rounded-[3px] px-2.5 h-6.5 text-xs outline-none text-text-primary font-mono font-bold uppercase transition-all duration-150"
                             />
                           </SapInputField>
 
@@ -1421,7 +1403,7 @@ export default function PurchaseOrdersView({
                               value={ewayBillNo}
                               onChange={e => setEwayBillNo(e.target.value.replace(/\D/g, ''))}
                               placeholder="12-digit numeric code"
-                              className="w-36 bg-surface border border-border focus:border-[rgb(var(--color-emerald-default-rgb))] rounded-[3px] px-2.5 h-6.5 text-xs outline-none text-text-primary font-mono font-bold tabular-nums transition-all duration-150"
+                              className="w-[16ch] bg-surface border border-border focus:border-[rgb(var(--color-emerald-default-rgb))] rounded-[3px] px-2.5 h-6.5 text-xs outline-none text-text-primary font-mono font-bold tabular-nums transition-all duration-150"
                             />
                           </SapInputField>
                         </div>
@@ -1545,9 +1527,8 @@ export default function PurchaseOrdersView({
                                                   }
                                                 }));
                                               }}
-                                              className={`w-24 bg-surface border focus:border-[rgb(var(--color-emerald-default-rgb))] rounded-[3px] px-2 py-0.5 text-xs text-right font-mono font-semibold outline-none tabular-nums transition-all duration-150 ${
-                                                error ? 'border-red-500 focus:border-red-500 bg-red-50/30' : 'border-border-em'
-                                              }`}
+                                              className={`w-24 bg-surface border focus:border-[rgb(var(--color-emerald-default-rgb))] rounded-[3px] px-2 py-0.5 text-xs text-right font-mono font-semibold outline-none tabular-nums transition-all duration-150 ${error ? 'border-red-500 focus:border-red-500 bg-red-50/30' : 'border-border-em'
+                                                }`}
                                               placeholder="0"
                                             />
                                             {error && (
@@ -1576,8 +1557,8 @@ export default function PurchaseOrdersView({
                                     type="button"
                                     onClick={() => setAsnLineIdx(dotIdx)}
                                     className={`size-2 rounded-full transition-all duration-150 cursor-pointer ${asnLineIdx === dotIdx
-                                        ? 'bg-text-primary w-4.5'
-                                        : 'bg-border-em hover:bg-text-tertiary'
+                                      ? 'bg-text-primary w-4.5'
+                                      : 'bg-border-em hover:bg-text-tertiary'
                                       }`}
                                     title={`Go to page ${dotIdx + 1}`}
                                   />
@@ -1823,8 +1804,8 @@ export default function PurchaseOrdersView({
                                       type="button"
                                       onClick={() => setGrnLineIdx(dotIdx)}
                                       className={`size-2 rounded-full transition-all duration-150 cursor-pointer ${grnLineIdx === dotIdx
-                                          ? 'bg-text-primary w-4.5'
-                                          : 'bg-border-em hover:bg-text-tertiary'
+                                        ? 'bg-text-primary w-4.5'
+                                        : 'bg-border-em hover:bg-text-tertiary'
                                         }`}
                                       title={`Go to page ${dotIdx + 1}`}
                                     />
@@ -1997,10 +1978,11 @@ export default function PurchaseOrdersView({
                         <EnterpriseFieldCard label="Vendor Tax Invoice No." required icon={FileText}>
                           <input
                             type="text"
+                            maxLength={16}
                             value={vendorInvoiceNo}
                             onChange={e => setVendorInvoiceNo(e.target.value)}
-                            placeholder="e.g. INV-2026-8890"
-                            className="w-full uppercase h-8"
+                            placeholder="INV-2026-8890"
+                            className="w-[20ch] uppercase h-8"
                           />
                         </EnterpriseFieldCard>
 
@@ -2009,7 +1991,7 @@ export default function PurchaseOrdersView({
                             type="date"
                             value={billingDate}
                             onChange={e => setBillingDate(e.target.value)}
-                            className="w-full h-8"
+                            className="w-[15ch] h-8"
                           />
                         </EnterpriseFieldCard>
                       </div>
@@ -2118,12 +2100,11 @@ export default function PurchaseOrdersView({
                       <button
                         key={st}
                         onClick={() => setPoIssueStatus(prev => ({ ...prev, [drawerPo.id]: st }))}
-                        className={`px-2 py-0.5 rounded text-[10px] font-bold border transition-colors duration-150 ${
-                            poIssueStatus[drawerPo.id] === st
-                              ? st === 'Open' ? 'bg-red-50 text-red-700 border-red-200'
-                              : st === 'In Review' ? 'bg-amber-50 text-amber-700 border-amber-200'
+                        className={`px-2 py-0.5 rounded text-[10px] font-bold border transition-colors duration-150 ${poIssueStatus[drawerPo.id] === st
+                          ? st === 'Open' ? 'bg-red-50 text-red-700 border-red-200'
+                            : st === 'In Review' ? 'bg-amber-50 text-amber-700 border-amber-200'
                               : 'bg-green-50 text-green-700 border-green-200'
-                              : 'bg-surface border-border text-text-secondary hover:bg-surface2'
+                          : 'bg-surface border-border text-text-secondary hover:bg-surface2'
                           }`}
                       >
                         {st}
