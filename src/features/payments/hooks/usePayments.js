@@ -14,6 +14,10 @@ export function usePayments() {
   }, []);
 
   const refreshPayments = useCallback(async () => {
+    if (typeof window !== 'undefined' && !localStorage.getItem('jwt_token')) {
+      setLoading(false);
+      return;
+    }
     try {
       const data = await paymentService.getPayments();
       const paymentList = data && Array.isArray(data.payments) ? data.payments : (Array.isArray(data) ? data : null);

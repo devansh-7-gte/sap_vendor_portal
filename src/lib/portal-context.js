@@ -69,10 +69,12 @@ export function PortalProvider({ children }) {
   };
 
   useEffect(() => {
+    const token = typeof window !== 'undefined' ? localStorage.getItem('jwt_token') : null;
+    if (!token) return;
+
     const vendorId = profileHook.profile?.vendorId || (typeof window !== 'undefined' ? localStorage.getItem('clerk_user_id') : null) || 'mock_vendor_id';
     
     console.log('[PortalContext] Initializing WebSockets connection for vendor:', vendorId);
-    const token = typeof window !== 'undefined' ? localStorage.getItem('jwt_token') : null;
     const socket = initSocket(token, vendorId);
 
     socket.on('po:new', (po) => {

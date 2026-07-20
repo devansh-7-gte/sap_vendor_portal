@@ -15,6 +15,7 @@ export function useRFQs(profile) {
   };
 
   const refreshRFQs = async () => {
+    if (typeof window !== 'undefined' && !localStorage.getItem('jwt_token')) return;
     try {
       const data = await rfqService.getRFQs();
       if (data) {

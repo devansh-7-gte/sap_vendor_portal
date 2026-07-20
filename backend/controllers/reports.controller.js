@@ -25,7 +25,7 @@ const drawLine = (doc, y) => {
 // @access  Public
 const generateStatement = asyncHandler(async (req, res, next) => {
   const vendorId = getVendorId(req);
-  const vendor = await Vendor.findOne({ clerkId: vendorId });
+  const vendor = await Vendor.findOne({ $or: [{ vendorId }, { clerkId: vendorId }] });
   
   // Get all payments for this vendor
   const payments = await Payment.find({ vendorId }).sort({ paymentDate: -1 });
@@ -156,7 +156,7 @@ const generateInvoicePDF = asyncHandler(async (req, res, next) => {
     return next(ApiError.notFound('Invoice document not found'));
   }
 
-  const vendor = await Vendor.findOne({ clerkId: invoice.vendorId });
+  const vendor = await Vendor.findOne({ $or: [{ vendorId: invoice.vendorId }, { clerkId: invoice.vendorId }] });
   const po = await PurchaseOrder.findOne({ id: invoice.poId });
 
   const doc = new PDFDocument({ margin: 50, size: 'A4' });
