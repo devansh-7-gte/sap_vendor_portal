@@ -694,20 +694,22 @@ export default function ReportsAnalyticsView({ state }) {
                   <SapInputField label="Report Name" required icon={FileText}>
                     <input
                       type="text"
-                      placeholder="e.g. Weekly AP Aging"
+                      maxLength={60}
+                      placeholder="Weekly AP Aging"
                       value={schedulerForm.reportName}
                       onChange={e => setSchedulerForm({ ...schedulerForm, reportName: e.target.value })}
-                      className="w-56 !py-1 font-bold"
+                      className="w-full !py-1 font-bold"
                     />
                   </SapInputField>
 
                   <SapInputField label="Recipients (Email)" required icon={Users}>
                     <input
                       type="text"
+                      maxLength={241}
                       placeholder="CFO, Finance Director, etc."
                       value={schedulerForm.recipients}
                       onChange={e => setSchedulerForm({ ...schedulerForm, recipients: e.target.value })}
-                      className="w-64 !py-1 font-mono font-bold"
+                      className="w-full !py-1 font-mono font-bold"
                     />
                   </SapInputField>
 
@@ -715,7 +717,7 @@ export default function ReportsAnalyticsView({ state }) {
                     <select
                       value={schedulerForm.frequency}
                       onChange={e => setSchedulerForm({ ...schedulerForm, frequency: e.target.value })}
-                      className="w-36 !py-1 font-semibold cursor-pointer"
+                      className="w-[15ch] !py-1 font-semibold cursor-pointer"
                     >
                       <option value="Daily">Daily</option>
                       <option value="Weekly">Weekly</option>
@@ -727,7 +729,7 @@ export default function ReportsAnalyticsView({ state }) {
                     <select
                       value={schedulerForm.format}
                       onChange={e => setSchedulerForm({ ...schedulerForm, format: e.target.value })}
-                      className="w-32 !py-1 font-semibold cursor-pointer"
+                      className="w-[15ch] !py-1 font-semibold cursor-pointer"
                     >
                       <option value="Excel">Excel (.xlsx)</option>
                       <option value="PDF">PDF Document</option>
@@ -738,7 +740,7 @@ export default function ReportsAnalyticsView({ state }) {
                     <select
                       value={schedulerForm.companyCode}
                       onChange={e => setSchedulerForm({ ...schedulerForm, companyCode: e.target.value })}
-                      className="w-32 !py-1 font-semibold cursor-pointer"
+                      className="w-[15ch] !py-1 font-semibold cursor-pointer"
                     >
                       <option value="1000">1000 (Mumbai)</option>
                       <option value="2000">2000 (Delhi)</option>
@@ -751,7 +753,7 @@ export default function ReportsAnalyticsView({ state }) {
                       type="date"
                       value={schedulerForm.nextRun}
                       onChange={e => setSchedulerForm({ ...schedulerForm, nextRun: e.target.value })}
-                      className="w-44 !py-1 font-semibold cursor-pointer"
+                      className="w-[15ch] !py-1 font-semibold cursor-pointer"
                     />
                   </SapInputField>
                 </div>

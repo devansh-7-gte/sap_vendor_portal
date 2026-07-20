@@ -610,7 +610,7 @@ export default function AdminPage() {
               <textarea
                 value={rejectModal.reason}
                 onChange={e => setRejectModal({ ...rejectModal, reason: e.target.value })}
-                placeholder="e.g. GST registration certificate upload is blurry or invalid. Please re-upload legible documentation."
+                placeholder="GST registration certificate upload is blurry or invalid. Please re-upload legible documentation."
                 rows="4"
                 className="w-full font-bold"
               />

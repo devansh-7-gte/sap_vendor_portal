@@ -143,7 +143,7 @@ export default function SignUpPage() {
                 type="text"
                 required
                 disabled={loading}
-                placeholder="e.g. Acme Manufacturing Ltd"
+                placeholder="Acme Manufacturing Ltd"
                 value={companyName}
                 onChange={(e) => setCompanyName(e.target.value)}
                 className="pl-8.5"

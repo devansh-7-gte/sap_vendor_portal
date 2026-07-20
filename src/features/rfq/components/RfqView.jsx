@@ -4,18 +4,15 @@ import {
   Clock,
   CheckCircle2,
   ChevronRight,
-  FileText,
   Database,
   Settings,
   Layers,
   Percent,
-  Calendar,
   Sparkles,
   ClipboardList,
   Search,
   Plus,
   Trash2,
-  User,
   Upload,
   X,
   File,
@@ -46,13 +43,25 @@ const formatDate = (dateStr) => {
   return `${day}.${month}.${year}`;
 };
 
-// --- Redesigned SAP Fiori Components ---
-const SectionHeader = ({ title, icon: Icon }) => (
-  <div className="col-span-full mb-4 mt-6 first:mt-0">
-    <h3 className="text-xs font-extrabold text-text-primary tracking-wider uppercase border-b border-border pb-2 flex items-center gap-2 select-none">
-      {Icon && <Icon className="size-4 text-text-secondary shrink-0" />}
-      <span>{title}</span>
-    </h3>
+// --- Redesigned components (matching vendor registration's numbered card style) ---
+const SectionHeader = ({ title, number }) => (
+  <div className="flex items-center gap-2.5 px-5 py-3 border-b border-border select-none">
+    {number && (
+      <span className="inline-flex items-center justify-center text-[11px] font-bold font-mono text-primary bg-primary/10 rounded px-2 py-1 tabular-nums shrink-0">
+        {number}
+      </span>
+    )}
+    <h3 className="text-[15px] font-bold text-text-primary">{title}</h3>
+  </div>
+);
+
+// Bordered, numbered card wrapper for a form section
+const FormSection = ({ number, title, children, className = '' }) => (
+  <div className={`bg-surface border border-border rounded-xl shadow-xs ${className}`}>
+    <SectionHeader number={number} title={title} />
+    <div className="p-4">
+      {children}
+    </div>
   </div>
 );
 
@@ -68,17 +77,20 @@ const EnterpriseCard = ({ label, required, children, error }) => (
   </div>
 );
 
-const EnterpriseFieldCard = ({ label, required, error, children, labelWidth = 'sm:w-56', className = '' }) => (
-  <div className={`h-full py-1.5 px-3 bg-surface transition-colors duration-150 flex flex-col sm:flex-row sm:items-center gap-3 select-none ${
-    error ? 'bg-red-50/10' : 'hover:bg-surface2/30 focus-within:bg-surface2/50'
-  } ${className}`}>
-    <label className={`text-xs font-bold text-text-secondary shrink-0 whitespace-nowrap select-none block ${labelWidth}`} title={label}>
-      {label} {required && <span className="text-red-500 font-bold select-none ml-0.5">*</span>}
+const FIELD_INPUT_OVERRIDES = "[&_input]:!rounded-md [&_input]:!border [&_input]:!border-border [&_input]:!bg-surface [&_input]:!px-2.5 [&_input]:!py-1.5 [&_input]:!text-[13px] [&_input]:placeholder:!text-text-tertiary/50 [&_input]:placeholder:!font-semibold [&_input:focus]:!border-primary [&_input:focus]:!bg-surface [&_input:focus]:!outline-none [&_select]:!rounded-md [&_select]:!border [&_select]:!border-border [&_select]:!bg-surface [&_select]:!px-2.5 [&_select]:!py-1.5 [&_select]:!text-[13px] [&_select:focus]:!border-primary [&_select:focus]:!bg-surface [&_select:focus]:!outline-none [&_textarea]:!rounded-md [&_textarea]:!border [&_textarea]:!border-border [&_textarea]:!bg-surface [&_textarea]:!px-2.5 [&_textarea]:!py-1.5 [&_textarea]:!text-[13px] [&_textarea]:placeholder:!text-text-tertiary/50 [&_textarea]:placeholder:!font-semibold [&_textarea:focus]:!border-primary [&_textarea:focus]:!bg-surface [&_textarea:focus]:!outline-none";
+
+const EnterpriseFieldCard = ({ label, required, error, hint, children }) => (
+  <div className={`flex items-start gap-1.5 select-none w-full ${FIELD_INPUT_OVERRIDES}`}>
+    <label className="text-[13px] font-semibold text-text-secondary shrink-0 w-28 pt-1.5" title={label}>
+      {label} {required && <span className="text-rose-500 font-bold ml-0.5">*</span>}
     </label>
-    <div className="flex-1 w-full min-w-0 flex flex-col justify-center">
+    <div className="flex-1 flex flex-col min-w-0">
       {children}
+      {hint && !error && (
+        <span className="text-[11px] text-text-tertiary mt-1">{hint}</span>
+      )}
       {error && (
-        <span className="text-[10px] font-bold text-red-600 mt-1 select-none">{error}</span>
+        <span className="text-[11px] font-bold text-rose-500 mt-1">{error}</span>
       )}
     </div>
   </div>
@@ -704,9 +716,8 @@ export default function RfqView({
                   {/* Scrollable Content */}
                   <div className="flex-1 overflow-y-auto p-4 custom-scrollbar space-y-6 bg-surface">
                     {/* RAW DETAILS */}
-                    <div>
-                      <SectionHeader title="RAW Details" icon={FileText} />
-                      <div className="card overflow-x-auto">
+                    <FormSection number="01" title="RAW details">
+                      <div className="overflow-x-auto -m-4">
                         <table className="w-full text-left border-collapse table-sticky">
                           <thead>
                             <tr>
@@ -734,11 +745,10 @@ export default function RfqView({
                           </tbody>
                         </table>
                       </div>
-                    </div>
+                    </FormSection>
 
                     {/* OTHER DETAILS (INVITED VENDORS) */}
-                    <div>
-                      <SectionHeader title="Invited Vendors (Other Details)" icon={User} />
+                    <FormSection number="02" title="Invited vendors">
                       <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
                         {activeRfq.invitedVendors?.map(v => {
                            const ratingVal = Number(v.rating || 0);
@@ -766,11 +776,10 @@ export default function RfqView({
                            );
                          })}
                       </div>
-                    </div>
+                    </FormSection>
 
                     {/* PROCESS DETAILS (AUDIT WORKFLOW STATUS) */}
-                    <div>
-                      <SectionHeader title="Audit Process Details & SAP Status Tracking" icon={Layers} />
+                    <FormSection number="03" title="Audit process &amp; SAP status tracking">
                       <div className="grid grid-cols-2 md:grid-cols-4 gap-3 text-xs">
                         <div className="p-3 border border-border rounded-md bg-surface2/30">
                           <span className="text-[9px] text-text-tertiary uppercase block font-bold">ME41 Create</span>
@@ -830,7 +839,7 @@ export default function RfqView({
                           </span>
                         </div>
                       </div>
-                    </div>
+                    </FormSection>
 
                     <div className="flex justify-between items-center pt-3 border-t border-border text-xs text-text-secondary">
                       <p className="font-semibold">
@@ -866,29 +875,22 @@ export default function RfqView({
         <div className="space-y-6">
 
           {/* Selection RFQ card */}
-          <div className="card p-5 space-y-4">
-            <div className="flex flex-wrap items-center justify-between gap-4">
-              <div>
-                <h3 className="label mb-0">Select RFQ for Comparative Analysis</h3>
-                <p className="text-[11px] text-text-secondary mt-0.5">Select a quoted or submitted RFQ to view the full bids comparison matrix</p>
-              </div>
-
-              <div className="flex gap-2">
-                <select
-                  value={selectedRfqEvalId}
-                  onChange={e => setSelectedRfqEvalId(e.target.value)}
-                  className="w-auto font-semibold cursor-pointer"
-                >
-                  <option value="">-- Choose RFQ --</option>
-                  {state.rfqs.filter(r => r.bids && r.bids.length > 0).map(r => (
-                    <option key={r.id} value={r.id}>
-                      {r.id} - {r.description.slice(0, 35)}... ({r.bids.length} bids)
-                    </option>
-                  ))}
-                </select>
-              </div>
-            </div>
-          </div>
+          <FormSection number="01" title="Select RFQ for comparative analysis">
+            <EnterpriseFieldCard label="RFQ document" hint="Select a quoted or submitted RFQ to view the full bids comparison matrix">
+              <select
+                value={selectedRfqEvalId}
+                onChange={e => setSelectedRfqEvalId(e.target.value)}
+                className="w-[25ch] max-w-full font-semibold cursor-pointer"
+              >
+                <option value="">-- Choose RFQ --</option>
+                {state.rfqs.filter(r => r.bids && r.bids.length > 0).map(r => (
+                  <option key={r.id} value={r.id}>
+                    {r.id} - {r.description.slice(0, 35)}... ({r.bids.length} bids)
+                  </option>
+                ))}
+              </select>
+            </EnterpriseFieldCard>
+          </FormSection>
 
           {selectedRfqEvalId ? (() => {
             const rfq = state.rfqs.find(r => r.id === selectedRfqEvalId);
@@ -946,9 +948,14 @@ export default function RfqView({
                 </div>
 
                 {/* Comparison Matrix Grid */}
-                <div className="card p-6 space-y-4">
-                  <div className="flex items-center justify-between border-b border-border pb-2">
-                    <h4 className="font-bold text-xs text-text-primary">ME48 Comparative Evaluation Matrix</h4>
+                <div className="bg-surface border border-border rounded-xl shadow-xs p-6 space-y-4">
+                  <div className="flex items-center justify-between border-b border-border pb-3">
+                    <div className="flex items-center gap-2.5">
+                      <span className="inline-flex items-center justify-center text-[11px] font-bold font-mono text-primary bg-primary/10 rounded px-2 py-1 tabular-nums shrink-0">
+                        02
+                      </span>
+                      <h4 className="text-[15px] font-bold text-text-primary">Comparative evaluation matrix</h4>
+                    </div>
                     <span className="text-[9px] text-text-tertiary uppercase font-mono font-bold">
                       Formula: Price 40% | Tech 30% | Delivery 20% | Rating 10%
                     </span>
@@ -1230,7 +1237,7 @@ export default function RfqView({
                             });
                             if (quoteErrors.rfqId) setQuoteErrors(prev => ({ ...prev, rfqId: false }));
                           }}
-                          className={`w-auto font-semibold ${
+                          className={`w-[25ch] max-w-full font-semibold ${
                             quoteErrors.rfqId ? 'border-red-500' : ''
                           }`}
                         >
@@ -1306,215 +1313,168 @@ export default function RfqView({
               })()}
 
               {/* 1. QUOTATION HEADER */}
-              <div className="space-y-4">
-                <SectionHeader title="Quotation Header" icon={FileText} />
-                <div className="flex flex-col border border-border rounded-lg divide-y divide-border bg-surface overflow-x-auto custom-scrollbar shadow-xs">
-                  <div className="flex flex-col lg:flex-row divide-y lg:divide-y-0 lg:divide-x divide-border bg-surface min-w-[900px]">
-                    <div className="flex-1">
-                      <EnterpriseFieldCard
-                        label="Your Quote Reference"
-                        error={quoteErrors.quoteRef}
-                        labelWidth="sm:w-36"
-                      >
-                        <input
-                          type="text"
-                          placeholder="e.g. QT-2026-001"
-                          value={quoteForm.quoteRef}
-                          onChange={e => setQuoteForm({ ...quoteForm, quoteRef: e.target.value })}
-                          className="max-w-[180px] font-mono uppercase font-bold h-8"
-                        />
-                      </EnterpriseFieldCard>
-                    </div>
+              <FormSection number="01" title="Quotation header">
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-x-6 gap-y-4">
+                  <EnterpriseFieldCard
+                    label="Your quote reference"
+                    error={quoteErrors.quoteRef}
+                  >
+                    <input
+                      type="text"
+                      maxLength={12}
+                      placeholder="QT-2026-001"
+                      value={quoteForm.quoteRef}
+                      onChange={e => setQuoteForm({ ...quoteForm, quoteRef: e.target.value })}
+                      className="w-[14ch] max-w-full font-mono uppercase font-bold"
+                    />
+                  </EnterpriseFieldCard>
 
-                    <div className="flex-1">
-                      <EnterpriseFieldCard
-                        label="Quotation Date"
-                        required
-                        error={quoteErrors.quoteDate}
-                        labelWidth="sm:w-32"
-                      >
-                        <div className="flex items-center h-8 max-w-[180px] w-full bg-base border border-border rounded-md overflow-hidden focus-within:border-[rgb(var(--color-emerald-default-rgb))] transition-colors duration-150">
-                          <input
-                            type="date"
-                            required
-                            value={quoteForm.quoteDate}
-                            onChange={e => {
-                              setQuoteForm({ ...quoteForm, quoteDate: e.target.value });
-                              if (quoteErrors.quoteDate) setQuoteErrors(prev => ({ ...prev, quoteDate: false }));
-                            }}
-                            className="border-none shadow-none bg-transparent flex-1 min-w-0 px-2.5 text-[13px] text-text-primary outline-none font-mono font-bold"
-                          />
-                          <Calendar className="size-3.5 text-text-tertiary shrink-0 mr-2 pointer-events-none" />
-                        </div>
-                      </EnterpriseFieldCard>
-                    </div>
+                  <EnterpriseFieldCard
+                    label="Quotation date"
+                    required
+                    error={quoteErrors.quoteDate}
+                  >
+                    <input
+                      type="date"
+                      required
+                      value={quoteForm.quoteDate}
+                      onChange={e => {
+                        setQuoteForm({ ...quoteForm, quoteDate: e.target.value });
+                        if (quoteErrors.quoteDate) setQuoteErrors(prev => ({ ...prev, quoteDate: false }));
+                      }}
+                      className="w-full font-mono font-bold"
+                    />
+                  </EnterpriseFieldCard>
 
-                    <div className="flex-1">
-                      <EnterpriseFieldCard
-                        label="Validity Date"
-                        required
-                        error={quoteErrors.validityDate}
-                        labelWidth="sm:w-32"
-                      >
-                        <div className="flex items-center h-8 max-w-[180px] w-full bg-base border border-border rounded-md overflow-hidden focus-within:border-[rgb(var(--color-emerald-default-rgb))] transition-colors duration-150">
-                          <input
-                            type="date"
-                            required
-                            value={quoteForm.validityDate}
-                            onChange={e => {
-                              setQuoteForm({ ...quoteForm, validityDate: e.target.value });
-                              if (quoteErrors.validityDate) setQuoteErrors(prev => ({ ...prev, validityDate: false }));
-                            }}
-                            className="border-none shadow-none bg-transparent flex-1 min-w-0 px-2.5 text-[13px] text-text-primary outline-none font-mono font-bold"
-                          />
-                          <Calendar className="size-3.5 text-text-tertiary shrink-0 mr-2 pointer-events-none" />
-                        </div>
-                      </EnterpriseFieldCard>
-                    </div>
-                  </div>
+                  <EnterpriseFieldCard
+                    label="Validity date"
+                    required
+                    error={quoteErrors.validityDate}
+                  >
+                    <input
+                      type="date"
+                      required
+                      value={quoteForm.validityDate}
+                      onChange={e => {
+                        setQuoteForm({ ...quoteForm, validityDate: e.target.value });
+                        if (quoteErrors.validityDate) setQuoteErrors(prev => ({ ...prev, validityDate: false }));
+                      }}
+                      className="w-full font-mono font-bold"
+                    />
+                  </EnterpriseFieldCard>
                 </div>
-              </div>
+              </FormSection>
 
 
               {/* 2. LINE ITEM PRICING */}
-              <div className="space-y-4">
-                <SectionHeader title="Line Item Pricing" icon={Percent} />
-                <div className="flex flex-col border border-border rounded-lg divide-y divide-border bg-surface overflow-x-auto custom-scrollbar shadow-xs">
-                  <div className="flex flex-col lg:flex-row divide-y lg:divide-y-0 lg:divide-x divide-border bg-surface min-w-[900px]">
-                    <div className="flex-1">
-                      <EnterpriseFieldCard
-                        label="Unit Price (₹)"
-                        required
-                        error={quoteErrors.unitPrice}
-                        labelWidth="sm:w-28"
-                      >
-                        <input
-                          type="number"
-                          min="0.01"
-                          step="0.01"
-                          required
-                          placeholder="0.00"
-                          value={quoteForm.unitPrice}
-                          onChange={e => {
-                            setQuoteForm({ ...quoteForm, unitPrice: e.target.value });
-                            if (quoteErrors.unitPrice) setQuoteErrors(prev => ({ ...prev, unitPrice: false }));
-                          }}
-                          className="max-w-[180px] font-mono font-bold h-8"
-                        />
-                      </EnterpriseFieldCard>
-                    </div>
+              <FormSection number="02" title="Line item pricing">
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-x-6 gap-y-4">
+                  <EnterpriseFieldCard
+                    label="Unit price (₹)"
+                    required
+                    error={quoteErrors.unitPrice}
+                  >
+                    <input
+                      type="number"
+                      min="0.01"
+                      step="0.01"
+                      required
+                      placeholder="0.00"
+                      value={quoteForm.unitPrice}
+                      onChange={e => {
+                        setQuoteForm({ ...quoteForm, unitPrice: e.target.value });
+                        if (quoteErrors.unitPrice) setQuoteErrors(prev => ({ ...prev, unitPrice: false }));
+                      }}
+                      className="w-[13ch] max-w-full font-mono font-bold"
+                    />
+                  </EnterpriseFieldCard>
 
-                    <div className="flex-1">
-                      <EnterpriseFieldCard
-                        label="GST Rate (%)"
-                        required
-                        error={quoteErrors.gstRate}
-                        labelWidth="sm:w-32"
-                      >
-                        <select
-                          value={quoteForm.gstRate}
-                          onChange={e => {
-                            setQuoteForm({ ...quoteForm, gstRate: e.target.value });
-                            if (quoteErrors.gstRate) setQuoteErrors(prev => ({ ...prev, gstRate: false }));
-                          }}
-                          className="max-w-[180px] font-semibold h-8"
-                        >
-                          <option value="18%">18% - G1</option>
-                          <option value="12%">12% - G2</option>
-                          <option value="5%">5% - G3</option>
-                          <option value="28%">28% - G4</option>
-                          <option value="Exempt">Exempt - G0</option>
-                        </select>
-                      </EnterpriseFieldCard>
-                    </div>
+                  <EnterpriseFieldCard
+                    label="GST rate (%)"
+                    required
+                    error={quoteErrors.gstRate}
+                  >
+                    <select
+                      value={quoteForm.gstRate}
+                      onChange={e => {
+                        setQuoteForm({ ...quoteForm, gstRate: e.target.value });
+                        if (quoteErrors.gstRate) setQuoteErrors(prev => ({ ...prev, gstRate: false }));
+                      }}
+                      className="w-[25ch] max-w-full font-semibold"
+                    >
+                      <option value="18%">18% - G1</option>
+                      <option value="12%">12% - G2</option>
+                      <option value="5%">5% - G3</option>
+                      <option value="28%">28% - G4</option>
+                      <option value="Exempt">Exempt - G0</option>
+                    </select>
+                  </EnterpriseFieldCard>
 
-                    <div className="flex-1">
-                      <EnterpriseFieldCard
-                        label="Discount (%)"
-                        labelWidth="sm:w-32"
-                      >
-                        <input
-                          type="number"
-                          min="0"
-                          max="100"
-                          step="0.01"
-                          placeholder="0"
-                          value={quoteForm.discount}
-                          onChange={e => setQuoteForm({ ...quoteForm, discount: e.target.value })}
-                          className="max-w-[120px] font-mono font-bold h-8"
-                        />
-                      </EnterpriseFieldCard>
-                    </div>
-                  </div>
+                  <EnterpriseFieldCard label="Discount (%)">
+                    <input
+                      type="number"
+                      min="0"
+                      max="100"
+                      step="0.01"
+                      placeholder="0"
+                      value={quoteForm.discount}
+                      onChange={e => setQuoteForm({ ...quoteForm, discount: e.target.value })}
+                      className="w-[9ch] max-w-full font-mono font-bold"
+                    />
+                  </EnterpriseFieldCard>
                 </div>
-              </div>
+              </FormSection>
 
 
               {/* 3. DELIVERY TERMS */}
-              <div className="space-y-4">
-                <SectionHeader title="Delivery Terms" icon={Clock} />
-                <div className="flex flex-col border border-border rounded-lg divide-y divide-border bg-surface overflow-x-auto custom-scrollbar shadow-xs">
-                  <div className="flex flex-col lg:flex-row divide-y lg:divide-y-0 lg:divide-x divide-border bg-surface min-w-[900px]">
-                    <div className="flex-1">
-                      <EnterpriseFieldCard
-                        label="Delivery Lead Time (Days)"
-                        required
-                        error={quoteErrors.deliveryLeadTime}
-                        labelWidth="sm:w-44"
-                      >
-                        <input
-                          type="number"
-                          min="1"
-                          required
-                          placeholder="7"
-                          value={quoteForm.deliveryLeadTime}
-                          onChange={e => {
-                            setQuoteForm({ ...quoteForm, deliveryLeadTime: e.target.value });
-                            if (quoteErrors.deliveryLeadTime) setQuoteErrors(prev => ({ ...prev, deliveryLeadTime: false }));
-                          }}
-                          className="max-w-[120px] font-mono font-bold h-8"
-                        />
-                      </EnterpriseFieldCard>
-                    </div>
+              <FormSection number="03" title="Delivery terms">
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-x-6 gap-y-4">
+                  <EnterpriseFieldCard
+                    label="Delivery lead time (days)"
+                    required
+                    error={quoteErrors.deliveryLeadTime}
+                  >
+                    <input
+                      type="number"
+                      min="1"
+                      required
+                      placeholder="7"
+                      value={quoteForm.deliveryLeadTime}
+                      onChange={e => {
+                        setQuoteForm({ ...quoteForm, deliveryLeadTime: e.target.value });
+                        if (quoteErrors.deliveryLeadTime) setQuoteErrors(prev => ({ ...prev, deliveryLeadTime: false }));
+                      }}
+                      className="w-[9ch] max-w-full font-mono font-bold"
+                    />
+                  </EnterpriseFieldCard>
 
-                    <div className="flex-1">
-                      <EnterpriseFieldCard
-                        label="Freight / Packing (₹)"
-                        labelWidth="sm:w-28"
-                      >
-                        <input
-                          type="number"
-                          min="0"
-                          step="0.01"
-                          placeholder="0"
-                          value={quoteForm.freight}
-                          onChange={e => setQuoteForm({ ...quoteForm, freight: e.target.value })}
-                          className="max-w-[180px] font-mono font-bold h-8"
-                        />
-                      </EnterpriseFieldCard>
-                    </div>
+                  <EnterpriseFieldCard label="Freight / packing (₹)">
+                    <input
+                      type="number"
+                      min="0"
+                      step="0.01"
+                      placeholder="0"
+                      value={quoteForm.freight}
+                      onChange={e => setQuoteForm({ ...quoteForm, freight: e.target.value })}
+                      className="w-[13ch] max-w-full font-mono font-bold"
+                    />
+                  </EnterpriseFieldCard>
 
-                    <div className="flex-1">
-                      <EnterpriseFieldCard
-                        label="Incoterms"
-                        labelWidth="sm:w-32"
-                      >
-                        <select
-                          value={quoteForm.incoterms}
-                          onChange={e => setQuoteForm({ ...quoteForm, incoterms: e.target.value })}
-                          className="max-w-[180px] font-semibold h-8"
-                        >
-                          <option value="EXW">EXW - Ex Works</option>
-                          <option value="FOB">FOB - Free on Board</option>
-                          <option value="CIF">CIF - Cost, Insurance &amp; Freight</option>
-                          <option value="FOR">FOR - Free on Rail</option>
-                          <option value="DDP">DDP - Delivered Duty Paid</option>
-                        </select>
-                      </EnterpriseFieldCard>
-                    </div>
-                  </div>
+                  <EnterpriseFieldCard label="Incoterms">
+                    <select
+                      value={quoteForm.incoterms}
+                      onChange={e => setQuoteForm({ ...quoteForm, incoterms: e.target.value })}
+                      className="w-[25ch] max-w-full font-semibold"
+                    >
+                      <option value="EXW">EXW - Ex Works</option>
+                      <option value="FOB">FOB - Free on Board</option>
+                      <option value="CIF">CIF - Cost, Insurance &amp; Freight</option>
+                      <option value="FOR">FOR - Free on Rail</option>
+                      <option value="DDP">DDP - Delivered Duty Paid</option>
+                    </select>
+                  </EnterpriseFieldCard>
                 </div>
-              </div>
+              </FormSection>
 
 
               {/* STICKY BOTTOM ACTION BAR */}
@@ -1576,243 +1536,181 @@ export default function RfqView({
             </div>
           )}
 
-          <div className="space-y-3">
-            {/* Header Details Card Title & Form Actions */}
-            <div className="flex flex-wrap items-center justify-between gap-4 border-b border-border pb-2 mb-3">
-              <div className="flex items-center gap-2">
-                <FileText className="size-4 text-text-secondary shrink-0" />
-                <h3 className="text-xs font-extrabold text-text-primary tracking-wider uppercase select-none">
-                  RFQ Header Details
-                </h3>
-              </div>
-              <div className="flex items-center gap-2 select-none">
-                <Button
-                  type="button"
-                  onClick={() => {
-                    if (confirm("Are you sure you want to cancel?")) {
-                      setActiveProcTab('monitor');
-                    }
-                  }}
-                  variant="outline"
-                >
-                  Cancel
-                </Button>
-                <Button
-                  type="button"
-                  onClick={() => {
-                    alert('Draft saved in local memory.');
-                  }}
-                  variant="outline"
-                >
-                  Save Draft
-                </Button>
-                <Button
-                  type="submit"
-                  variant="default"
-                  className="px-4 flex items-center gap-1"
-                >
-                  <span>Create RFQ</span>
-                  <ChevronDown className="size-3.5" />
-                </Button>
-              </div>
+          {/* Header Details Card Title & Form Actions */}
+          <div className="flex flex-wrap items-center justify-between gap-4">
+            <h3 className="text-sm font-bold text-text-primary">RFQ Header Details</h3>
+            <div className="flex items-center gap-2 select-none">
+              <Button
+                type="button"
+                onClick={() => {
+                  if (confirm("Are you sure you want to cancel?")) {
+                    setActiveProcTab('monitor');
+                  }
+                }}
+                variant="outline"
+              >
+                Cancel
+              </Button>
+              <Button
+                type="button"
+                onClick={() => {
+                  alert('Draft saved in local memory.');
+                }}
+                variant="outline"
+              >
+                Save Draft
+              </Button>
+              <Button
+                type="submit"
+                variant="default"
+                className="px-4 flex items-center gap-1"
+              >
+                <span>Create RFQ</span>
+                <ChevronDown className="size-3.5" />
+              </Button>
             </div>
+          </div>
 
-            <div className="flex flex-col border border-border rounded-lg divide-y divide-border bg-surface overflow-hidden shadow-xs">
-              {/* Row 1: RFQ Reference No. | Document Type */}
-              <div className="flex flex-col lg:flex-row divide-y lg:divide-y-0 lg:divide-x divide-border bg-surface">
-                <div className="flex-1">
-                  <EnterpriseFieldCard
-                    label="RFQ Reference No."
-                    required
-                    dataType="CHAR"
-                    length="LEN 10"
-                    tableField="EKKO-EBELN"
-                    labelWidth="sm:w-28"
-                    error={formErrors.rfqRefNo}
-                  >
-                    <input
-                      type="text"
-                      required
-                      placeholder="e.g. RFQ-10029"
-                      value={rfqForm.rfqRefNo}
-                      onChange={e => {
-                        rfqFormSet({ ...rfqForm, rfqRefNo: e.target.value });
-                        if (formErrors.rfqRefNo) setFormErrors({ ...formErrors, rfqRefNo: false });
-                      }}
-                      className="w-[150px] font-mono uppercase font-bold"
-                    />
-                  </EnterpriseFieldCard>
-                </div>
-
-                <div className="flex-1">
-                  <EnterpriseFieldCard
-                    label="Document Type"
-                    required
-                    dataType="CHAR"
-                    length="LEN 4"
-                    tableField="EKKO-BSART"
-                    labelWidth="sm:w-24"
-                    error={formErrors.rfqType}
-                  >
-                    <select
-                      value={rfqForm.rfqType}
-                      onChange={e => {
-                        rfqFormSet({ ...rfqForm, rfqType: e.target.value });
-                        if (formErrors.rfqType) setFormErrors({ ...formErrors, rfqType: false });
-                      }}
-                      className="w-[190px] font-semibold"
-                    >
-                      <option value="AN">AN - Standard RFQ</option>
-                      <option value="AB">AB - Outline Agreement RFQ</option>
-                    </select>
-                  </EnterpriseFieldCard>
-                </div>
-              </div>
-
-              {/* Row 2: RFQ Description */}
-              <div className="bg-surface">
-                <EnterpriseFieldCard
-                  label="RFQ Description"
+          <FormSection number="01" title="RFQ header details">
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-x-6 gap-y-4">
+              <EnterpriseFieldCard
+                label="RFQ reference no."
+                required
+                error={formErrors.rfqRefNo}
+              >
+                <input
+                  type="text"
                   required
-                  dataType="CHAR"
-                  length="LEN 40"
-                  tableField="EKKO-TXZ01"
-                  labelWidth="sm:w-28"
+                  maxLength={10}
+                  placeholder="RFQ-10029"
+                  value={rfqForm.rfqRefNo}
+                  onChange={e => {
+                    rfqFormSet({ ...rfqForm, rfqRefNo: e.target.value });
+                    if (formErrors.rfqRefNo) setFormErrors({ ...formErrors, rfqRefNo: false });
+                  }}
+                  className="w-[12ch] max-w-full font-mono uppercase font-bold"
+                />
+              </EnterpriseFieldCard>
+
+              <EnterpriseFieldCard
+                label="Document type"
+                required
+                error={formErrors.rfqType}
+              >
+                <select
+                  value={rfqForm.rfqType}
+                  onChange={e => {
+                    rfqFormSet({ ...rfqForm, rfqType: e.target.value });
+                    if (formErrors.rfqType) setFormErrors({ ...formErrors, rfqType: false });
+                  }}
+                  className="w-[25ch] max-w-full font-semibold"
+                >
+                  <option value="AN">AN - Standard RFQ</option>
+                  <option value="AB">AB - Outline Agreement RFQ</option>
+                </select>
+              </EnterpriseFieldCard>
+
+              <div className="md:col-span-2 lg:col-span-3">
+                <EnterpriseFieldCard
+                  label="RFQ description"
+                  required
                   error={formErrors.description}
                 >
                   <textarea
                     rows={2}
                     required
+                    maxLength={40}
                     placeholder="Describe the RFQ purchase target..."
                     value={rfqForm.description}
                     onChange={e => {
                       rfqFormSet({ ...rfqForm, description: e.target.value });
                       if (formErrors.description) setFormErrors({ ...formErrors, description: false });
                     }}
-                    className="w-full max-w-2xl min-h-0 resize-none font-bold"
+                    className="w-full min-h-0 resize-none font-bold"
                   />
                 </EnterpriseFieldCard>
               </div>
             </div>
-          </div>
+          </FormSection>
 
           {/* Schedule & Terms */}
-          <div className="space-y-3">
-            <SectionHeader title="Schedule & Terms" icon={Calendar} />
-            <div className="flex flex-col border border-border rounded-lg divide-y divide-border bg-surface overflow-hidden shadow-xs">
-              <div className="flex flex-col lg:flex-row lg:flex-wrap divide-y lg:divide-y-0 lg:divide-x divide-border bg-surface">
-                <div className="flex-1">
-                  <EnterpriseFieldCard
-                    label="Quotation Deadline"
-                    required
-                    dataType="DATE"
-                    length="LEN 8"
-                    tableField="EKKO-ANGDT"
-                    labelWidth="sm:w-36"
-                    error={formErrors.deadlineDate}
-                  >
-                    <div className="flex items-center h-8 max-w-[180px] w-full bg-base border border-border rounded-md overflow-hidden focus-within:border-[rgb(var(--color-emerald-default-rgb))] transition-colors duration-150">
-                      <input
-                        type="date"
-                        required
-                        value={rfqForm.deadlineDate}
-                        onChange={e => {
-                          rfqFormSet({ ...rfqForm, deadlineDate: e.target.value });
-                          if (formErrors.deadlineDate) setFormErrors({ ...formErrors, deadlineDate: false });
-                        }}
-                        className="border-none shadow-none bg-transparent flex-1 min-w-0 px-2.5 text-[13px] text-text-primary outline-none font-mono font-bold"
-                      />
-                      <Calendar className="size-3.5 text-text-tertiary shrink-0 mr-2 pointer-events-none" />
-                    </div>
-                  </EnterpriseFieldCard>
-                </div>
+          <FormSection number="02" title="Schedule &amp; terms">
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-x-6 gap-y-4">
+              <EnterpriseFieldCard
+                label="Quotation deadline"
+                required
+                error={formErrors.deadlineDate}
+              >
+                <input
+                  type="date"
+                  required
+                  value={rfqForm.deadlineDate}
+                  onChange={e => {
+                    rfqFormSet({ ...rfqForm, deadlineDate: e.target.value });
+                    if (formErrors.deadlineDate) setFormErrors({ ...formErrors, deadlineDate: false });
+                  }}
+                  className="w-full font-mono font-bold"
+                />
+              </EnterpriseFieldCard>
 
-                <div className="flex-1">
-                  <EnterpriseFieldCard
-                    label="Binding Period"
-                    dataType="NUMC"
-                    length="LEN 3"
-                    tableField="EKKO-BNDDT"
-                    labelWidth="sm:w-20"
-                    error={formErrors.bindingPeriod}
-                  >
-                    <input
-                      type="number"
-                      min="1"
-                      value={rfqForm.bindingPeriod}
-                      onChange={e => {
-                        rfqFormSet({ ...rfqForm, bindingPeriod: e.target.value });
-                        if (formErrors.bindingPeriod) setFormErrors({ ...formErrors, bindingPeriod: false });
-                      }}
-                      className="w-[70px] font-mono font-bold"
-                    />
-                  </EnterpriseFieldCard>
-                </div>
+              <EnterpriseFieldCard
+                label="Binding period"
+                error={formErrors.bindingPeriod}
+              >
+                <input
+                  type="number"
+                  min="1"
+                  value={rfqForm.bindingPeriod}
+                  onChange={e => {
+                    rfqFormSet({ ...rfqForm, bindingPeriod: e.target.value });
+                    if (formErrors.bindingPeriod) setFormErrors({ ...formErrors, bindingPeriod: false });
+                  }}
+                  className="w-[9ch] max-w-full font-mono font-bold"
+                />
+              </EnterpriseFieldCard>
 
-                <div className="flex-1">
-                  <EnterpriseFieldCard
-                    label="Payment Terms"
-                    dataType="CHAR"
-                    length="LEN 4"
-                    tableField="EKKO-ZTERM"
-                    labelWidth="sm:w-22"
-                  >
-                    <select
-                      value={rfqForm.paymentTerms}
-                      onChange={e => rfqFormSet({ ...rfqForm, paymentTerms: e.target.value })}
-                      className="w-[150px] font-semibold"
-                    >
-                      <option value="NET 30 Days">NET 30 Days</option>
-                      <option value="NET 45 Days">NET 45 Days</option>
-                      <option value="NET 60 Days">NET 60 Days</option>
-                      <option value="Immediate">Immediate / COD</option>
-                    </select>
-                  </EnterpriseFieldCard>
-                </div>
-              </div>
+              <EnterpriseFieldCard label="Payment terms">
+                <select
+                  value={rfqForm.paymentTerms}
+                  onChange={e => rfqFormSet({ ...rfqForm, paymentTerms: e.target.value })}
+                  className="w-[25ch] max-w-full font-semibold"
+                >
+                  <option value="NET 30 Days">NET 30 Days</option>
+                  <option value="NET 45 Days">NET 45 Days</option>
+                  <option value="NET 60 Days">NET 60 Days</option>
+                  <option value="Immediate">Immediate / COD</option>
+                </select>
+              </EnterpriseFieldCard>
             </div>
-          </div>
+          </FormSection>
 
           {/* Vendor Selection */}
-          <div className="space-y-3">
-            <SectionHeader title="Vendor Selection" icon={User} />
-            <div className="flex flex-col border border-border rounded-lg divide-y divide-border bg-surface overflow-hidden shadow-xs">
-              <div className="flex flex-col lg:flex-row divide-y lg:divide-y-0 lg:divide-x divide-border bg-surface">
-                <div className="flex-1">
-                  <EnterpriseFieldCard
-                    label="Purchasing Group"
-                    required
-                    dataType="CHAR"
-                    length="LEN 3"
-                    tableField="EKKO-EKGRP"
-                    labelWidth="sm:w-24"
-                    error={formErrors.purchasingGroup}
-                  >
-                    <select
-                      value={rfqForm.purchasingGroup}
-                      onChange={e => {
-                        rfqFormSet({ ...rfqForm, purchasingGroup: e.target.value });
-                        if (formErrors.purchasingGroup) setFormErrors({ ...formErrors, purchasingGroup: false });
-                      }}
-                      className="w-[130px] font-semibold"
-                    >
-                      <option value="001">001 - Raw Materials</option>
-                      <option value="002">002 - Steel & Piping</option>
-                      <option value="003">003 - Fasteners</option>
-                      <option value="100">100 - General Services</option>
-                    </select>
-                  </EnterpriseFieldCard>
-                </div>
-              </div>
+          <FormSection number="03" title="Vendor selection">
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-x-6 gap-y-4">
+              <EnterpriseFieldCard
+                label="Purchasing group"
+                required
+                error={formErrors.purchasingGroup}
+              >
+                <select
+                  value={rfqForm.purchasingGroup}
+                  onChange={e => {
+                    rfqFormSet({ ...rfqForm, purchasingGroup: e.target.value });
+                    if (formErrors.purchasingGroup) setFormErrors({ ...formErrors, purchasingGroup: false });
+                  }}
+                  className="w-[25ch] max-w-full font-semibold"
+                >
+                  <option value="001">001 - Raw Materials</option>
+                  <option value="002">002 - Steel & Piping</option>
+                  <option value="003">003 - Fasteners</option>
+                  <option value="100">100 - General Services</option>
+                </select>
+              </EnterpriseFieldCard>
 
-              <div className="bg-surface">
+              <div className="md:col-span-2">
                 <EnterpriseFieldCard
-                  label="Vendors to Invite"
+                  label="Vendors to invite"
                   required
-                  dataType="CHAR"
-                  length="LEN 10"
-                  tableField="EKKO-LIFNR"
-                  labelWidth="sm:w-32"
                   error={formErrors.selectedVendors}
                 >
                   <div className="w-full relative">
@@ -1895,19 +1793,14 @@ export default function RfqView({
                 </EnterpriseFieldCard>
               </div>
             </div>
-          </div>
+          </FormSection>
 
-          <div className="space-y-3">
-            <SectionHeader title="Line Items Entry" icon={ClipboardList} />
-            <div className="flex flex-col border border-border rounded-lg divide-y divide-border bg-surface overflow-hidden shadow-xs">
+          <FormSection number="04" title="Line items entry">
+            <div className="space-y-4">
               {/* Row 1: Material Description (full width) */}
-              <div className="bg-surface">
+              <div>
                 <EnterpriseFieldCard
-                  label="Material / Item"
-                  dataType="CHAR"
-                  length="LEN 18"
-                  tableField="EKPO-MATNR/TXZ01"
-                  labelWidth="sm:w-24"
+                  label="Material / item"
                   error={formErrors.materialDescription}
                 >
                   <div className="w-full max-w-xl relative">
@@ -1965,62 +1858,49 @@ export default function RfqView({
               </div>
 
               {/* Row 2: Quantity | UoM | Add Button side-by-side */}
-              <div className="flex flex-col lg:flex-row divide-y lg:divide-y-0 lg:divide-x divide-border bg-surface">
-                <div className="flex-1">
-                  <EnterpriseFieldCard
-                    label="Quantity"
-                    dataType="QUAN"
-                    length="LEN 13"
-                    tableField="EKPO-MENGE"
-                    labelWidth="sm:w-16"
-                    error={formErrors.quantityRequired}
-                  >
-                    <input
-                      type="number"
-                      min="1"
-                      placeholder="e.g. 10000"
-                      value={rfqForm.quantityRequired}
-                      onChange={e => {
-                        rfqFormSet({ ...rfqForm, quantityRequired: e.target.value });
-                        if (formErrors.quantityRequired) setFormErrors({ ...formErrors, quantityRequired: false });
-                      }}
-                      className="w-[120px] font-mono font-bold"
-                    />
-                  </EnterpriseFieldCard>
-                </div>
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-x-6 gap-y-4">
+                <EnterpriseFieldCard
+                  label="Quantity"
+                  error={formErrors.quantityRequired}
+                >
+                  <input
+                    type="number"
+                    min="1"
+                    placeholder="10000"
+                    value={rfqForm.quantityRequired}
+                    onChange={e => {
+                      rfqFormSet({ ...rfqForm, quantityRequired: e.target.value });
+                      if (formErrors.quantityRequired) setFormErrors({ ...formErrors, quantityRequired: false });
+                    }}
+                    className="w-[15ch] max-w-full font-mono font-bold"
+                  />
+                </EnterpriseFieldCard>
 
-                <div className="flex-1">
-                  <EnterpriseFieldCard
-                    label="Unit of Measure"
-                    dataType="UNIT"
-                    length="LEN 3"
-                    tableField="EKPO-MEINS"
-                    labelWidth="sm:w-22"
-                    error={formErrors.unitOfMeasure}
+                <EnterpriseFieldCard
+                  label="Unit of measure"
+                  error={formErrors.unitOfMeasure}
+                >
+                  <select
+                    value={rfqForm.unitOfMeasure}
+                    onChange={e => {
+                      rfqFormSet({ ...rfqForm, unitOfMeasure: e.target.value });
+                      if (formErrors.unitOfMeasure) setFormErrors({ ...formErrors, unitOfMeasure: false });
+                    }}
+                    className="w-[25ch] max-w-full font-semibold"
                   >
-                    <select
-                      value={rfqForm.unitOfMeasure}
-                      onChange={e => {
-                        rfqFormSet({ ...rfqForm, unitOfMeasure: e.target.value });
-                        if (formErrors.unitOfMeasure) setFormErrors({ ...formErrors, unitOfMeasure: false });
-                      }}
-                      className="w-[100px] font-semibold"
-                    >
-                      <option value="EA">EA - Each</option>
-                      <option value="PC">PC - Piece</option>
-                      <option value="KG">KG - Kilogram</option>
-                      <option value="MTR">MTR - Meter</option>
-                      <option value="NOS">NOS - Number</option>
-                    </select>
-                  </EnterpriseFieldCard>
-                </div>
+                    <option value="EA">EA - Each</option>
+                    <option value="PC">PC - Piece</option>
+                    <option value="KG">KG - Kilogram</option>
+                    <option value="MTR">MTR - Meter</option>
+                    <option value="NOS">NOS - Number</option>
+                  </select>
+                </EnterpriseFieldCard>
 
-                <div className="flex items-center px-3 py-1.5">
+                <div className="flex items-end pb-0.5">
                   <Button
                     type="button"
                     onClick={handleAddLineItem}
                     variant="default"
-                    className="h-7"
                   >
                     <Plus className="size-3.5" /> Add Item
                   </Button>
@@ -2028,7 +1908,7 @@ export default function RfqView({
               </div>
 
               {/* Added items list */}
-              <div className="md:col-span-3 space-y-2 pt-2">
+              <div className="space-y-2 pt-2">
                 <label className="label">Currently Added Items ({addedItems.length})</label>
                 {addedItems.length === 0 ? (
                   <EmptyState description={'No items added to this RFQ yet. Enter details above and click "Add Line Item".'} className="border border-dashed border-border-em rounded-md bg-surface2/30 py-6" />
@@ -2076,7 +1956,7 @@ export default function RfqView({
                 )}
               </div>
             </div>
-          </div>
+          </FormSection>
 
           <div className="flex items-center justify-between border-t border-border pt-4">
             <div>

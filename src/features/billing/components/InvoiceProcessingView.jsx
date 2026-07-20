@@ -177,10 +177,11 @@ export default function InvoiceProcessingView({
                               <input
                                 type="text"
                                 required
-                                placeholder="e.g. TAX-2026-INV-84"
+                                maxLength={16}
+                                placeholder="TAX-2026-INV-84"
                                 value={invoiceForm.invoiceNumber}
                                 onChange={e => setInvoiceForm({ ...invoiceForm, invoiceNumber: e.target.value })}
-                                className="w-[150px] font-mono font-bold uppercase h-8"
+                                className="w-[20ch] font-mono font-bold uppercase h-8"
                               />
                             </EnterpriseFieldCard>
                           </div>
@@ -196,7 +197,7 @@ export default function InvoiceProcessingView({
                                 required
                                 value={invoiceForm.invoiceDate}
                                 onChange={e => setInvoiceForm({ ...invoiceForm, invoiceDate: e.target.value })}
-                                className="w-[150px] font-mono font-bold h-8 tabular-nums"
+                                className="w-[15ch] font-mono font-bold h-8 tabular-nums"
                               />
                             </EnterpriseFieldCard>
                           </div>

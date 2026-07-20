@@ -158,7 +158,7 @@ export default function RFQsView({
                                 }
                               });
                             }}
-                            className="w-40 text-right font-mono tabular-nums"
+                            className="w-[15ch] text-right font-mono tabular-nums"
                           />
                         </div>
                       </div>
@@ -171,7 +171,7 @@ export default function RFQsView({
                       <input
                         type="number" value={bidLeadTime}
                         onChange={e => setBidLeadTime(Number(e.target.value))}
-                        className="font-mono tabular-nums"
+                        className="w-[9ch] font-mono tabular-nums"
                       />
                     </div>
                     <div className="space-y-1">
@@ -179,7 +179,7 @@ export default function RFQsView({
                       <select
                         value={gstRate}
                         onChange={e => setGstRate(e.target.value)}
-                        className="font-mono"
+                        className="w-[15ch] font-mono"
                       >
                         <option value="18">18% (Regular Services/Goods)</option>
                         <option value="12">12%</option>
@@ -192,7 +192,7 @@ export default function RFQsView({
                       <input
                         type="date" value={validityDate}
                         onChange={e => setValidityDate(e.target.value)}
-                        className="font-mono tabular-nums"
+                        className="w-[15ch] font-mono tabular-nums"
                       />
                     </div>
                   </div>
@@ -203,7 +203,7 @@ export default function RFQsView({
                       <input
                         type="number" value={freight}
                         onChange={e => setFreight(Number(e.target.value))}
-                        className="font-mono tabular-nums"
+                        className="w-[15ch] font-mono tabular-nums"
                       />
                     </div>
                     <div className="space-y-1">
@@ -219,7 +219,7 @@ export default function RFQsView({
                       <input
                         type="text" value={bidRemarks}
                         onChange={e => setBidRemarks(e.target.value)}
-                        placeholder="e.g. Bulk shipment discounts included"
+                        placeholder="Bulk shipment discounts included"
                       />
                     </div>
                   </div>

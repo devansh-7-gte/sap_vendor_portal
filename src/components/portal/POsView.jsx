@@ -131,27 +131,28 @@ export default function POsView({
                     <div className="space-y-1">
                       <label className="label">Carrier Partner</label>
                       <input
-                        type="text" required value={asnForm.carrierName}
+                        type="text" required maxLength={10} value={asnForm.carrierName}
                         onChange={e => setAsnForm({ ...asnForm, carrierName: e.target.value })}
-                        placeholder="e.g. DHL Logistics"
+                        placeholder="DHL Logistics"
+                        className="w-[14ch]"
                       />
                     </div>
                     <div className="space-y-1">
                       <label className="label">Tracking / LR Number</label>
                       <input
-                        type="text" required value={asnForm.trackingNumber}
+                        type="text" required maxLength={20} value={asnForm.trackingNumber}
                         onChange={e => setAsnForm({ ...asnForm, trackingNumber: e.target.value })}
-                        placeholder="e.g. LR-4001928"
-                        className="font-mono"
+                        placeholder="LR-4001928"
+                        className="font-mono w-[24ch]"
                       />
                     </div>
                     <div className="space-y-1">
                       <label className="label">Vehicle Registration</label>
                       <input
-                        type="text" required value={asnForm.vehicleNumber}
+                        type="text" required maxLength={20} value={asnForm.vehicleNumber}
                         onChange={e => setAsnForm({ ...asnForm, vehicleNumber: e.target.value })}
-                        placeholder="e.g. DL-01-CA-1234"
-                        className="uppercase font-mono"
+                        placeholder="DL-01-CA-1234"
+                        className="uppercase font-mono w-[24ch]"
                       />
                     </div>
                     <div className="space-y-1">
@@ -159,7 +160,7 @@ export default function POsView({
                       <input
                         type="text" required value={asnForm.invoiceReference}
                         onChange={e => setAsnForm({ ...asnForm, invoiceReference: e.target.value })}
-                        placeholder="e.g. TAX-2026-092"
+                        placeholder="TAX-2026-092"
                         className="font-mono"
                       />
                     </div>
@@ -168,7 +169,7 @@ export default function POsView({
                       <input
                         type="date" value={asnForm.shipDate}
                         onChange={e => setAsnForm({ ...asnForm, shipDate: e.target.value })}
-                        className="font-mono tabular-nums"
+                        className="w-[15ch] font-mono tabular-nums"
                       />
                     </div>
                     <div className="space-y-1">
@@ -176,7 +177,7 @@ export default function POsView({
                       <input
                         type="date" value={asnForm.estimatedDeliveryDate}
                         onChange={e => setAsnForm({ ...asnForm, estimatedDeliveryDate: e.target.value })}
-                        className="font-mono tabular-nums"
+                        className="w-[15ch] font-mono tabular-nums"
                       />
                     </div>
                   </div>

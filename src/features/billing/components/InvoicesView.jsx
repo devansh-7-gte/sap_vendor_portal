@@ -119,10 +119,10 @@ export default function InvoicesView({
                       <div className="space-y-1">
                         <label className="label">Vendor Invoice Ref Code *</label>
                         <input
-                          type="text" required placeholder="e.g. TAX-2026-INV-1092"
+                          type="text" required maxLength={16} placeholder="TAX-2026-INV-1092"
                           value={invoiceForm.invoiceNumber}
                           onChange={e => setInvoiceForm({ ...invoiceForm, invoiceNumber: e.target.value })}
-                          className="font-mono uppercase"
+                          className="font-mono uppercase w-[20ch]"
                         />
                       </div>
                       <div className="space-y-1">
@@ -130,7 +130,7 @@ export default function InvoicesView({
                         <input
                           type="date" required value={invoiceForm.invoiceDate}
                           onChange={e => setInvoiceForm({ ...invoiceForm, invoiceDate: e.target.value })}
-                          className="font-mono tabular-nums"
+                          className="w-[15ch] font-mono tabular-nums"
                         />
                       </div>
                     </div>
