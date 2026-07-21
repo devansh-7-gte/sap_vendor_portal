@@ -199,7 +199,6 @@ export default function DashboardView({ state, setActiveTab }) {
       const headers = {};
       const token = localStorage.getItem('jwt_token');
       if (token) headers['Authorization'] = `Bearer ${token}`;
-      headers['x-vendor-id'] = localStorage.getItem('clerk_user_id') || 'mock_vendor_id';
 
       for (const key of selectedItemIds) {
         const invoice = (state.invoices || []).find(i => i.invoiceNumber === key || i.no === key || i.id === key);

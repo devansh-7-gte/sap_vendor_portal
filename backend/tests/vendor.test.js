@@ -1,7 +1,7 @@
 const request = require('supertest');
 const buildTestApp = require('./testApp');
 const Vendor = require('../models/Vendor');
-const { baseVendor, registerVendor } = require('./helpers');
+const { baseVendor, registerVendor, createAdminVendor } = require('./helpers');
 
 const app = buildTestApp();
 
@@ -93,10 +93,11 @@ describe('registration approval flow', () => {
   });
 
   it('admin approve sets Approved and assigns a sapVendorCode', async () => {
-    const { token, vendor } = await registerVendor(app);
+    const { vendor } = await registerVendor(app);
+    const { token: adminToken } = await createAdminVendor();
     const res = await request(app)
       .put(`/api/vendors/${vendor._id}/approve`)
-      .set('Authorization', `Bearer ${token}`);
+      .set('Authorization', `Bearer ${adminToken}`);
 
     expect(res.status).toBe(200);
     expect(res.body.vendor.status).toBe('Approved');
@@ -104,27 +105,49 @@ describe('registration approval flow', () => {
   });
 
   it('admin reject requires a reason', async () => {
-    const { token, vendor } = await registerVendor(app);
+    const { vendor } = await registerVendor(app);
+    const { token: adminToken } = await createAdminVendor();
 
     const noReason = await request(app)
       .put(`/api/vendors/${vendor._id}/reject`)
-      .set('Authorization', `Bearer ${token}`)
+      .set('Authorization', `Bearer ${adminToken}`)
       .send({});
     expect(noReason.status).toBe(400);
 
     const rejected = await request(app)
       .put(`/api/vendors/${vendor._id}/reject`)
-      .set('Authorization', `Bearer ${token}`)
+      .set('Authorization', `Bearer ${adminToken}`)
       .send({ reason: 'Incomplete documents' });
     expect(rejected.status).toBe(200);
     expect(rejected.body.vendor.status).toBe('Rejected');
     expect(rejected.body.vendor.rejectionReason).toBe('Incomplete documents');
   });
+
+  it('a non-admin vendor gets 403 from all three admin endpoints', async () => {
+    const { token, vendor } = await registerVendor(app);
+
+    const list = await request(app)
+      .get('/api/vendors')
+      .set('Authorization', `Bearer ${token}`);
+    expect(list.status).toBe(403);
+
+    const approve = await request(app)
+      .put(`/api/vendors/${vendor._id}/approve`)
+      .set('Authorization', `Bearer ${token}`);
+    expect(approve.status).toBe(403);
+
+    const reject = await request(app)
+      .put(`/api/vendors/${vendor._id}/reject`)
+      .set('Authorization', `Bearer ${token}`)
+      .send({ reason: 'Some reason' });
+    expect(reject.status).toBe(403);
+  });
 });
 
 describe('GET /api/vendors (admin list)', () => {
   it('filters by status and paginates', async () => {
-    const { token } = await registerVendor(app);
+    await registerVendor(app);
+    const { token: adminToken } = await createAdminVendor();
     await Vendor.create({
       vendorId: 'vendor_approved_1',
       companyName: 'Approved Co Ltd',
@@ -136,11 +159,31 @@ describe('GET /api/vendors (admin list)', () => {
 
     const res = await request(app)
       .get('/api/vendors?status=Approved')
-      .set('Authorization', `Bearer ${token}`);
+      .set('Authorization', `Bearer ${adminToken}`);
 
     expect(res.status).toBe(200);
     expect(res.body.vendors).toHaveLength(1);
     expect(res.body.vendors[0].status).toBe('Approved');
     expect(res.body.pagination.total).toBe(1);
+  });
+});
+
+describe('admin bootstrap via ADMIN_BOOTSTRAP_EMAILS', () => {
+  const originalEnv = process.env.ADMIN_BOOTSTRAP_EMAILS;
+
+  afterEach(() => {
+    process.env.ADMIN_BOOTSTRAP_EMAILS = originalEnv;
+  });
+
+  it('assigns admin role on register when the email matches the bootstrap list', async () => {
+    process.env.ADMIN_BOOTSTRAP_EMAILS = 'Owner@Example.com, other@example.com';
+    const { vendor } = await registerVendor(app, { vendorId: 'vendor_bootstrap_1', email: 'owner@example.com' });
+    expect(vendor.role).toBe('admin');
+  });
+
+  it('leaves role as vendor when the email is not in the bootstrap list', async () => {
+    process.env.ADMIN_BOOTSTRAP_EMAILS = 'someone-else@example.com';
+    const { vendor } = await registerVendor(app, { vendorId: 'vendor_bootstrap_2', email: 'random@example.com' });
+    expect(vendor.role).toBe('vendor');
   });
 });

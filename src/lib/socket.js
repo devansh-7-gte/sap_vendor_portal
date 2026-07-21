@@ -17,9 +17,9 @@ export const initSocket = (token, vendorId) => {
   const jwtToken = token || (typeof window !== 'undefined' ? localStorage.getItem('jwt_token') : null);
 
   socket = io(apiUrl, {
-    auth: { 
+    auth: {
       token: jwtToken,
-      vendorId: vendorId || (typeof window !== 'undefined' ? localStorage.getItem('clerk_user_id') : null)
+      vendorId
     },
     transports: ['websocket'],
     reconnectionAttempts: 5,

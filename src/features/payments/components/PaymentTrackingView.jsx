@@ -278,10 +278,6 @@ export default function PaymentTrackingView({ state }) {
       if (token) {
         headers['Authorization'] = `Bearer ${token}`;
       }
-      const clerkId = localStorage.getItem('clerk_user_id') || 'mock_vendor_id';
-      if (clerkId) {
-        headers['x-vendor-id'] = clerkId;
-      }
 
       const baseUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000/api';
       const response = await fetch(`${baseUrl}/reports/statement`, { headers });
