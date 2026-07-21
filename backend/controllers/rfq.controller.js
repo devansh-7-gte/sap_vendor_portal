@@ -211,6 +211,9 @@ const submitBid = asyncHandler(async (req, res, next) => {
     return next(ApiError.badRequest('RFQ submission deadline has passed'));
   }
 
+  // Fetch Vendor's DB ID & Rating
+  const vendor = await Vendor.findOne({ $or: [{ vendorId }, { clerkId: vendorId }] });
+
   // Verify vendor is invited or dynamically invite them in dev/unauth mode
   let invitation = rfq.invitedVendors.find(v => v.id === vendorId);
   if (!invitation) {
@@ -230,8 +233,6 @@ const submitBid = asyncHandler(async (req, res, next) => {
     }
   }
 
-  // Fetch Vendor's DB ID & Rating
-  const vendor = await Vendor.findOne({ $or: [{ vendorId }, { clerkId: vendorId }] });
   const vendorDbId = vendor ? vendor._id : null;
   const rating = invitation.rating || 80;
 

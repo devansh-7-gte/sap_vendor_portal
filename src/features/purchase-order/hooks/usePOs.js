@@ -95,9 +95,11 @@ export function usePOs(profile) {
       setPos(prev => prev.map(po => po.id === poId ? { ...po, status: 'Acknowledged', acknowledgedAt: new Date().toISOString() } : po));
       await poService.acknowledgePO(poId);
       refreshPOs();
+      return { success: true };
     } catch (e) {
       console.error(e);
       refreshPOs();
+      return { success: false, error: e.message };
     }
   };
 

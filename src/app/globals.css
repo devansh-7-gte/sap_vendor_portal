@@ -2,6 +2,10 @@
 @import "tw-animate-css";
 @import "shadcn/tailwind.css";
 
+/* The app toggles a `.dark` class on <html> (see theme-context.js) instead of
+   relying on OS color-scheme, so `dark:` utilities must key off that class. */
+@custom-variant dark (&:where(.dark, .dark *));
+
 /* ── Kinetic Industrial Console Tokens: RGB triplets for opacity modifiers ─────────── */
 :root {
   /* ── Arctic Light Theme ────────────────────────────────────────── */

@@ -38,16 +38,10 @@ const mapIncomingBody = (body) => {
 const formatVendorResponse = (vendor) => {
   if (!vendor) return null;
   const obj = vendor.toObject ? vendor.toObject({ virtuals: true }) : { ...vendor };
-  
-  // Provide nested properties for backwards-compatibility (legacy tests/views)
-  obj.address = {
-    street: obj.address || '',
-    city: obj.city || '',
-    state: obj.state || '',
-    pincode: obj.postalCode || '',
-    country: 'India'
-  };
-  
+
+  // Never expose the password hash (select:false does not strip it on create/+password queries)
+  delete obj.password;
+
   obj.bankDetails = {
     bankName: obj.bankName || '',
     accountNumber: obj.accountNumber || '',

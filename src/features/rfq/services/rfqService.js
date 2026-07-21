@@ -10,22 +10,22 @@ export const rfqService = {
   },
 
   async createRFQ(rfqData) {
-    return apiClient.post('/rfqs', rfqData).catch(() => null);
+    return apiClient.post('/rfqs', rfqData);
   },
 
   async submitBid(rfqId, bidData) {
-    return apiClient.post(`/rfqs/${rfqId}/bid`, bidData).catch(() => null);
+    return apiClient.post(`/rfqs/${rfqId}/bid`, bidData);
   },
 
   async awardBid(rfqId, vendorId) {
-    return apiClient.post(`/rfqs/${rfqId}/award`, { vendorId }).catch(() => null);
+    return apiClient.post(`/rfqs/${rfqId}/award`, { vendorId });
   },
 
   async reissueRFQ(rfqId, newDeadline) {
-    return apiClient.put(`/rfqs/${rfqId}/reissue`, { deadlineDate: newDeadline }).catch(() => null);
+    return apiClient.put(`/rfqs/${rfqId}/reissue`, { deadlineDate: newDeadline });
   },
 
   async cancelRFQ(rfqId) {
-    return apiClient.put(`/rfqs/${rfqId}/cancel`, {}).catch(() => null);
+    return apiClient.put(`/rfqs/${rfqId}/cancel`, {});
   }
 };

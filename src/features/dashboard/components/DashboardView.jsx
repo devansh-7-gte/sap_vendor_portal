@@ -171,9 +171,65 @@ export default function DashboardView({ state, setActiveTab }) {
     );
   };
 
-  const handleBulkAction = (action) => {
-    // Basic stub for bulk actions
-    alert(`Performed ${action} on ${selectedItemIds.length} items`);
+  // Selection is shared across the PO and Invoice lists, so each branch below only
+  // acts on the ids that actually match its own dataset and skips the rest.
+  const handleBulkAction = async (action) => {
+    if (selectedItemIds.length === 0) return;
+
+    let successCount = 0;
+    let failCount = 0;
+
+    if (action === 'Acknowledge') {
+      for (const id of selectedItemIds) {
+        const po = (state.pos || []).find(p => p.id === id);
+        if (!po) {
+          failCount++;
+          continue;
+        }
+        const result = await portal.poHook.acknowledgePO(id);
+        if (result?.success) successCount++;
+        else failCount++;
+      }
+      portal.addToast(
+        failCount === 0 ? 'success' : (successCount === 0 ? 'error' : 'info'),
+        `Acknowledged ${successCount} of ${selectedItemIds.length} selected purchase order(s)${failCount ? ` — ${failCount} could not be acknowledged` : ''}.`
+      );
+    } else if (action === 'Download') {
+      const baseUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000/api';
+      const headers = {};
+      const token = localStorage.getItem('jwt_token');
+      if (token) headers['Authorization'] = `Bearer ${token}`;
+      headers['x-vendor-id'] = localStorage.getItem('clerk_user_id') || 'mock_vendor_id';
+
+      for (const key of selectedItemIds) {
+        const invoice = (state.invoices || []).find(i => i.invoiceNumber === key || i.no === key || i.id === key);
+        if (!invoice) {
+          failCount++;
+          continue;
+        }
+        try {
+          const response = await fetch(`${baseUrl}/reports/invoice/${invoice.id}`, { headers });
+          if (!response.ok) throw new Error('Download failed');
+          const blob = await response.blob();
+          const url = window.URL.createObjectURL(blob);
+          const a = document.createElement('a');
+          a.href = url;
+          a.download = `invoice-${invoice.invoiceNumber || invoice.id}.pdf`;
+          document.body.appendChild(a);
+          a.click();
+          a.remove();
+          window.URL.revokeObjectURL(url);
+          successCount++;
+        } catch (e) {
+          failCount++;
+        }
+      }
+      portal.addToast(
+        failCount === 0 ? 'success' : (successCount === 0 ? 'error' : 'info'),
+        `Downloaded ${successCount} of ${selectedItemIds.length} selected invoice PDF(s)${failCount ? ` — ${failCount} unavailable` : ''}.`
+      );
+    }
+
     setSelectedItemIds([]);
   };
 
@@ -257,7 +313,7 @@ export default function DashboardView({ state, setActiveTab }) {
         </div>
 
         {/* 2. WELCOME BANNER (Spacious Solid Hero) */}
-        <div className="bg-[#3730A3] text-white rounded-2xl p-5 shadow-xl border border-white/10 flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4">
+        <div className="bg-[#3730A3] dark:bg-[#B8860B] text-white rounded-2xl p-5 shadow-xl border border-white/10 flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4">
           <div>
             <p className="text-[10px] uppercase tracking-wider text-white/80 font-bold mb-1">WELCOME BACK</p>
             <h3 className="text-xl font-bold text-white mb-2">
