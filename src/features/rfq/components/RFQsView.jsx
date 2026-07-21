@@ -42,7 +42,7 @@ export default function RFQsView({
 
       {/* RFQ CARDS LIST */}
       <div className="space-y-4">
-        {state.rfqs.map(rfq => (
+        {(state.rfqs || []).map(rfq => (
           <div key={rfq.id} className="card p-5 space-y-4">
             <div className="flex flex-wrap items-center justify-between gap-4">
               <div>
@@ -106,24 +106,24 @@ export default function RFQsView({
               )}
 
               {rfq.status === 'Submitted' && rfq.vendorBid && (
-                <div className="w-full flex items-center justify-between text-xs p-3 rounded-none bg-amber-500/20 border border-amber-500/30">
-                  <span className="text-amber-400 font-bold flex items-center gap-1.5">
-                    <Clock className="size-4" /> Bid registered in SAP; under evaluation cycles
+                <div className="w-full flex items-center justify-between text-xs p-3 rounded-none bg-amber-50 border border-amber-200">
+                  <span className="text-amber-900 font-bold flex items-center gap-1.5">
+                    <Clock className="size-4 text-amber-600" /> Bid registered in SAP; under evaluation cycles
                   </span>
-                  <div className="space-x-4 font-mono text-text-secondary tabular-nums">
-                    <span>Lead time: <strong className="text-text-primary">{rfq.vendorBid.deliveryLeadTimeDays} Days</strong></span>
-                    <span>Total Bid: <strong className="text-emerald-400">₹{rfq.items.reduce((sum, it) => sum + (rfq.vendorBid?.unitPrices[it.line] || 0) * it.quantity, 0).toLocaleString()}</strong></span>
+                  <div className="space-x-4 font-mono text-amber-800 tabular-nums">
+                    <span>Lead time: <strong className="text-amber-950 font-bold">{rfq.vendorBid.deliveryLeadTimeDays} Days</strong></span>
+                    <span>Total Bid: <strong className="text-emerald-700 font-bold">₹{rfq.items.reduce((sum, it) => sum + (rfq.vendorBid?.unitPrices[it.line] || 0) * it.quantity, 0).toLocaleString()}</strong></span>
                   </div>
                 </div>
               )}
 
               {rfq.status === 'Awarded' && (
-                <div className="w-full flex items-center justify-between text-xs p-3 rounded-none bg-emerald-900/20 border border-emerald-900/50">
-                  <span className="text-emerald-400 font-bold flex items-center gap-1.5">
-                    <CheckCircle2 className="size-4" /> Bidding Awarded & Synced to SAP Info Records (BAPI)
+                <div className="w-full flex items-center justify-between text-xs p-3 rounded-none bg-emerald-50 border border-emerald-200">
+                  <span className="text-emerald-900 font-bold flex items-center gap-1.5">
+                    <CheckCircle2 className="size-4 text-emerald-600" /> Bidding Awarded & Synced to SAP Info Records (BAPI)
                   </span>
-                  <div className="font-mono text-text-secondary tabular-nums">
-                    <span>Total contract: <strong className="text-emerald-400">₹{rfq.items.reduce((sum, it) => sum + (rfq.vendorBid?.unitPrices[it.line] || 0) * it.quantity, 0).toLocaleString()}</strong></span>
+                  <div className="font-mono text-emerald-800 tabular-nums">
+                    <span>Total contract: <strong className="text-emerald-950 font-bold">₹{rfq.items.reduce((sum, it) => sum + (rfq.vendorBid?.unitPrices[it.line] || 0) * it.quantity, 0).toLocaleString()}</strong></span>
                   </div>
                 </div>
               )}

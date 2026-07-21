@@ -30,6 +30,6 @@ export const poService = {
   },
 
   async updatePOStatus(poId, status) {
-    return apiClient.put(`/purchase-orders/${poId}/status`, { status }).catch(() => null);
+    return apiClient.put(`/pos/${poId}/status`, { status }).catch(() => null);
   }
 };

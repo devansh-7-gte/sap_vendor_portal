@@ -33,7 +33,7 @@ export default function InvoiceProcessingView({
   handleInvoiceSubmit,
   isSubmitting
 }) {
-  const uninvoicedGRNs = state.grns.filter(g => !g.invoiceSubmitted);
+  const uninvoicedGRNs = (state.grns || []).filter(g => !g.invoiceSubmitted);
   const submittedInvoices = state.invoices;
 
   return (

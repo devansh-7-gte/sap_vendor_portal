@@ -66,7 +66,7 @@ export default function Sidebar({ activeTab, setActiveTab, state, onReset }) {
         {!isCollapsed && <span className="truncate">{item.name}</span>}
 
         {/* Dynamic Badge counts */}
-        {mounted && item.id === 'pos' && state.pos.filter(p => p.status === 'Open').length > 0 && (
+        {mounted && item.id === 'pos' && (state.pos || []).filter(p => p.status === 'Open').length > 0 && (
           <span className={isCollapsed
             ? "absolute top-1 right-3.5 size-4 rounded-full text-white text-[8px] flex items-center justify-center font-bold"
             : "ml-auto size-4.5 rounded-full text-[9px] flex items-center justify-center font-bold"
@@ -75,10 +75,10 @@ export default function Sidebar({ activeTab, setActiveTab, state, onReset }) {
             ? { backgroundColor: 'rgb(var(--color-emerald-default-rgb))' }
             : { backgroundColor: 'var(--color-emerald-dim)', color: 'rgb(var(--color-emerald-text-rgb))' }
           }>
-            {state.pos.filter(p => p.status === 'Open').length}
+            {(state.pos || []).filter(p => p.status === 'Open').length}
           </span>
         )}
-        {mounted && item.id === 'rfqs' && state.rfqs.filter(r => r.status === 'Bidding Open').length > 0 && (
+        {mounted && item.id === 'rfqs' && (state.rfqs || []).filter(r => r.status === 'Bidding Open').length > 0 && (
           <span className={isCollapsed
             ? "absolute top-1 right-3.5 size-4 rounded-full text-white text-[8px] flex items-center justify-center font-bold"
             : "ml-auto size-4.5 rounded-full text-[9px] flex items-center justify-center font-bold"
@@ -87,7 +87,7 @@ export default function Sidebar({ activeTab, setActiveTab, state, onReset }) {
             ? { backgroundColor: 'rgb(var(--color-emerald-default-rgb))' }
             : { backgroundColor: 'var(--color-emerald-dim)', color: 'rgb(var(--color-emerald-text-rgb))' }
           }>
-            {state.rfqs.filter(r => r.status === 'Bidding Open').length}
+            {(state.rfqs || []).filter(r => r.status === 'Bidding Open').length}
           </span>
         )}
       </button>

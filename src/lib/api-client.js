@@ -20,22 +20,30 @@ export const apiClient = {
       headers,
     };
 
-    const response = await fetch(`${BASE_URL}${endpoint}`, config);
-    if (!response.ok) {
-      if (response.status === 401 && typeof window !== 'undefined') {
-        localStorage.removeItem('jwt_token');
-        localStorage.removeItem('clerk_user_id');
-        localStorage.removeItem('sap_vendor_profile_data');
-        if (window.location.pathname !== '/sign-in' && window.location.pathname !== '/sign-up') {
-          window.location.href = '/sign-in';
+    try {
+      const response = await fetch(`${BASE_URL}${endpoint}`, config);
+      if (!response.ok) {
+        if (response.status === 401 && typeof window !== 'undefined') {
+          localStorage.removeItem('jwt_token');
+          localStorage.removeItem('clerk_user_id');
+          localStorage.removeItem('sap_vendor_profile_data');
+          if (window.location.pathname !== '/sign-in' && window.location.pathname !== '/sign-up') {
+            window.location.href = '/sign-in';
+          }
         }
+        const errorData = await response.json().catch(() => ({}));
+        throw new Error(errorData.error || `Request failed with status ${response.status}`);
       }
-      const errorData = await response.json().catch(() => ({}));
-      throw new Error(errorData.error || `Request failed with status ${response.status}`);
+      
+      if (response.status === 204) return null;
+      return response.json();
+    } catch (err) {
+      if (err.name === 'TypeError' || err.message === 'Failed to fetch') {
+        console.warn(`[apiClient] Network connectivity error on ${endpoint}`);
+        return null;
+      }
+      throw err;
     }
-    
-    if (response.status === 204) return null;
-    return response.json();
   },
 
   get(endpoint, headers = {}) {

@@ -33,5 +33,6 @@ router.use('/uploads', protect, require('./upload.routes'));
 router.use('/reports', protect, require('./report.routes'));
 router.use('/asns', protect, require('./asn.routes'));
 router.use('/logs', protect, require('./saplog.routes'));
+router.use('/dashboard', protect, require('./dashboard.routes'));
 
 module.exports = router;

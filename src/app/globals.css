@@ -280,14 +280,14 @@ aside nav::-webkit-scrollbar-thumb:hover {
   .status-badge {
     @apply inline-flex items-center gap-1.5 text-[10px] font-bold px-2 py-0.5 rounded-full font-mono tracking-[0.05em] border uppercase;
   }
-  .status-badge-active { @apply bg-emerald-900/20 text-emerald-400 border-emerald-900/50; }
-  .status-badge-suspended { @apply bg-rose-900/20 text-rose-400 border-rose-900/50; }
-  .status-badge-trial { @apply bg-amber-500/20 text-amber-400 border-amber-500/30; }
-  .status-badge-pending { @apply bg-zinc-800 text-zinc-400 border-zinc-700; }
-  .status-badge-warn { @apply bg-amber-500/20 text-amber-400 border-amber-500/30; }
-  .status-badge-info { @apply bg-zinc-800 text-zinc-400 border-zinc-700; }
-  .status-badge-cooling { @apply bg-amber-500/20 text-amber-400 border-amber-500/30; }
-  .status-badge-revoked { @apply bg-zinc-800 text-zinc-600 border-zinc-700; }
+  .status-badge-active { @apply bg-emerald-50 text-emerald-800 border-emerald-300; }
+  .status-badge-suspended { @apply bg-rose-50 text-rose-800 border-rose-300; }
+  .status-badge-trial { @apply bg-amber-50 text-amber-900 border-amber-300; }
+  .status-badge-pending { @apply bg-slate-100 text-slate-800 border-slate-300; }
+  .status-badge-warn { @apply bg-amber-50 text-amber-900 border-amber-300; }
+  .status-badge-info { @apply bg-blue-50 text-blue-900 border-blue-300; }
+  .status-badge-cooling { @apply bg-sky-50 text-sky-900 border-sky-300; }
+  .status-badge-revoked { @apply bg-slate-100 text-slate-700 border-slate-300; }
 
   /* ── Plan / tier badges (repurposed for vendor tiers/categories) ────────── */
   .plan-badge-starter { @apply bg-zinc-800 text-zinc-400 font-bold rounded-full px-2.5 py-0.5 text-[10px] inline-block tracking-[0.05em] uppercase border border-zinc-700; }

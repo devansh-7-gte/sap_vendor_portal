@@ -15,12 +15,12 @@ export default function OverviewView({ setActiveTab, state }) {
   ];
 
   const rolePills = [
-    { name: 'Vendor Desk', style: 'bg-purple-50 text-purple-650 border border-purple-100' },
-    { name: 'Buyer Procurement', style: 'bg-blue-50 text-blue-650 border border-blue-100' },
-    { name: 'Finance / AP', style: 'bg-emerald-50 text-emerald-650 border border-emerald-100' },
-    { name: 'SAP ERP Server', style: 'bg-amber-50 text-amber-650 border border-amber-100' },
-    { name: 'Warehouse Logistics', style: 'bg-teal-50 text-teal-650 border border-teal-100' },
-    { name: 'Quality QC Inspectors', style: 'bg-rose-50 text-rose-650 border border-rose-100' }
+    { name: 'Vendor Desk', style: 'bg-purple-50 text-purple-700 border border-purple-100' },
+    { name: 'Buyer Procurement', style: 'bg-blue-50 text-blue-700 border border-blue-100' },
+    { name: 'Finance / AP', style: 'bg-emerald-50 text-emerald-700 border border-emerald-100' },
+    { name: 'SAP ERP Server', style: 'bg-amber-50 text-amber-700 border border-amber-100' },
+    { name: 'Warehouse Logistics', style: 'bg-teal-50 text-teal-700 border border-teal-100' },
+    { name: 'Quality QC Inspectors', style: 'bg-rose-50 text-rose-700 border border-rose-100' }
   ];
 
   const architectureLines = [

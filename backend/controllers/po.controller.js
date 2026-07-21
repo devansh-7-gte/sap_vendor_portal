@@ -358,6 +358,26 @@ const getASNs = asyncHandler(async (req, res, next) => {
   res.json(asns);
 });
 
+// @desc    Update PO status
+// @route   PUT /api/pos/:id/status
+// @access  Public
+const updatePOStatus = asyncHandler(async (req, res, next) => {
+  const { status } = req.body;
+  if (!status) {
+    return next(ApiError.badRequest('Status is required'));
+  }
+
+  const po = await PurchaseOrder.findOne({ id: req.params.id });
+  if (!po) {
+    return next(ApiError.notFound('Purchase Order not found'));
+  }
+
+  po.status = status;
+  await po.save();
+
+  res.json({ message: 'PO status updated successfully', po });
+});
+
 module.exports = {
   getPOs,
   getPOById,
@@ -365,5 +385,6 @@ module.exports = {
   simulatePO,
   submitASN,
   getASNForPO,
-  getASNs
+  getASNs,
+  updatePOStatus
 };

@@ -55,9 +55,12 @@ export function paymentStatusVariant(status) {
 export function rfqStatusVariant(status) {
   switch (status) {
     case 'Awarded':
+    case 'Acknowledged':
     case 'Quoted':
+    case 'Accepted':
       return 'active';
     case 'Bidding Open':
+    case 'Published':
       return 'info';
     case 'Submitted':
     case 'Under Review':
@@ -65,7 +68,9 @@ export function rfqStatusVariant(status) {
     case 'Draft':
       return 'pending';
     case 'Closed':
-      return 'revoked';
+    case 'Expired':
+    case 'Cancelled':
+      return 'suspended';
     default:
       return 'pending';
   }
