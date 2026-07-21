@@ -237,9 +237,45 @@ export function PortalProvider({ children }) {
     setActiveTab('registration');
   };
 
-  const handleBidSubmit = (rfqId, prices, leadTime, remarks, gstRate, validityDate, freight, moq, docs) => {
-    rfqHook.submitBid(rfqId, prices, leadTime, remarks, gstRate, validityDate, freight, moq, docs);
+  const handleBidSubmit = async (rfqId, prices, leadTime, remarks, gstRate, validityDate, freight, moq, docs) => {
+    const result = await rfqHook.submitBid(rfqId, prices, leadTime, remarks, gstRate, validityDate, freight, moq, docs);
     setSelectedRfqId(null);
+    if (result.success) {
+      addToast('success', `Quotation for ${rfqId} submitted and synchronized with SAP Info Records (ME47).`);
+    } else {
+      addToast('error', result.error || `Failed to submit quotation for ${rfqId}.`);
+    }
+    return result;
+  };
+
+  const handleCreateRFQ = async (rfqData) => {
+    const result = await rfqHook.createRFQ(rfqData);
+    if (result.success) {
+      addToast('success', `RFQ ${rfqData.id} successfully created & published to SAP ERP (ME41).`);
+    } else {
+      addToast('error', result.error || 'Failed to create RFQ.');
+    }
+    return result;
+  };
+
+  const handleReissueRFQ = async (rfqId, newDeadline) => {
+    const result = await rfqHook.reissueRFQ(rfqId, newDeadline);
+    if (result.success) {
+      addToast('success', `RFQ ${rfqId} successfully re-issued with new deadline: ${newDeadline}. Bids have been reset.`);
+    } else {
+      addToast('error', result.error || `Failed to reissue RFQ ${rfqId}.`);
+    }
+    return result;
+  };
+
+  const handleCancelRFQ = async (rfqId) => {
+    const result = await rfqHook.cancelRFQ(rfqId);
+    if (result.success) {
+      addToast('success', `RFQ ${rfqId} has been cancelled.`);
+    } else {
+      addToast('error', result.error || `Failed to cancel RFQ ${rfqId}.`);
+    }
+    return result;
   };
 
   const handleAsnSubmit = async (po) => {
@@ -268,7 +304,9 @@ export function PortalProvider({ children }) {
       items: {}
     });
 
-    // Fallback timer to refresh POs, ASNs and GRNs after 11 seconds (backend simulation takes 10s)
+    // MOCK — replace with real GRN/MIGO poll/webhook when SAP integration lands.
+    // Backend (backend/controllers/po.controller.js submitASN) fakes goods receipt via a
+    // 10s setTimeout ([SIMULATOR] logs); this just refreshes state 1s after that fires.
     setTimeout(() => {
       console.log('[PortalContext] Fallback refresh for GRN/MIGO simulation...');
       poHook.refreshPOs();
@@ -321,7 +359,9 @@ export function PortalProvider({ children }) {
       setInvoiceForm({ invoiceNumber: '', invoiceDate: '' });
       setActiveTab('invoices');
 
-      // Fallback timer to refresh payments, invoices and POs after 13 seconds (backend simulation takes 12s)
+      // MOCK — replace with real SAP payment-run polling/webhook when SAP integration lands.
+      // Backend (backend/controllers/invoice.controller.js submitInvoice) fakes the payment run
+      // via a 12s setTimeout ([SIMULATOR] logs); this just refreshes state 1s after that fires.
       setTimeout(() => {
         console.log('[PortalContext] Fallback refresh for Payment simulation...');
         paymentHook.refreshPayments();
@@ -345,12 +385,16 @@ export function PortalProvider({ children }) {
   };
 
   const awardVendorBidWrapper = async (rfqId, vendorId) => {
-    const newPO = await rfqHook.awardVendorBid(rfqId, vendorId);
-    if (newPO) {
-      poHook.addPO(newPO);
+    const result = await rfqHook.awardVendorBid(rfqId, vendorId);
+    if (result.success && result.po) {
+      poHook.addPO(result.po);
       poHook.refreshPOs();
-      dashboardHook.addSystemMessage(`Purchase Order ${newPO.id} has been created and dispatched to the awarded vendor.`);
+      dashboardHook.addSystemMessage(`Purchase Order ${result.po.id} has been created and dispatched to the awarded vendor.`);
+      addToast('success', `BAPI_PO_CREATE sync complete — RFQ ${rfqId} converted to Purchase Order ${result.po.id}.`);
+    } else {
+      addToast('error', result.error || `Failed to award bid and convert RFQ ${rfqId} to a Purchase Order.`);
     }
+    return result;
   };
 
   return (
@@ -395,6 +439,9 @@ export function PortalProvider({ children }) {
         consoleEndRef,
         handleCompanySubmit,
         handleBidSubmit,
+        handleCreateRFQ,
+        handleReissueRFQ,
+        handleCancelRFQ,
         handleAsnSubmit,
         handleInvoiceSubmit,
         handleSendMessage,

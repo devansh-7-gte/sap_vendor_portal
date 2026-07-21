@@ -7,19 +7,20 @@ import { dashboardService } from '../services/dashboardService';
 export function useDashboard(profile, clearAllLogs) {
   const [chats, setChats] = useState([]);
 
-  const [performance, setPerformance] = useState(() => {
-    if (typeof window !== 'undefined') {
-      try {
-        const savedPerf = localStorage.getItem('sap_vendor_portal_performance');
-        if (savedPerf) {
-          return JSON.parse(savedPerf);
-        }
-      } catch (e) {
-        console.error('Failed to load dashboard state performance', e);
+  const [performance, setPerformance] = useState(INITIAL_PERFORMANCE);
+
+  // Read any locally cached performance score after mount (client-only, so it
+  // can't cause a server/client render mismatch during hydration).
+  useEffect(() => {
+    try {
+      const savedPerf = localStorage.getItem('sap_vendor_portal_performance');
+      if (savedPerf) {
+        setPerformance(JSON.parse(savedPerf));
       }
+    } catch (e) {
+      console.error('Failed to load dashboard state performance', e);
     }
-    return INITIAL_PERFORMANCE;
-  });
+  }, []);
 
   // Fetch live backend performance score if vendor is approved
   useEffect(() => {

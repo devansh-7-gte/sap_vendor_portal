@@ -10,8 +10,11 @@ export default function RfqsPage() {
     selectedRfqId,
     setSelectedRfqId,
     handleBidSubmit,
-    rfqHook,
-    awardVendorBidWrapper
+    handleCreateRFQ,
+    handleReissueRFQ,
+    handleCancelRFQ,
+    awardVendorBidWrapper,
+    addToast
   } = usePortal();
 
   return (
@@ -20,10 +23,11 @@ export default function RfqsPage() {
       selectedRfqId={selectedRfqId}
       setSelectedRfqId={setSelectedRfqId}
       handleBidSubmit={handleBidSubmit}
-      createRFQ={rfqHook.createRFQ}
+      createRFQ={handleCreateRFQ}
       awardVendorBid={awardVendorBidWrapper}
-      reissueRFQ={rfqHook.reissueRFQ}
-      cancelRFQ={rfqHook.cancelRFQ}
+      reissueRFQ={handleReissueRFQ}
+      cancelRFQ={handleCancelRFQ}
+      addToast={addToast}
     />
   );
 }

@@ -1,4 +1,5 @@
 import { Geist, Geist_Mono } from "next/font/google";
+import Script from "next/script";
 import "./globals.css";
 import { ShellProvider } from "@/lib/shell-context";
 import { PortalProvider } from "@/lib/portal-context";
@@ -31,7 +32,11 @@ export default function RootLayout({ children }) {
       suppressHydrationWarning
     >
       <head>
-        <script dangerouslySetInnerHTML={{ __html: themeScript }} />
+        <Script
+          id="theme-script"
+          strategy="beforeInteractive"
+          dangerouslySetInnerHTML={{ __html: themeScript }}
+        />
       </head>
       <body className="min-h-full flex flex-col bg-base text-text-primary">
         <a href="#main-content" className="skip-link">Skip to main content</a>

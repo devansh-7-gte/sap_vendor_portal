@@ -8,30 +8,30 @@ const ShellContext = createContext(undefined);
 
 export function ShellProvider({ children }) {
   const [activeTab, setActiveTab] = useState('dashboard');
-  const [sapPayloadLogs, setSapPayloadLogs] = useState(() => {
-    if (typeof window !== 'undefined') {
-      try {
-        const saved = localStorage.getItem('sap_vendor_portal_logs');
-        if (saved) {
-          return JSON.parse(saved);
-        }
-      } catch (e) {
-        console.error('Failed to load SAP logs', e);
-      }
+  const [sapPayloadLogs, setSapPayloadLogs] = useState(() => [
+    {
+      id: 'LOG-001',
+      timestamp: new Date().toISOString(),
+      type: 'SYS',
+      direction: 'INBOUND',
+      name: 'PORTAL_INITIALIZE',
+      payload: '{"status":"CONNECTED","sapHost":"ecc-prd-app01.sap.internal","client":"100"}',
+      status: 'SUCCESS'
     }
-    // Default initial log
-    return [
-      {
-        id: 'LOG-001',
-        timestamp: new Date().toISOString(),
-        type: 'SYS',
-        direction: 'INBOUND',
-        name: 'PORTAL_INITIALIZE',
-        payload: '{"status":"CONNECTED","sapHost":"ecc-prd-app01.sap.internal","client":"100"}',
-        status: 'SUCCESS'
+  ]);
+
+  // Read any locally cached logs after mount (client-only, so it can't cause
+  // a server/client render mismatch during hydration).
+  useEffect(() => {
+    try {
+      const saved = localStorage.getItem('sap_vendor_portal_logs');
+      if (saved) {
+        setSapPayloadLogs(JSON.parse(saved));
       }
-    ];
-  });
+    } catch (e) {
+      console.error('Failed to load SAP logs', e);
+    }
+  }, []);
 
   const refreshSapLogs = async () => {
     if (typeof window !== 'undefined' && !localStorage.getItem('jwt_token')) return;

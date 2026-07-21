@@ -3,7 +3,7 @@
 import React, { useState, useEffect } from 'react';
 import {
   FileText, Landmark, Clock, CheckCircle2, ChevronRight, AlertCircle,
-  Filter, Calendar, Building2, ShieldCheck, Receipt, Download, Search, ChevronLeft
+  Calendar, Building2, ShieldCheck, Receipt, Download, Search, ChevronLeft
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import ErrorBoundary from '@/components/ErrorBoundary';
@@ -11,6 +11,7 @@ import TableSkeleton from '@/components/ui/TableSkeleton';
 import StatusBadge from '@/components/ui/StatusBadge';
 import EmptyState from '@/components/ui/EmptyState';
 import { paymentStatusVariant } from '@/lib/statusColors';
+import { usePortal } from '@/lib/portal-context';
 
 const formatDate = (dateStr) => {
   if (!dateStr) return '';
@@ -59,6 +60,7 @@ function SapReadOnlyField({ label, value, isFile, isMonospace = true }) {
 }
 
 export default function PaymentTrackingView({ state }) {
+  const portal = usePortal();
   const [isLoading, setIsLoading] = useState(true);
   useEffect(() => {
     const timer = setTimeout(() => {
@@ -297,6 +299,68 @@ export default function PaymentTrackingView({ state }) {
     }
   };
 
+  // No dedicated backend CSV export endpoint exists, so build one client-side from the
+  // already-filtered ledger rows (keeps the export consistent with what's on screen).
+  const handleExportLedger = () => {
+    const headers = ['Invoice Number', 'SAP Document No.', 'Clearing Date', 'Gross Amount', 'TDS Deducted', 'Net Disbursed', 'UTR Reference', 'Method'];
+    const rows = filteredPayments.map(payment => {
+      const invData = getInvoiceForPayment(payment);
+      const payAmt = payment.amount !== undefined ? payment.amount : (payment.netAmount || 0);
+      const tdsAmt = payment.tdsDeducted !== undefined ? payment.tdsDeducted : Math.round(payAmt * 0.01);
+      const grossAmt = payment.grossAmount !== undefined ? payment.grossAmount : payAmt + tdsAmt;
+      return [
+        invData?.invoiceNumber || payment.invoiceId || '',
+        invData?.sapMiroDoc || '',
+        formatDate(payment.paymentDate),
+        grossAmt,
+        tdsAmt,
+        payAmt,
+        payment.utrCode || '',
+        payment.paymentMethod || 'NEFT'
+      ];
+    });
+
+    const csvContent = [headers, ...rows]
+      .map(row => row.map(val => `"${String(val).replace(/"/g, '""')}"`).join(','))
+      .join('\n');
+
+    const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+    const url = window.URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = `payment-ledger-${new Date().toISOString().split('T')[0]}.csv`;
+    document.body.appendChild(a);
+    a.click();
+    a.remove();
+    window.URL.revokeObjectURL(url);
+  };
+
+  // No dedicated dispute/query backend endpoint exists yet, so route the inquiry through
+  // the real Communications Hub chat endpoint so it actually reaches a buyer officer.
+  const handleRaiseInquiry = async (payment) => {
+    const invData = getInvoiceForPayment(payment);
+    const message = `Raising a query regarding settlement UTR: ${payment.utrCode || payment.id}, Invoice: ${invData?.invoiceNumber || payment.invoiceId || 'N/A'}. Please review and advise.`;
+    try {
+      await portal.dashboardHook.sendChatMessage(message);
+      portal.addToast('success', 'Your inquiry has been sent to the Communications Hub. A buyer officer will respond shortly.');
+    } catch (err) {
+      portal.addToast('error', 'Failed to send inquiry. Please try again.');
+    }
+  };
+
+  // There is no backend document generation for Form 16A certificates (the TDS registry
+  // below is illustrative data, not a real filing record), so rather than faking a download
+  // we route the request through the same real chat endpoint so Finance actually gets it.
+  const handleRequestForm16A = async (cert) => {
+    const message = `Requesting Form 16A TDS certificate — ${cert.quarter}, FY ${cert.fiscalYear}, PAN: ${cert.deducteePan}, Ref: ${cert.refNo}.`;
+    try {
+      await portal.dashboardHook.sendChatMessage(message);
+      portal.addToast('info', 'Form 16A certificates are issued by Finance and are not available for direct download yet. Your request has been sent to the Communications Hub.');
+    } catch (err) {
+      portal.addToast('error', 'Failed to send certificate request. Please try again.');
+    }
+  };
+
   if (isLoading) {
     return (
       <ErrorBoundary>
@@ -333,16 +397,7 @@ export default function PaymentTrackingView({ state }) {
             type="button"
             variant="outline"
             className="h-9"
-            onClick={() => alert('Opening Filters pane')}
-          >
-            <Filter className="size-4 text-text-tertiary shrink-0" />
-            <span>Filters</span>
-          </Button>
-          <Button
-            type="button"
-            variant="outline"
-            className="h-9"
-            onClick={() => alert('Exporting payment ledger report')}
+            onClick={handleExportLedger}
           >
             <Download className="size-4 text-text-tertiary shrink-0" />
             <span>Export</span>
@@ -493,7 +548,7 @@ export default function PaymentTrackingView({ state }) {
                               <Button
                                 variant="outline"
                                 size="xs"
-                                onClick={() => alert(`Raising inquiry regarding settlement transaction UTR: ${payment.utrCode}`)}
+                                onClick={() => handleRaiseInquiry(payment)}
                                 title="Raise query / dispute"
                               >
                                 Query
@@ -606,9 +661,10 @@ export default function PaymentTrackingView({ state }) {
                           <Button
                             variant="default"
                             size="xs"
-                            onClick={() => alert(`Downloading signed Form 16A quarterly TDS certificate for PAN: ${cert.deducteePan} (${cert.quarter} FY ${cert.fiscalYear})`)}
+                            onClick={() => handleRequestForm16A(cert)}
+                            title="Request certificate via Communications Hub"
                           >
-                            Download Form 16A
+                            Request Certificate
                           </Button>
                         </td>
                       </tr>

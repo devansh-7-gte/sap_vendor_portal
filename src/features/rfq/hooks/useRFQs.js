@@ -45,49 +45,55 @@ export function useRFQs(profile) {
         uploadedDocs
       };
       await rfqService.submitBid(rfqId, bidData);
-      refreshRFQs();
+      await refreshRFQs();
+      return { success: true };
     } catch (e) {
       console.error(e);
+      return { success: false, error: e.message };
     }
   };
 
   const createRFQ = async (rfqData) => {
     try {
-      await rfqService.createRFQ(rfqData);
-      refreshRFQs();
+      const res = await rfqService.createRFQ(rfqData);
+      await refreshRFQs();
+      return { success: true, data: res };
     } catch (e) {
       console.error(e);
+      return { success: false, error: e.message };
     }
   };
 
   const awardVendorBid = async (rfqId, vendorId) => {
     try {
       const res = await rfqService.awardBid(rfqId, vendorId);
-      refreshRFQs();
-      if (res && res.po) {
-        return res.po;
-      }
+      await refreshRFQs();
+      return { success: true, po: res?.po || null };
     } catch (e) {
       console.error(e);
+      return { success: false, error: e.message, po: null };
     }
-    return null;
   };
 
   const reissueRFQ = async (rfqId, newDeadline) => {
     try {
       await rfqService.reissueRFQ(rfqId, newDeadline);
-      refreshRFQs();
+      await refreshRFQs();
+      return { success: true };
     } catch (e) {
       console.error(e);
+      return { success: false, error: e.message };
     }
   };
 
   const cancelRFQ = async (rfqId) => {
     try {
       await rfqService.cancelRFQ(rfqId);
-      refreshRFQs();
+      await refreshRFQs();
+      return { success: true };
     } catch (e) {
       console.error(e);
+      return { success: false, error: e.message };
     }
   };
 

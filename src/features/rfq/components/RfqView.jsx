@@ -66,10 +66,10 @@ const FormSection = ({ number, title, children, className = '' }) => (
 );
 
 const EnterpriseCard = ({ label, required, children, error }) => (
-  <div className={`p-4.5 border rounded-xl shadow-xs flex flex-col justify-between min-h-[110px] transition-all duration-200 ${error ? 'border-red-500 ring-1 ring-red-500/50 bg-red-50/5' : 'border-border hover:border-border-em hover:shadow-xs bg-surface'
+  <div className={`p-4.5 border rounded-xl shadow-xs flex flex-col justify-between min-h-[110px] transition-all duration-200 ${error ? 'border-rose-500 ring-1 ring-rose-500/50 bg-rose-50/5' : 'border-border hover:border-border-em hover:shadow-xs bg-surface'
     }`}>
     <div className="flex justify-between items-center mb-1.5">
-      <span className="text-xs font-medium text-text-secondary block select-none">{label} {required && <span className="text-red-500 font-bold select-none ml-0.5">*</span>}</span>
+      <span className="text-xs font-medium text-text-secondary block select-none">{label} {required && <span className="text-rose-500 font-bold select-none ml-0.5">*</span>}</span>
     </div>
     <div className="flex-1 flex items-center w-full">
       {children}
@@ -148,6 +148,19 @@ const getInitialQuoteForm = () => ({
   incoterms: 'EXW'
 });
 
+const RFQ_DRAFT_KEY = 'sap_vendor_portal_rfq_draft';
+const QUOTE_DRAFT_KEY = 'sap_vendor_portal_quote_draft';
+
+const loadDraft = (key) => {
+  if (typeof window === 'undefined') return null;
+  try {
+    const saved = localStorage.getItem(key);
+    return saved ? JSON.parse(saved) : null;
+  } catch (e) {
+    return null;
+  }
+};
+
 export default function RfqView({
   state,
   selectedRfqId,
@@ -156,7 +169,8 @@ export default function RfqView({
   createRFQ,
   awardVendorBid,
   reissueRFQ,
-  cancelRFQ
+  cancelRFQ,
+  addToast
 }) {
   const [isPageLoading, setIsPageLoading] = useState(true);
   useEffect(() => {
@@ -218,7 +232,7 @@ export default function RfqView({
   ];
 
 
-  const [addedItems, setAddedItems] = useState([
+  const [addedItems, setAddedItems] = useState(() => [
     {
       materialCode: 'FAST-HEX-M12-050',
       description: 'Hexagonal Bolt M12 x 50mm Grade 8.8',
@@ -227,6 +241,17 @@ export default function RfqView({
       targetPrice: 15.50
     }
   ]);
+
+  // Restore any locally saved drafts after mount (client-only, so it can't
+  // cause a server/client render mismatch during hydration).
+  useEffect(() => {
+    const rfqDraft = loadDraft(RFQ_DRAFT_KEY);
+    if (rfqDraft?.rfqForm) rfqFormSet(rfqDraft.rfqForm);
+    if (rfqDraft?.addedItems) setAddedItems(rfqDraft.addedItems);
+
+    const quoteDraft = loadDraft(QUOTE_DRAFT_KEY);
+    if (quoteDraft?.quoteForm) setQuoteForm(quoteDraft.quoteForm);
+  }, []);
 
   const handleAddLineItem = () => {
     if (!rfqForm.materialDescription.trim()) {
@@ -338,90 +363,77 @@ export default function RfqView({
     setIsPreviewOpen(true);
   };
 
-  const confirmAndPublishRFQ = () => {
+  const confirmAndPublishRFQ = async () => {
     setIsPreviewOpen(false);
     setIsLoading(true);
 
-    setTimeout(() => {
-      const invitedList = selectedVendors.map(vid => {
-        const vMaster = vendorMasterList.find(vm => vm.id === vid || (vid === 'VND-CURRENT' && vm.id === 'VND-CURRENT'));
-        return {
-          id: vid === 'VND-CURRENT' ? currentVendorCode : vid,
-          name: vMaster ? vMaster.name : 'Unknown Vendor',
-          status: 'Pending',
-          rating: vMaster ? vMaster.rating : 85
-        };
-      });
+    const invitedList = selectedVendors.map(vid => {
+      const vMaster = vendorMasterList.find(vm => vm.id === vid || (vid === 'VND-CURRENT' && vm.id === 'VND-CURRENT'));
+      return {
+        id: vid === 'VND-CURRENT' ? currentVendorCode : vid,
+        name: vMaster ? vMaster.name : 'Unknown Vendor',
+        status: 'Pending',
+        rating: vMaster ? vMaster.rating : 85
+      };
+    });
 
-      const items = addedItems.map((item, index) => ({
-        line: (index + 1) * 10,
-        materialCode: item.materialCode,
-        description: item.description,
-        quantity: Number(item.quantity),
-        uom: item.uom,
-        targetPrice: Number(item.targetPrice),
-        plant: '1000',
-        deliveryDate: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toISOString().split('T')[0]
-      }));
+    const items = addedItems.map((item, index) => ({
+      line: (index + 1) * 10,
+      materialCode: item.materialCode,
+      description: item.description,
+      quantity: Number(item.quantity),
+      uom: item.uom,
+      targetPrice: Number(item.targetPrice),
+      plant: '1000',
+      deliveryDate: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toISOString().split('T')[0]
+    }));
 
-      createRFQ({
-        id: rfqForm.rfqRefNo,
-        description: rfqForm.description,
-        rfqType: rfqForm.rfqType,
-        deadlineDate: rfqForm.deadlineDate,
-        paymentTerms: rfqForm.paymentTerms,
-        purchasingGroup: rfqForm.purchasingGroup,
-        companyCode: rfqForm.companyCode || '1000',
-        purchasingOrg: '1000',
-        currency: rfqForm.currency || 'INR',
-        incoterms: rfqForm.incoterms || 'FOB',
-        deliveryLocation: rfqForm.plant || 'Plant 1000 (Mumbai)',
-        notes: `Binding Period: ${rfqForm.bindingPeriod} Days`,
-        items: items,
-        invitedVendors: invitedList
-      });
+    const result = await createRFQ({
+      id: rfqForm.rfqRefNo,
+      description: rfqForm.description,
+      rfqType: rfqForm.rfqType,
+      deadlineDate: rfqForm.deadlineDate,
+      paymentTerms: rfqForm.paymentTerms,
+      purchasingGroup: rfqForm.purchasingGroup,
+      companyCode: rfqForm.companyCode || '1000',
+      purchasingOrg: '1000',
+      currency: rfqForm.currency || 'INR',
+      incoterms: rfqForm.incoterms || 'FOB',
+      deliveryLocation: rfqForm.plant || 'Plant 1000 (Mumbai)',
+      notes: `Binding Period: ${rfqForm.bindingPeriod} Days`,
+      items: items,
+      invitedVendors: invitedList
+    });
 
-      setIsLoading(false);
+    setIsLoading(false);
 
-      // Reset Form
-      rfqFormSet({
-        rfqRefNo: '',
-        description: '',
-        rfqType: 'AN',
-        deadlineDate: new Date(Date.now() + 14 * 24 * 60 * 60 * 1000).toISOString().split('T')[0],
-        bindingPeriod: '30',
-        paymentTerms: 'NET 30 Days',
-        purchasingGroup: '001',
-        materialDescription: 'FAST-HEX-M12-050',
-        quantityRequired: '10000',
-        unitOfMeasure: 'EA',
-        currency: 'INR',
-        priceBasis: 'Exclusive of Tax',
-        vendorType: 'Manufacturer',
-        vendorCategory: 'Raw Material',
-        plant: 'PL01 - Delhi',
-        companyCode: '1000',
-        incoterms: 'FOB',
-        remarks: 'Please provide best competitive pricing.'
-      });
-      setAddedItems([
-        {
-          materialCode: 'FAST-HEX-M12-050',
-          description: 'Hexagonal Bolt M12 x 50mm Grade 8.8',
-          quantity: 10000,
-          uom: 'EA',
-          targetPrice: 15.50
-        }
-      ]);
-      setSelectedVendors(['VND-4001', 'VND-4002']);
-      setFormErrors({});
-      setActiveProcTab('monitor');
-      alert(`RFQ ${rfqForm.rfqRefNo} successfully created & published to SAP ERP (ME41).`);
-    }, 1500); // 1.5 seconds simulated BAPI posting
+    if (!result.success) {
+      // Keep the form and draft intact so the user can retry without re-entering data.
+      return;
+    }
+
+    try {
+      localStorage.removeItem(RFQ_DRAFT_KEY);
+    } catch (e) {}
+
+    // Reset Form
+    rfqFormSet(getInitialRfqForm());
+    setAddedItems([
+      {
+        materialCode: 'FAST-HEX-M12-050',
+        description: 'Hexagonal Bolt M12 x 50mm Grade 8.8',
+        quantity: 10000,
+        uom: 'EA',
+        targetPrice: 15.50
+      }
+    ]);
+    setSelectedVendors(['VND-4001', 'VND-4002']);
+    setFormErrors({});
+    setActiveProcTab('monitor');
   };
 
   // Submit ME47 Quotation (Submit Quotation Tab)
-  const handleQuotationSubmit = (e) => {
+  const handleQuotationSubmit = async (e) => {
     if (e) e.preventDefault();
 
     const errors = {};
@@ -440,47 +452,41 @@ export default function RfqView({
 
     setIsLoading(true);
 
-    setTimeout(() => {
-      // Structure prices object mapping selected line number to unit price
-      const prices = {
-        [quoteForm.selectedLine]: Number(quoteForm.unitPrice)
-      };
+    // Structure prices object mapping selected line number to unit price
+    const prices = {
+      [quoteForm.selectedLine]: Number(quoteForm.unitPrice)
+    };
 
-      // Formulate comments/remarks
-      const remarks = `Quote Ref: ${quoteForm.quoteRef || 'N/A'} | Discount: ${quoteForm.discount || '0'}% | Incoterms: ${quoteForm.incoterms}`;
+    // Formulate comments/remarks
+    const remarks = `Quote Ref: ${quoteForm.quoteRef || 'N/A'} | Discount: ${quoteForm.discount || '0'}% | Incoterms: ${quoteForm.incoterms}`;
 
-      handleBidSubmit(
-        quoteForm.rfqId,
-        prices,
-        Number(quoteForm.deliveryLeadTime),
-        remarks,
-        quoteForm.gstRate,
-        quoteForm.validityDate,
-        Number(quoteForm.freight),
-        1, // MOQ default
-        [] // docs empty
-      );
+    const result = await handleBidSubmit(
+      quoteForm.rfqId,
+      prices,
+      Number(quoteForm.deliveryLeadTime),
+      remarks,
+      quoteForm.gstRate,
+      quoteForm.validityDate,
+      Number(quoteForm.freight),
+      1, // MOQ default
+      [] // docs empty
+    );
 
-      setIsLoading(false);
+    setIsLoading(false);
 
-      // Reset form
-      setQuoteForm({
-        rfqId: '',
-        selectedLine: 10,
-        quoteRef: '',
-        quoteDate: new Date().toISOString().split('T')[0],
-        validityDate: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toISOString().split('T')[0],
-        unitPrice: '',
-        gstRate: '18%',
-        discount: '0',
-        deliveryLeadTime: '7',
-        freight: '0',
-        incoterms: 'EXW'
-      });
-      setQuoteErrors({});
-      setActiveProcTab('monitor');
-      alert('Quotation submitted and synchronized with SAP Info Records (ME47).');
-    }, 1500); // 1.5s simulated posting delay
+    if (!result.success) {
+      // Keep the form and draft intact so the user can retry without re-entering data.
+      return;
+    }
+
+    try {
+      localStorage.removeItem(QUOTE_DRAFT_KEY);
+    } catch (err) {}
+
+    // Reset form
+    setQuoteForm(getInitialQuoteForm());
+    setQuoteErrors({});
+    setActiveProcTab('monitor');
   };
 
 
@@ -540,15 +546,12 @@ export default function RfqView({
     };
   };
 
-  // Convert Award & Convert PO (ME58 equivalent BAPI simulation)
-  const triggerPOConversion = (rfqId, vendorId) => {
+  // Award bid & convert RFQ to PO (ME58)
+  const triggerPOConversion = async (rfqId, vendorId) => {
     setIsPoConverting(true);
-    setTimeout(() => {
-      awardVendorBid(rfqId, vendorId);
-      setIsPoConverting(false);
-      setSelectedRfqEvalId('');
-      alert(`BAPI_PO_CREATE Sync Complete. RFQ converted to PO successfully!`);
-    }, 1500);
+    await awardVendorBid(rfqId, vendorId);
+    setIsPoConverting(false);
+    setSelectedRfqEvalId('');
   };
 
   if (isPageLoading) {
@@ -564,6 +567,20 @@ export default function RfqView({
   return (
     <ErrorBoundary>
       <div className="space-y-4 max-w-full animate-fade-in pb-16">
+
+      {/* PAGE HEADER */}
+      <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 border-b border-border pb-4 select-none">
+        <div className="space-y-1">
+          <div className="flex items-center gap-2">
+            <h2 className="text-[22px] font-bold text-text-primary">RFQ Management</h2>
+          </div>
+          <div className="flex items-center gap-2 text-text-tertiary text-xs font-semibold">
+            <span className="bg-surface2 border border-border text-text-secondary px-2 py-0.5 rounded font-mono uppercase tracking-wide">
+              Procurement
+            </span>
+          </div>
+        </div>
+      </div>
 
       {/* PROCUREMENT SUB NAVIGATION */}
       <div className="flex items-center justify-between border-b border-border select-none bg-surface p-1 rounded-md shadow-xs">
@@ -1141,12 +1158,11 @@ export default function RfqView({
                       <Button
                         type="button"
                         variant="outline"
-                        onClick={() => {
+                        onClick={async () => {
                           const newDead = prompt('Enter new Bidding Deadline Date (YYYY-MM-DD):', new Date(Date.now() + 14 * 24 * 60 * 60 * 1000).toISOString().split('T')[0]);
                           if (newDead) {
-                            reissueRFQ(rfq.id, newDead);
+                            await reissueRFQ(rfq.id, newDead);
                             setSelectedRfqEvalId('');
-                            alert(`RFQ ${rfq.id} successfully re-issued with new deadline: ${newDead}. Bids have been reset.`);
                           }
                         }}
                       >
@@ -1155,11 +1171,10 @@ export default function RfqView({
                       <Button
                         type="button"
                         variant="destructive"
-                        onClick={() => {
+                        onClick={async () => {
                           if (confirm(`Are you sure you want to cancel RFQ ${rfq.id}? This will permanently close the document.`)) {
-                            cancelRFQ(rfq.id);
+                            await cancelRFQ(rfq.id);
                             setSelectedRfqEvalId('');
-                            alert(`RFQ ${rfq.id} has been cancelled.`);
                           }
                         }}
                       >
@@ -1218,7 +1233,7 @@ export default function RfqView({
               {(() => {
                 const selectedRfq = state.rfqs.find(r => r.id === quoteForm.rfqId);
                 return (
-                  <div className={`p-4 bg-surface2/30 border rounded-md space-y-4 ${quoteErrors.rfqId ? 'border-red-500 ring-1 ring-red-500/50 bg-red-50/5' : 'border-border'}`}>
+                  <div className={`p-4 bg-surface2/30 border rounded-md space-y-4 ${quoteErrors.rfqId ? 'border-rose-500 ring-1 ring-rose-500/50 bg-rose-50/5' : 'border-border'}`}>
                     <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
                       <div>
                         <h4 className="text-[11px] font-bold text-text-secondary uppercase tracking-wider font-mono">Select RFQ Document</h4>
@@ -1238,7 +1253,7 @@ export default function RfqView({
                             if (quoteErrors.rfqId) setQuoteErrors(prev => ({ ...prev, rfqId: false }));
                           }}
                           className={`w-[25ch] max-w-full font-semibold ${
-                            quoteErrors.rfqId ? 'border-red-500' : ''
+                            quoteErrors.rfqId ? 'border-rose-500' : ''
                           }`}
                         >
                           <option value="">-- Choose RFQ Document --</option>
@@ -1325,7 +1340,7 @@ export default function RfqView({
                       placeholder="QT-2026-001"
                       value={quoteForm.quoteRef}
                       onChange={e => setQuoteForm({ ...quoteForm, quoteRef: e.target.value })}
-                      className="w-[14ch] max-w-full font-mono uppercase font-bold"
+                      className="w-[14ch] max-w-full font-mono uppercase font-semibold"
                     />
                   </EnterpriseFieldCard>
 
@@ -1342,7 +1357,7 @@ export default function RfqView({
                         setQuoteForm({ ...quoteForm, quoteDate: e.target.value });
                         if (quoteErrors.quoteDate) setQuoteErrors(prev => ({ ...prev, quoteDate: false }));
                       }}
-                      className="w-full font-mono font-bold"
+                      className="w-full font-mono font-semibold"
                     />
                   </EnterpriseFieldCard>
 
@@ -1359,7 +1374,7 @@ export default function RfqView({
                         setQuoteForm({ ...quoteForm, validityDate: e.target.value });
                         if (quoteErrors.validityDate) setQuoteErrors(prev => ({ ...prev, validityDate: false }));
                       }}
-                      className="w-full font-mono font-bold"
+                      className="w-full font-mono font-semibold"
                     />
                   </EnterpriseFieldCard>
                 </div>
@@ -1385,7 +1400,7 @@ export default function RfqView({
                         setQuoteForm({ ...quoteForm, unitPrice: e.target.value });
                         if (quoteErrors.unitPrice) setQuoteErrors(prev => ({ ...prev, unitPrice: false }));
                       }}
-                      className="w-[13ch] max-w-full font-mono font-bold"
+                      className="w-[13ch] max-w-full font-mono font-semibold"
                     />
                   </EnterpriseFieldCard>
 
@@ -1419,7 +1434,7 @@ export default function RfqView({
                       placeholder="0"
                       value={quoteForm.discount}
                       onChange={e => setQuoteForm({ ...quoteForm, discount: e.target.value })}
-                      className="w-[9ch] max-w-full font-mono font-bold"
+                      className="w-[9ch] max-w-full font-mono font-semibold"
                     />
                   </EnterpriseFieldCard>
                 </div>
@@ -1444,7 +1459,7 @@ export default function RfqView({
                         setQuoteForm({ ...quoteForm, deliveryLeadTime: e.target.value });
                         if (quoteErrors.deliveryLeadTime) setQuoteErrors(prev => ({ ...prev, deliveryLeadTime: false }));
                       }}
-                      className="w-[9ch] max-w-full font-mono font-bold"
+                      className="w-[9ch] max-w-full font-mono font-semibold"
                     />
                   </EnterpriseFieldCard>
 
@@ -1456,7 +1471,7 @@ export default function RfqView({
                       placeholder="0"
                       value={quoteForm.freight}
                       onChange={e => setQuoteForm({ ...quoteForm, freight: e.target.value })}
-                      className="w-[13ch] max-w-full font-mono font-bold"
+                      className="w-[13ch] max-w-full font-mono font-semibold"
                     />
                   </EnterpriseFieldCard>
 
@@ -1478,17 +1493,17 @@ export default function RfqView({
 
 
               {/* STICKY BOTTOM ACTION BAR */}
-              <div className="sticky bottom-0 left-0 right-0 bg-surface/95 backdrop-blur-xs border border-border p-4 rounded-xl flex items-center justify-between gap-4 shadow-lg z-10 mt-8 transition-shadow duration-150 hover:shadow-xl">
-                <div>
-                  <span className="text-[9px] font-bold text-text-tertiary uppercase tracking-widest block font-mono">SAP Info Record Session</span>
-                  <p className="text-xs font-semibold text-text-primary">ME47 Maintain Quotation Bids</p>
-                </div>
-
-                <div className="flex gap-3">
+              <footer className="sticky bottom-0 z-30 -mx-6 bg-surface border-t border-border py-3.5 px-4 md:px-6 select-none">
+                <div className="flex items-center justify-between gap-4">
                   <Button
                     type="button"
                     onClick={() => {
-                      alert('Quotation Draft saved in local memory.');
+                      try {
+                        localStorage.setItem(QUOTE_DRAFT_KEY, JSON.stringify({ quoteForm }));
+                        addToast('success', 'Quotation draft saved. It will be restored next time you open this form.');
+                      } catch (e) {
+                        addToast('error', 'Failed to save quotation draft.');
+                      }
                     }}
                     variant="outline"
                   >
@@ -1497,12 +1512,11 @@ export default function RfqView({
                   <Button
                     type="submit"
                     variant="default"
-                    className="px-8"
                   >
                     Submit Quotation
                   </Button>
                 </div>
-              </div>
+              </footer>
             </form>
           )}
         </div>
@@ -1536,39 +1550,9 @@ export default function RfqView({
             </div>
           )}
 
-          {/* Header Details Card Title & Form Actions */}
+          {/* Header Details Card Title */}
           <div className="flex flex-wrap items-center justify-between gap-4">
             <h3 className="text-sm font-bold text-text-primary">RFQ Header Details</h3>
-            <div className="flex items-center gap-2 select-none">
-              <Button
-                type="button"
-                onClick={() => {
-                  if (confirm("Are you sure you want to cancel?")) {
-                    setActiveProcTab('monitor');
-                  }
-                }}
-                variant="outline"
-              >
-                Cancel
-              </Button>
-              <Button
-                type="button"
-                onClick={() => {
-                  alert('Draft saved in local memory.');
-                }}
-                variant="outline"
-              >
-                Save Draft
-              </Button>
-              <Button
-                type="submit"
-                variant="default"
-                className="px-4 flex items-center gap-1"
-              >
-                <span>Create RFQ</span>
-                <ChevronDown className="size-3.5" />
-              </Button>
-            </div>
           </div>
 
           <FormSection number="01" title="RFQ header details">
@@ -1588,7 +1572,7 @@ export default function RfqView({
                     rfqFormSet({ ...rfqForm, rfqRefNo: e.target.value });
                     if (formErrors.rfqRefNo) setFormErrors({ ...formErrors, rfqRefNo: false });
                   }}
-                  className="w-[12ch] max-w-full font-mono uppercase font-bold"
+                  className="w-[12ch] max-w-full font-mono uppercase font-semibold"
                 />
               </EnterpriseFieldCard>
 
@@ -1626,7 +1610,7 @@ export default function RfqView({
                       rfqFormSet({ ...rfqForm, description: e.target.value });
                       if (formErrors.description) setFormErrors({ ...formErrors, description: false });
                     }}
-                    className="w-full min-h-0 resize-none font-bold"
+                    className="w-full min-h-0 resize-none font-semibold"
                   />
                 </EnterpriseFieldCard>
               </div>
@@ -1649,7 +1633,7 @@ export default function RfqView({
                     rfqFormSet({ ...rfqForm, deadlineDate: e.target.value });
                     if (formErrors.deadlineDate) setFormErrors({ ...formErrors, deadlineDate: false });
                   }}
-                  className="w-full font-mono font-bold"
+                  className="w-full font-mono font-semibold"
                 />
               </EnterpriseFieldCard>
 
@@ -1665,7 +1649,7 @@ export default function RfqView({
                     rfqFormSet({ ...rfqForm, bindingPeriod: e.target.value });
                     if (formErrors.bindingPeriod) setFormErrors({ ...formErrors, bindingPeriod: false });
                   }}
-                  className="w-[9ch] max-w-full font-mono font-bold"
+                  className="w-[9ch] max-w-full font-mono font-semibold"
                 />
               </EnterpriseFieldCard>
 
@@ -1872,7 +1856,7 @@ export default function RfqView({
                       rfqFormSet({ ...rfqForm, quantityRequired: e.target.value });
                       if (formErrors.quantityRequired) setFormErrors({ ...formErrors, quantityRequired: false });
                     }}
-                    className="w-[15ch] max-w-full font-mono font-bold"
+                    className="w-[15ch] max-w-full font-mono font-semibold"
                   />
                 </EnterpriseFieldCard>
 
@@ -1958,28 +1942,43 @@ export default function RfqView({
             </div>
           </FormSection>
 
-          <div className="flex items-center justify-between border-t border-border pt-4">
-            <div>
-              <span className="text-[9px] font-bold text-text-tertiary uppercase tracking-widest block font-mono">SAP Draft Session</span>
-              <p className="text-xs font-semibold text-text-primary">ME41 RFQ Document Creation</p>
-            </div>
-            <div className="flex gap-3">
-              <Button
-                type="button"
-                onClick={() => alert('Draft saved.')}
-                variant="outline"
-              >
-                Save Draft
-              </Button>
+          <footer className="sticky bottom-0 z-30 -mx-5 bg-surface border-t border-border py-3.5 px-4 md:px-6 select-none">
+            <div className="flex items-center justify-between gap-4">
+              <div className="flex items-center gap-2 sm:gap-3">
+                <Button
+                  type="button"
+                  onClick={() => {
+                    if (confirm("Are you sure you want to cancel?")) {
+                      setActiveProcTab('monitor');
+                    }
+                  }}
+                  variant="outline"
+                >
+                  Cancel
+                </Button>
+                <Button
+                  type="button"
+                  onClick={() => {
+                    try {
+                      localStorage.setItem(RFQ_DRAFT_KEY, JSON.stringify({ rfqForm, addedItems }));
+                      addToast('success', 'RFQ draft saved. It will be restored next time you open this form.');
+                    } catch (e) {
+                      addToast('error', 'Failed to save RFQ draft.');
+                    }
+                  }}
+                  variant="outline"
+                >
+                  Save Draft
+                </Button>
+              </div>
               <Button
                 type="submit"
                 variant="default"
-                className="px-8"
               >
                 Preview &amp; Post RFQ
               </Button>
             </div>
-          </div>
+          </footer>
         </form>
       )}
     </div>
