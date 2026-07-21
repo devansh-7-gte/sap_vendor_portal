@@ -1,15 +1,16 @@
 'use client';
 
 import React, { useState, useEffect } from 'react';
-import { 
-  ShieldAlert, 
-  CheckCircle, 
-  XCircle, 
-  RefreshCw, 
-  Activity, 
-  Users, 
-  FileText, 
-  DollarSign, 
+import { useRouter } from 'next/navigation';
+import {
+  ShieldAlert,
+  CheckCircle,
+  XCircle,
+  RefreshCw,
+  Activity,
+  Users,
+  FileText,
+  DollarSign,
   Database,
   Layers,
   Settings,
@@ -30,10 +31,26 @@ import ErrorBoundary from '@/components/ErrorBoundary';
 import EmptyState from '@/components/ui/EmptyState';
 import KPICard from '@/components/ui/KPICard';
 import StatusBadge from '@/components/ui/StatusBadge';
+import { usePortal } from '@/lib/portal-context';
+import { apiClient } from '@/lib/api-client';
 
 const BASE_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000/api';
 
 export default function AdminPage() {
+  const router = useRouter();
+  const { profileHook } = usePortal();
+  const { profile, loading: profileLoading } = profileHook;
+
+  // Gate this page behind the admin role — it's only reachable by URL
+  // otherwise, and the underlying list/approve/reject endpoints are now
+  // server-side role-checked too, so this is a UX redirect, not the
+  // security boundary.
+  useEffect(() => {
+    if (!profileLoading && profile && profile.role && profile.role !== 'admin') {
+      router.replace('/');
+    }
+  }, [profileLoading, profile, router]);
+
   const [activeTab, setActiveTab] = useState('dashboard');
   const [metrics, setMetrics] = useState({
     totalVendors: 0,
@@ -79,12 +96,9 @@ export default function AdminPage() {
         setMetrics(metricsData);
       }
 
-      // 3. Fetch Vendors Queue (Under Review)
-      const vendorsRes = await fetch(`${BASE_URL}/vendors?status=Under%20Review`);
-      if (vendorsRes.ok) {
-        const vendorsData = await vendorsRes.json();
-        setRegistrationQueue(vendorsData.vendors || []);
-      }
+      // 3. Fetch Vendors Queue (Under Review) — admin-only, needs the JWT apiClient attaches
+      const vendorsData = await apiClient.get('/vendors?status=Under%20Review');
+      setRegistrationQueue(vendorsData.vendors || []);
 
       // 4. Fetch Logs (all=true for admin view)
       let logUrl = `${BASE_URL}/logs?all=true`;
@@ -113,19 +127,11 @@ export default function AdminPage() {
   const handleApprove = async (id) => {
     if (!confirm('Are you sure you want to approve this vendor registration and register them in SAP?')) return;
     try {
-      const res = await fetch(`${BASE_URL}/vendors/${id}/approve`, {
-        method: 'PUT',
-        headers: { 'Content-Type': 'application/json' }
-      });
-      if (res.ok) {
-        alert('Vendor registration approved and SAP Vendor Code assigned successfully!');
-        fetchData();
-      } else {
-        const err = await res.json();
-        alert(`Error: ${err.error || 'Approval failed'}`);
-      }
+      await apiClient.put(`/vendors/${id}/approve`, {});
+      alert('Vendor registration approved and SAP Vendor Code assigned successfully!');
+      fetchData();
     } catch (e) {
-      alert('Network request failed');
+      alert(`Error: ${e.message || 'Approval failed'}`);
     }
   };
 
@@ -135,21 +141,12 @@ export default function AdminPage() {
       return;
     }
     try {
-      const res = await fetch(`${BASE_URL}/vendors/${rejectModal.vendorId}/reject`, {
-        method: 'PUT',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ reason: rejectModal.reason })
-      });
-      if (res.ok) {
-        alert('Vendor registration rejected.');
-        setRejectModal({ open: false, vendorId: null, reason: '' });
-        fetchData();
-      } else {
-        const err = await res.json();
-        alert(`Error: ${err.error || 'Rejection failed'}`);
-      }
+      await apiClient.put(`/vendors/${rejectModal.vendorId}/reject`, { reason: rejectModal.reason });
+      alert('Vendor registration rejected.');
+      setRejectModal({ open: false, vendorId: null, reason: '' });
+      fetchData();
     } catch (e) {
-      alert('Network request failed');
+      alert(`Error: ${e.message || 'Rejection failed'}`);
     }
   };
 

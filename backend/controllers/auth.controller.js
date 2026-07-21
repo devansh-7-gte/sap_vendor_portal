@@ -50,6 +50,16 @@ const register = asyncHandler(async (req, res, next) => {
   // Auto-set status for registration
   const defaultStatus = vendorId.startsWith('mock_vendor_') ? 'Pending' : 'Draft';
 
+  // Bootstrap: emails listed in ADMIN_BOOTSTRAP_EMAILS (comma-separated) get
+  // the admin role on first registration — there is no other signup path
+  // that produces an admin account, so this env var is the intended way to
+  // provision the first admin(s) for a deployment.
+  const bootstrapEmails = (process.env.ADMIN_BOOTSTRAP_EMAILS || '')
+    .split(',')
+    .map(e => e.trim().toLowerCase())
+    .filter(Boolean);
+  const role = bootstrapEmails.includes((email || '').toLowerCase()) ? 'admin' : 'vendor';
+
   const vendor = await Vendor.create({
     vendorId,
     password,
@@ -67,7 +77,8 @@ const register = asyncHandler(async (req, res, next) => {
     ifscCode,
     accountName,
     bankBranch,
-    status: defaultStatus
+    status: defaultStatus,
+    role
   });
 
   const token = generateToken(vendor);

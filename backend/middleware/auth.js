@@ -10,7 +10,9 @@ const protect = asyncHandler(async (req, res, next) => {
     token = req.headers.authorization.split(' ')[1];
   }
   
-  // Dev/test fallback to x-vendor-id when not in production
+  // Dev/test-only fallback: lets local requests authenticate via x-vendor-id
+  // instead of a JWT. Inert whenever NODE_ENV=production (checked below), so
+  // it must never be treated as a supported production auth path.
   if (!token && process.env.NODE_ENV !== 'production') {
     const fallbackVendorId = req.headers['x-vendor-id'];
     if (fallbackVendorId) {
@@ -47,4 +49,12 @@ const protect = asyncHandler(async (req, res, next) => {
   }
 });
 
-module.exports = { protect };
+// Must run after `protect` — relies on req.vendor being populated
+const authorize = (...roles) => (req, res, next) => {
+  if (!req.vendor || !roles.includes(req.vendor.role)) {
+    return next(ApiError.forbidden('Not authorized for this action'));
+  }
+  next();
+};
+
+module.exports = { protect, authorize };

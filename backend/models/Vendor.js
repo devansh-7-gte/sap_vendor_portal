@@ -8,6 +8,7 @@ const vendorSchema = new Schema({
   vendorId:       { type: String, required: true, unique: true }, // ← Local unique user/vendor ID
   clerkId:        { type: String },                               // ← Deprecated, kept for backward compatibility
   password:       { type: String, select: false },                // ← Hashed password (not returned by default)
+  role:           { type: String, enum: ['vendor', 'admin'], default: 'vendor' },
   companyName:    { type: String, required: true, trim: true },
   tradeName:      { type: String, trim: true },
   businessType:   { type: String },

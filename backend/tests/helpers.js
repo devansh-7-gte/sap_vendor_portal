@@ -1,4 +1,6 @@
 const request = require('supertest');
+const jwt = require('jsonwebtoken');
+const Vendor = require('../models/Vendor');
 
 const baseVendor = {
   vendorId: 'vendor_test_001',
@@ -29,4 +31,25 @@ const registerVendor = async (app, overrides = {}) => {
   return { token: res.body.token, vendor: res.body.vendor, payload };
 };
 
-module.exports = { baseVendor, registerVendor };
+// Creates a vendor with role 'admin' directly via the model (the register
+// endpoint intentionally never accepts a client-supplied role) and signs a
+// token for it the same way auth.controller.js's generateToken does.
+const createAdminVendor = async (overrides = {}) => {
+  const vendor = await Vendor.create({
+    vendorId: 'vendor_admin_001',
+    companyName: 'Portal Admin Ops',
+    gstin: '27AABCA9999F1Z1',
+    pan: 'AABCA9999F',
+    email: 'admin@example.com',
+    role: 'admin',
+    ...overrides
+  });
+  const token = jwt.sign(
+    { id: vendor._id, vendorId: vendor.vendorId, email: vendor.email },
+    process.env.JWT_SECRET || 'secret',
+    { expiresIn: '30d' }
+  );
+  return { token, vendor };
+};
+
+module.exports = { baseVendor, registerVendor, createAdminVendor };

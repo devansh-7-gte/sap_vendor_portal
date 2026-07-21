@@ -117,3 +117,56 @@ File: `src/lib/portal-context.js`
 - Do backend endpoints for RFQ create/publish/convert-to-PO/reissue/cancel already exist under a different name, or do they need to be built from scratch?
 - Is there a real document-storage backend for Form 16A / ledger exports, or does that need to be added?
 - Is real SAP GRN/MIGO/payment integration in scope for this phase of work, or should it stay mocked for now?
+
+---
+
+## Phase 6 — Authorization, auth-flow gaps, and remaining dead code
+
+Source: follow-up audit of the vendor-facing UI, `PortalProvider`, and the backend authorization surface (2026-07-21). Phases 1–5 above closed out the stub-wiring and test-coverage work; this phase addresses gaps that are structural rather than cosmetic — most importantly, **there is currently no authorization model at all**: every authenticated vendor can list, approve, and reject every other vendor's registration.
+
+### Implementation Brief
+
+**Problem.** `backend/middleware/auth.js` (`protect`) only checks that a JWT is valid — it attaches `req.vendor` but never checks *what kind* of vendor it is, because the `Vendor` model has no role field at all. `backend/routes/vendor.routes.js:31-33` mounts `listVendors` / `approveVendor` / `rejectVendor` behind the same `protect` middleware as every vendor-self-service route. The `/admin` frontend page ([src/app/admin/page.jsx](src/app/admin/page.jsx)) is reachable by any signed-in user; it isn't hidden behind a role check because there's no role to check. This is the highest-severity gap in the app: any vendor account can approve/reject competitors' SAP onboarding.
+
+A secondary but related issue: several controllers resolve "which vendor is this request for" via `getVendorId(req)` ([vendor.controller.js:9-11](backend/controllers/vendor.controller.js#L9-L11)), which falls back through `req.vendorId → req.clerkUserId → x-vendor-id header → 'mock_vendor_id'`. The header fallback is already gated to non-production by `protect` ([auth.js:14](backend/middleware/auth.js#L14)), so it isn't exploitable once `NODE_ENV=production` is actually set — but several frontend call sites still read/send `x-vendor-id` from `localStorage` as if it were the source of truth (e.g. [DashboardView.jsx:202](src/features/dashboard/components/DashboardView.jsx#L202), [FileUploadZone.jsx:25](src/components/shared/FileUploadZone.jsx#L25), [portal-context.js:75](src/lib/portal-context.js#L75)), and the `'mock_vendor_id'` literal ships as a silent final fallback in both frontend and backend. This should be cleaned up so identity always resolves from the verified JWT server-side, with no client-suppliable override, before this app is ever pointed at a real deployment.
+
+Third, the auth flow itself is missing standard account-recovery and session-expiry handling, and there are a few leftover dead files from the pre-migration UI that Phase 1 didn't catch.
+
+### Tasks
+
+**6a. Add a role model and gate admin routes (highest priority)** — done
+- [x] Add a `role` field to `backend/models/Vendor.js` (enum: `'vendor' | 'admin'`, default `'vendor'`).
+- [x] Add an `authorize(...roles)` middleware in `backend/middleware/auth.js` that checks `req.vendor.role` after `protect` has run.
+- [x] Apply `authorize('admin')` to `GET /api/vendors` (list), `PUT /api/vendors/:id/approve`, and `PUT /api/vendors/:id/reject` in `backend/routes/vendor.routes.js`.
+- [x] **Admin provisioning:** env-var bootstrap — `ADMIN_BOOTSTRAP_EMAILS` (comma-separated, checked case-insensitively) in `backend/controllers/auth.controller.js`'s `register`. Any email in that list gets `role: 'admin'` on first registration; documented in `backend/.env.example`. There's no other path to the admin role (register is the only signup endpoint, and it never accepts a client-supplied `role`), so this is safe as long as the env var is unset/removed after the intended admin(s) sign up.
+- [x] Frontend: `src/app/admin/page.jsx` now reads `profileHook.profile.role` (from `usePortal()`) and redirects non-admins to `/` via `router.replace`. Also switched its vendor-list/approve/reject calls from raw unauthenticated `fetch` to `apiClient`, which attaches the `Authorization: Bearer` JWT — those calls would otherwise 401/403 now that the routes are gated. This is a UX redirect only; the real boundary is the server-side `authorize('admin')` middleware.
+- [x] Backend tests: `backend/tests/vendor.test.js` — added a test asserting a non-admin vendor gets 403 from all three admin endpoints, updated the existing approve/reject/list tests to use an admin token (new `createAdminVendor` test helper in `backend/tests/helpers.js`), and added two tests covering the `ADMIN_BOOTSTRAP_EMAILS` bootstrap path. Full backend suite: 39/39 passing. `npm run build` (frontend) also passes.
+
+**6b. Remove client-suppliable vendor identity** — done
+- [x] Stop sending `x-vendor-id` from the frontend. Removed from all four call sites that sent it (the plan's DashboardView.jsx/FileUploadZone.jsx examples plus two more found in the same pattern): `src/lib/api-client.js` (the shared client used by every `apiClient.*` call — this was the biggest offender, guessing `clerkId` from three different localStorage keys), `src/features/dashboard/components/DashboardView.jsx` (bulk invoice download), `src/components/shared/FileUploadZone.jsx` (upload/delete), and `src/features/payments/components/PaymentTrackingView.jsx` (statement download). All of these already send the `Authorization: Bearer` JWT, which is what `protect` actually uses server-side — confirmed via `backend/routes/index.js` (every data route is mounted behind `protect`) and `backend/controllers/upload.controller.js`'s `getVendorId` (checks `req.clerkUserId`, set from the verified JWT, before the header).
+- [x] Removed the `'mock_vendor_id'` fallback literal from `portal-context.js:75`: the WebSocket-init `useEffect` now reads `vendorId = profileHook.profile?.vendorId` and returns early (waits, since `profileHook.profile?.vendorId` is already a dependency and will re-run when it loads) if either the token or vendorId is missing, instead of substituting `localStorage.getItem('clerk_user_id') || 'mock_vendor_id'`. Also removed the equivalent dead fallback in `src/lib/socket.js`'s `initSocket` (`vendorId || localStorage.getItem('clerk_user_id')`) since it now always receives a real id from its one caller. Confirmed via `backend/server.js:64-85` that the Socket.io handshake already derives `socket.clerkUserId` from the verified JWT when a token is present — the client-sent `vendorId` in the auth payload was already inert for authenticated users, only mattering for the dev-only unauthenticated fallback path.
+- [x] Confirmed via new backend tests (`backend/tests/auth-middleware.test.js`, 3 tests) that the `x-vendor-id` dev fallback in `auth.js`'s `protect` is: (1) usable with no JWT under test/dev `NODE_ENV`, (2) rejected with 401 once `NODE_ENV=production` even with a valid `x-vendor-id` header and no token, (3) rejected with 401 when neither is present. The explanatory dev/test-only comment above the fallback in `auth.js` was already added in 6a. Full backend suite: 42/42 passing. `npm run build` and `npm test` (frontend, 15/15) also pass.
+
+**6c. Auth-flow completeness**
+- [ ] Add forgot-password / reset-password: `POST /api/auth/forgot-password` (issue a time-limited token, email or log it since there's no mail service configured) and `POST /api/auth/reset-password`; corresponding `/forgot-password` and `/reset-password` frontend pages linked from `sign-in/page.jsx`.
+- [ ] Add a 401 interceptor in `src/lib/api-client.js`: on any `401` response, clear `jwt_token`/`clerk_user_id` and redirect to `/sign-in`, instead of letting individual calls fail silently or throw uncaught.
+- [ ] Replace the client-generated `mock_vendor_${random}` id in [sign-up/page.jsx:10](src/app/sign-up/page.jsx#L10) — the vendor number/id should be assigned by the backend on `createProfile`, not guessed client-side before the record exists.
+
+**6d. Delete remaining orphaned files** (Phase 1 missed these — none are imported by any `page.jsx` or other live file, confirmed via repo-wide grep on 2026-07-21):
+- [ ] `src/components/portal/payment/PaymentDashboard.jsx`
+- [ ] `src/components/portal/payment/PaymentDetailPage.jsx`
+- [ ] `src/components/portal/payment/utils/dataUtils.js` (mock payment/TDS/MSME data generators, only consumed by the two files above)
+- [ ] `src/features/profile/components/OnboardingView.jsx`
+- [ ] `src/features/dashboard/components/OverviewView.jsx`
+- [ ] `src/features/rfq/components/RFQsView.jsx` (already flagged as dead in Phase 2, task 48 — deferred pending user confirmation; confirming again here)
+- [ ] Re-run `npm run build` after deletion to confirm no regressions, same as Phase 1.
+
+**6e. UX polish (lower priority, do after 6a–6d)**
+- [ ] Replace remaining `alert()`/`confirm()` calls with the existing toast system / a `Modal`-based confirm — notably `src/app/admin/page.jsx` (approve/reject flows) which still uses `alert()` even though `admin/page.jsx` should exist as a proper role-gated view after 6a.
+- [ ] Remove or explicitly dev-gate `handleResetDatabase` ("Reset portal ERP database") from the vendor-facing shell — it currently ships as a live control any vendor can trigger.
+- [ ] Add a lightweight notifications affordance in `Header.jsx` (persist recent toast events so they aren't lost if the user isn't looking at the screen when they fire) — nice-to-have, not blocking.
+
+**Effort:** 6a ~1 day (model change + middleware + route wiring + tests), 6b ~0.5 day, 6c ~1 day, 6d ~1 hour, 6e ~0.5 day. **~3 days total.**
+**Risk:** 6a is medium risk — it's an auth model change touching every admin code path and needs a migration/bootstrap story for existing vendor documents (they'll all default to `role: 'vendor'`, so at least one document needs manual promotion). 6b–6d are low risk (additive/deletion only, no schema changes). 6e is low risk, UI-only.
+
+**Suggested order:** 6a before anything else touches `/admin` — it's the actual security gap. 6d can run in parallel any time (independent cleanup). 6b and 6c can follow once 6a is merged.

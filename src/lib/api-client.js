@@ -13,37 +13,6 @@ export const apiClient = {
       if (token) {
         headers['Authorization'] = `Bearer ${token}`;
       }
-
-      // Add default vendor ID header for development/compatibility
-      let clerkId = localStorage.getItem('clerk_user_id');
-      
-      if (!clerkId) {
-        const profileData = localStorage.getItem('sap_vendor_profile_data');
-        if (profileData) {
-          try {
-            const parsed = JSON.parse(profileData);
-            clerkId = parsed.clerkId || parsed.vendorId;
-          } catch (e) {
-            // Ignore
-          }
-        }
-      }
-      
-      if (!clerkId) {
-        const savedState = localStorage.getItem('sap_vendor_portal_state');
-        if (savedState) {
-          try {
-            const state = JSON.parse(savedState);
-            clerkId = state?.profile?.clerkId || state?.profile?.vendorId;
-          } catch (e) {
-            // Ignore
-          }
-        }
-      }
-
-      if (clerkId) {
-        headers['x-vendor-id'] = clerkId;
-      }
     }
 
     const config = {

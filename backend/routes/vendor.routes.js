@@ -11,7 +11,7 @@ const {
 } = require('../controllers/vendor.controller');
 
 const validate = require('../middleware/validate');
-const { protect } = require('../middleware/auth');
+const { protect, authorize } = require('../middleware/auth');
 const {
   profileCreateSchema,
   profileUpdateSchema,
@@ -28,8 +28,8 @@ router.post('/profile/submit', protect, submitRegistration);
 router.get('/performance', protect, getPerformance);
 
 // Admin routes
-router.get('/', protect, listVendors);
-router.put('/:id/approve', protect, approveVendor);
-router.put('/:id/reject', protect, validate(rejectVendorSchema), rejectVendor);
+router.get('/', protect, authorize('admin'), listVendors);
+router.put('/:id/approve', protect, authorize('admin'), approveVendor);
+router.put('/:id/reject', protect, authorize('admin'), validate(rejectVendorSchema), rejectVendor);
 
 module.exports = router;

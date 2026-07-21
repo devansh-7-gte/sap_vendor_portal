@@ -22,10 +22,6 @@ export default function FileUploadZone({
       if (token) {
         headers['Authorization'] = `Bearer ${token}`;
       }
-      const clerkId = localStorage.getItem('clerk_user_id') || 'mock_vendor_id';
-      if (clerkId) {
-        headers['x-vendor-id'] = clerkId;
-      }
     }
     return headers;
   };
