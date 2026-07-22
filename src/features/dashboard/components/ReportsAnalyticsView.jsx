@@ -457,7 +457,7 @@ export default function ReportsAnalyticsView({ state }) {
                             <td className="py-2 px-3 border-r border-border text-center font-mono tabular-nums">{item.date}</td>
                             <td className="py-2 px-3 border-r border-border font-semibold">{item.vendor}</td>
                             <td className="py-2 px-3 border-r border-border font-mono text-text-secondary">{item.gstin}</td>
-                            <td className="py-2 px-3 border-r border-border text-center font-extrabold text-blue-650">{item.type}</td>
+                            <td className="py-2 px-3 border-r border-border text-center font-extrabold text-blue-700">{item.type}</td>
                             <td className={`py-2 px-3 border-r border-border text-right font-mono font-bold tabular-nums ${isOverdue ? 'text-rose-600' : ''}`}>{item.days}</td>
                             <td className="py-2 px-3 border-r border-border text-right font-mono font-bold text-text-primary tabular-nums">₹ {item.amount.toLocaleString('en-IN')}.00</td>
                             <td className="py-2 px-3 text-center">
@@ -507,7 +507,7 @@ export default function ReportsAnalyticsView({ state }) {
                   <SapReadOnlyField label="Fiscal Year" value="2026" icon={Calendar} containerClassName="bg-surface2 text-text-secondary border-border" />
                   <SapReadOnlyField label="Posting Period" value="03" icon={Clock} containerClassName="bg-surface2 text-text-secondary border-border" />
                   <SapReadOnlyField label="Vendor" value="VND10023" icon={Users} containerClassName="bg-blue-50 text-blue-700 border-blue-200 hover:bg-blue-100 cursor-pointer" />
-                  <SapReadOnlyField label="Payment Status" value="Cleared" isMonospace={false} icon={CheckCircle2} containerClassName="bg-emerald-50 text-emerald-800 border-emerald-250" />
+                  <SapReadOnlyField label="Payment Status" value="Cleared" isMonospace={false} icon={CheckCircle2} containerClassName="bg-emerald-50 text-emerald-800 border-emerald-300" />
                 </div>
               </div>
 
@@ -575,7 +575,7 @@ export default function ReportsAnalyticsView({ state }) {
                           <td className="py-2 px-3 border-r border-border font-medium">{item.desc}</td>
                           <td className="py-2 px-3 border-r border-border text-right font-mono tabular-nums">{item.debit > 0 ? `₹ ${item.debit.toLocaleString('en-IN')}.00` : '—'}</td>
                           <td className="py-2 px-3 border-r border-border text-right font-mono tabular-nums">{item.credit > 0 ? `₹ ${item.credit.toLocaleString('en-IN')}.00` : '—'}</td>
-                          <td className="py-2 px-3 border-r border-border text-right font-mono font-bold text-text-primary tabular-nums">₹ {item.balance.toLocaleString('en-IN')}.05</td>
+                          <td className="py-2 px-3 border-r border-border text-right font-mono font-bold text-text-primary tabular-nums">₹ {item.balance.toLocaleString('en-IN')}.00</td>
                           <td className="py-2 px-3 text-center">
                             <StatusBadge
                               label={item.status}
@@ -613,7 +613,7 @@ export default function ReportsAnalyticsView({ state }) {
                   <SapReadOnlyField label="Document Date" value="2026-05-28" icon={Calendar} containerClassName="bg-surface2 text-text-secondary border-border" />
                   <SapReadOnlyField label="Invoice / Payment Ref" value="INV-2025-0058" icon={FileText} containerClassName="bg-blue-50 text-blue-700 border-blue-200" />
                   <SapReadOnlyField label="Clearing Status" value="OPEN (UN-CLEARED)" isMonospace={false} icon={Clock} containerClassName="bg-amber-50 text-amber-700 border-amber-300 animate-pulse" />
-                  <SapReadOnlyField label="Debit - Invoice" value="₹ 84,600.00" icon={Receipt} containerClassName="bg-rose-50 text-rose-805 border-rose-200" />
+                  <SapReadOnlyField label="Debit - Invoice" value="₹ 84,600.00" icon={Receipt} containerClassName="bg-rose-50 text-rose-800 border-rose-200" />
                   <SapReadOnlyField label="Credit - Payment" value="₹ 0.00" icon={Receipt} containerClassName="bg-emerald-50 text-emerald-800 border-emerald-200" />
                   <SapReadOnlyField label="Outstanding Balance" value="₹ 84,600.00" icon={TrendingUp} containerClassName="bg-orange-50 text-orange-700 border-orange-200" />
                 </div>
@@ -627,7 +627,7 @@ export default function ReportsAnalyticsView({ state }) {
                 </div>
                 <div className="grid grid-cols-2 md:grid-cols-3 gap-4 p-5">
                   <SapReadOnlyField label="Fiscal Year" value="2026" icon={Calendar} containerClassName="bg-surface2 text-text-secondary border-border" />
-                  <SapReadOnlyField label="Quarter / Section" value="Q1 / 194C" isMonospace={false} icon={Receipt} containerClassName="bg-blue-50 text-blue-750 border-blue-200" />
+                  <SapReadOnlyField label="Quarter / Section" value="Q1 / 194C" isMonospace={false} icon={Receipt} containerClassName="bg-blue-50 text-blue-700 border-blue-200" />
                   <SapReadOnlyField label="Total TDS Deducted" value="₹ 846.00" icon={ShieldCheck} containerClassName="bg-emerald-50 text-emerald-800 border-emerald-200" />
                 </div>
               </div>
@@ -678,7 +678,7 @@ export default function ReportsAnalyticsView({ state }) {
                   <SapReadOnlyField label="Vendor Master Compliance" value="COMPLIANT" isMonospace={false} icon={CheckCircle2} containerClassName="bg-emerald-50 text-emerald-700 border-emerald-300" />
                   <SapReadOnlyField label="MSME Overdue Tracker" value="₹ 0.00 (Cleared)" isMonospace={false} icon={Clock} containerClassName="bg-emerald-50 text-emerald-700 border-emerald-300" />
                   <SapReadOnlyField label="Scorecard Summary Report" value="95.0 / 100" icon={Activity} containerClassName="bg-blue-50 text-blue-700 border-blue-200" />
-                  <SapReadOnlyField label="Invoice Rejection Analysis" value="0% Rejection Rate" isMonospace={false} icon={AlertTriangle} containerClassName="bg-emerald-50 text-emerald-700 border-emerald-250" />
+                  <SapReadOnlyField label="Invoice Rejection Analysis" value="0% Rejection Rate" isMonospace={false} icon={AlertTriangle} containerClassName="bg-emerald-50 text-emerald-700 border-emerald-300" />
                   <SapReadOnlyField label="GST GSTR-2B Reconciliation" value="RECONCILED" isMonospace={false} icon={ShieldCheck} containerClassName="bg-emerald-50 text-emerald-700 border-emerald-300" />
                   <SapReadOnlyField label="Document Expiry Tracker" value="No Expiring Documents" isMonospace={false} icon={Calendar} containerClassName="bg-emerald-50 text-emerald-700 border-emerald-300" />
                 </div>

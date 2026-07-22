@@ -37,7 +37,6 @@ export function usePOs(profile) {
   };
 
   const refreshPOs = async () => {
-    if (typeof window !== 'undefined' && !localStorage.getItem('jwt_token')) return;
     try {
       const data = await poService.getPOs();
       if (data && data.pos) {
@@ -50,7 +49,6 @@ export function usePOs(profile) {
   };
 
   const refreshGRNs = async () => {
-    if (typeof window !== 'undefined' && !localStorage.getItem('jwt_token')) return;
     try {
       const data = await poService.getGRNs();
       if (data) {
@@ -64,7 +62,6 @@ export function usePOs(profile) {
   };
 
   const refreshASNs = async () => {
-    if (typeof window !== 'undefined' && !localStorage.getItem('jwt_token')) return;
     try {
       const data = await poService.getASNs();
       if (data) {
@@ -120,11 +117,52 @@ export function usePOs(profile) {
 
   const simulateIncomingPO = async () => {
     try {
-      await poService.createPO();
-      refreshPOs();
+      const res = await poService.createPO({});
+      if (res && (res.id || res._id)) {
+        setPos(prev => {
+          if (prev.some(p => p.id === res.id)) return prev;
+          const updated = [res, ...prev];
+          persistLocally('sap_vendor_portal_pos', updated);
+          return updated;
+        });
+        addSapLog('OData', '/API_PURCHASEORDER_PROCESS_SRV', 'INBOUND', res, 'SUCCESS');
+        return res;
+      }
     } catch (e) {
-      console.error(e);
+      console.error('API simulation error:', e);
     }
+
+    const newId = generatePoId();
+    const fallbackPO = {
+      id: newId,
+      sapPoNumber: '4500' + Math.floor(100000 + Math.random() * 900000),
+      vendorId: profile?.vendorId || 'mock_vendor_id',
+      buyerName: 'SAP Buyer System',
+      plant: '1000',
+      paymentTerms: 'NET 30 Days',
+      currency: 'INR',
+      deliveryAddress: 'Plant 1000 Main Warehouse, Mumbai',
+      status: 'Open',
+      createdDate: new Date().toLocaleDateString('en-GB'),
+      items: [{
+        line: 10,
+        materialCode: 'MAT-3849',
+        description: 'Steel Pipe 3" SCH40',
+        quantity: 500,
+        grnQuantity: 0,
+        unitPrice: 240,
+        netValue: 120000,
+        uom: 'EA'
+      }]
+    };
+
+    setPos(prev => {
+      const updated = [fallbackPO, ...prev];
+      persistLocally('sap_vendor_portal_pos', updated);
+      return updated;
+    });
+    addSapLog('OData', '/API_PURCHASEORDER_PROCESS_SRV', 'INBOUND', fallbackPO, 'SUCCESS');
+    return fallbackPO;
   };
 
   const setInvoiceSubmittedForGrn = (grnId) => {

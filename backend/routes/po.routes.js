@@ -5,7 +5,8 @@ const {
   acknowledgePO,
   simulatePO,
   submitASN,
-  getASNForPO
+  getASNForPO,
+  updatePOStatus
 } = require('../controllers/po.controller');
 
 const validate = require('../middleware/validate');
@@ -15,6 +16,7 @@ router.get('/', getPOs);
 router.post('/simulate', simulatePO);
 router.get('/:id', getPOById);
 router.put('/:id/acknowledge', acknowledgePO);
+router.put('/:id/status', updatePOStatus);
 router.post('/:id/asn', validate(asnCreateSchema), submitASN);
 router.get('/:id/asn', getASNForPO);
 

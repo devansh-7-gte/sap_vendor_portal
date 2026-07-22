@@ -39,10 +39,10 @@ function EnterpriseFieldCard({ label, required, error, children, icon: Icon }) {
 // Side-by-side: label on left, value box on right
 function SapReadOnlyField({ label, value, isFile, isMonospace = true, valueClassName = '', containerClassName = '', icon: Icon }) {
   return (
-    <div className="flex items-center justify-between gap-2 select-none focus-within:outline-none w-full px-8">
-      <span className="text-[11px] font-extrabold text-text-secondary uppercase tracking-wider flex items-center gap-1.5 leading-none shrink-0" title={label}>
+    <div className="flex items-center justify-start gap-2 select-none focus-within:outline-none w-full">
+      <span className="w-36 text-[11px] font-extrabold text-text-secondary uppercase tracking-wider flex items-center gap-1.5 leading-none shrink-0 truncate" title={label}>
         {Icon && <Icon className="size-3 text-text-tertiary shrink-0" />}
-        <span>{label}</span>
+        <span className="truncate">{label}</span>
       </span>
       <div
         className={`inline-flex items-center gap-1.5 border rounded-[3px] px-2.5 text-xs h-6.5 font-semibold cursor-default box-border w-fit max-w-full overflow-hidden text-ellipsis whitespace-nowrap focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-blue-400 focus-visible:ring-offset-1 select-all transition-all duration-150 tabular-nums ${isMonospace ? 'font-mono' : 'font-sans'
@@ -1346,12 +1346,14 @@ export default function PurchaseOrdersView({
                           <span className="text-[10px] font-extrabold text-text-secondary uppercase tracking-widest">ASN Shipment Header</span>
                         </div>
                         <div className="grid grid-cols-2 md:grid-cols-3 gap-4 p-5">
-                          <SapReadOnlyField
-                            label="Linked PO Number"
-                            value={activePo.id}
-                            icon={ShoppingBag}
-                            containerClassName="bg-blue-50 text-blue-700 border-blue-200 hover:bg-blue-100 cursor-pointer font-mono"
-                          />
+                          <SapInputField label="Linked PO Number" icon={ShoppingBag}>
+                            <input
+                              type="text"
+                              readOnly
+                              value={activePo.id}
+                              className="w-36 bg-surface border border-border rounded-[3px] px-2.5 h-6.5 text-xs outline-none text-text-primary font-mono font-bold tabular-nums cursor-not-allowed select-all"
+                            />
+                          </SapInputField>
 
                           <SapInputField label="Dispatch Date" required icon={Calendar}>
                             <input

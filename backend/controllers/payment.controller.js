@@ -33,6 +33,55 @@ const getPayments = asyncHandler(async (req, res, next) => {
   });
 });
 
+// @desc    Get Payment by ID
+// @route   GET /api/payments/:id
+// @access  Public
+const getPaymentById = asyncHandler(async (req, res, next) => {
+  const payment = await Payment.findOne({ id: req.params.id });
+  if (!payment) {
+    return next(ApiError.notFound('Payment not found'));
+  }
+  res.json(payment);
+});
+
+// @desc    Create Payment
+// @route   POST /api/payments
+// @access  Public
+const createPayment = asyncHandler(async (req, res, next) => {
+  const vendorId = req.clerkUserId || req.headers['x-vendor-id'] || 'mock_vendor_id';
+  const paymentData = { ...req.body, vendorId };
+
+  if (!paymentData.id) {
+    paymentData.id = 'PMT-' + Math.floor(100000 + Math.random() * 900000);
+  }
+
+  const payment = await Payment.create(paymentData);
+  res.status(201).json(payment);
+});
+
+// @desc    Update Payment status
+// @route   PUT /api/payments/:id/status
+// @access  Public
+const updatePaymentStatus = asyncHandler(async (req, res, next) => {
+  const { status } = req.body;
+  if (!status) {
+    return next(ApiError.badRequest('Status is required'));
+  }
+
+  const payment = await Payment.findOne({ id: req.params.id });
+  if (!payment) {
+    return next(ApiError.notFound('Payment not found'));
+  }
+
+  payment.status = status;
+  await payment.save();
+
+  res.json({ message: 'Payment status updated successfully', payment });
+});
+
 module.exports = {
-  getPayments
+  getPayments,
+  getPaymentById,
+  createPayment,
+  updatePaymentStatus
 };

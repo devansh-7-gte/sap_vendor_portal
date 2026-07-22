@@ -646,9 +646,9 @@ export default function RegistrationView({
     <div className="space-y-4 max-w-full pb-8 animate-fade-in relative">
       {/* 1. TOAST NOTIFICATION FOR SAVE DRAFT */}
       {showSaveToast && (
-        <div className="fixed top-4 right-4 z-50 flex items-center gap-2 bg-surface2 border border-border-em text-text-primary text-xs px-4 py-2.5 rounded-none shadow-[0_1px_4px_rgba(10,15,46,0.08)] animate-slide-down">
-          <CheckCircle2 className="size-4 text-emerald-500 shrink-0" />
-          <span className="font-semibold select-none">Draft onboarding configurations saved successfully</span>
+        <div className="fixed top-4 right-4 z-50 flex items-center gap-2 bg-white text-slate-900 border border-slate-200 px-4 py-2.5 rounded-lg shadow-xl animate-slide-down">
+          <CheckCircle2 className="size-4 text-emerald-600 shrink-0" />
+          <span className="font-semibold select-none text-xs">Draft onboarding configurations saved successfully</span>
         </div>
       )}
 

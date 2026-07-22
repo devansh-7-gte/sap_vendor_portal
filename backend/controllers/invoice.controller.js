@@ -251,8 +251,48 @@ const submitInvoice = asyncHandler(async (req, res, next) => {
   res.status(201).json({ message: 'Invoice submitted successfully. Payment scheduled in 12 seconds.', invoice });
 });
 
+// @desc    Update Invoice status
+// @route   PUT /api/invoices/:id/status
+// @access  Public
+const updateInvoiceStatus = asyncHandler(async (req, res, next) => {
+  const { status } = req.body;
+  if (!status) {
+    return next(ApiError.badRequest('Status is required'));
+  }
+
+  const invoice = await Invoice.findOne({ id: req.params.id });
+  if (!invoice) {
+    return next(ApiError.notFound('Invoice not found'));
+  }
+
+  invoice.status = status;
+  await invoice.save();
+
+  res.json({ message: 'Invoice status updated successfully', invoice });
+});
+
+// @desc    Post MIRO document in SAP
+// @route   POST /api/invoices/:id/miro
+// @access  Public
+const postMiro = asyncHandler(async (req, res, next) => {
+  const invoice = await Invoice.findOne({ id: req.params.id });
+  if (!invoice) {
+    return next(ApiError.notFound('Invoice not found'));
+  }
+
+  if (!invoice.sapMiroDoc) {
+    invoice.sapMiroDoc = 'MIRO-51' + Math.floor(100000000 + Math.random() * 900000000);
+  }
+  invoice.status = 'Verified';
+  await invoice.save();
+
+  res.json({ message: 'MIRO document created successfully in SAP', invoice });
+});
+
 module.exports = {
   getInvoices,
   getInvoiceById,
-  submitInvoice
+  submitInvoice,
+  updateInvoiceStatus,
+  postMiro
 };
