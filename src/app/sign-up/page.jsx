@@ -3,11 +3,10 @@
 import React, { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
-import { Building2, KeyRound, Mail, ArrowRight, Loader2, AlertCircle, Sparkles } from 'lucide-react';
+import { Building2, KeyRound, Mail, ArrowRight, Loader2, AlertCircle } from 'lucide-react';
 
 export default function SignUpPage() {
   const router = useRouter();
-  const [vendorId, setVendorId] = useState(`mock_vendor_${Math.floor(10000 + Math.random() * 90000)}`);
   const [companyName, setCompanyName] = useState('');
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
@@ -25,10 +24,6 @@ export default function SignUpPage() {
       }
     }
   }, [router]);
-
-  const generateNewId = () => {
-    setVendorId(`mock_vendor_${Math.floor(10000 + Math.random() * 90000)}`);
-  };
 
   const handleRegister = async (e) => {
     e.preventDefault();
@@ -55,7 +50,6 @@ export default function SignUpPage() {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
-          vendorId,
           companyName,
           email,
           password,
@@ -108,31 +102,6 @@ export default function SignUpPage() {
       {/* Onboarding Form */}
       <form onSubmit={handleRegister} className="space-y-3.5">
         <div className="grid grid-cols-1 gap-3.5">
-          {/* Vendor ID Field */}
-          <div>
-            <div className="flex justify-between items-center mb-1">
-              <label className="label mb-0">
-                Suggested Vendor ID
-              </label>
-              <button
-                type="button"
-                onClick={generateNewId}
-                className="text-[9px] font-semibold text-emerald-400 hover:opacity-80 flex items-center gap-0.5 cursor-pointer transition-opacity duration-150"
-              >
-                <Sparkles className="size-2.5" />
-                <span>Re-generate</span>
-              </button>
-            </div>
-            <input
-              type="text"
-              required
-              disabled={loading}
-              value={vendorId}
-              onChange={(e) => setVendorId(e.target.value)}
-              className="disabled:opacity-55"
-            />
-          </div>
-
           {/* Company Name */}
           <div>
             <label className="label">

@@ -18,6 +18,8 @@ import {
 } from 'lucide-react';
 import { usePortal } from '@/lib/portal-context';
 
+const isDevEnv = process.env.NODE_ENV !== 'production';
+
 export default function Sidebar({ activeTab, setActiveTab, state, onReset }) {
   const { sidebarCollapsed, setSidebarCollapsed, logout } = usePortal();
   const [mounted, setMounted] = React.useState(false);
@@ -148,16 +150,18 @@ export default function Sidebar({ activeTab, setActiveTab, state, onReset }) {
           )}
         </div>
 
-        {/* Database Clean Reset Trigger */}
+        {/* Database Clean Reset Trigger — dev/local only, not a production control */}
         {isCollapsed ? (
           <div className="flex flex-col gap-1 mt-1">
-            <button
-              onClick={onReset}
-              className="text-text-tertiary hover:text-red-500 flex items-center justify-center p-1.5 rounded-md hover:bg-surface2 transition-colors duration-150 cursor-pointer"
-              title="Reset ERP Database"
-            >
-              <Database className="size-4" />
-            </button>
+            {isDevEnv && (
+              <button
+                onClick={onReset}
+                className="text-text-tertiary hover:text-red-500 flex items-center justify-center p-1.5 rounded-md hover:bg-surface2 transition-colors duration-150 cursor-pointer"
+                title="Reset ERP Database (dev only)"
+              >
+                <Database className="size-4" />
+              </button>
+            )}
             <button
               onClick={logout}
               className="text-text-tertiary hover:text-red-500 flex items-center justify-center p-1.5 rounded-md hover:bg-surface2 transition-colors duration-150 cursor-pointer"
@@ -168,14 +172,16 @@ export default function Sidebar({ activeTab, setActiveTab, state, onReset }) {
           </div>
         ) : (
           <div className="flex flex-col gap-1 mt-1">
-            <button
-              onClick={onReset}
-              className="text-left text-[11px] font-mono text-text-tertiary hover:text-red-500 hover:underline flex items-center gap-1.5 cursor-pointer transition-colors duration-150"
-              title="Reset local state back to defaults"
-            >
-              <Database className="size-3.5 shrink-0" />
-              <span>Reset ERP Database</span>
-            </button>
+            {isDevEnv && (
+              <button
+                onClick={onReset}
+                className="text-left text-[11px] font-mono text-text-tertiary hover:text-red-500 hover:underline flex items-center gap-1.5 cursor-pointer transition-colors duration-150"
+                title="Reset local state back to defaults (dev only)"
+              >
+                <Database className="size-3.5 shrink-0" />
+                <span>Reset ERP Database</span>
+              </button>
+            )}
             <button
               onClick={logout}
               className="text-left text-[11px] font-mono text-text-tertiary hover:text-red-500 hover:underline flex items-center gap-1.5 cursor-pointer transition-colors duration-150"

@@ -27,7 +27,8 @@ export const apiClient = {
           localStorage.removeItem('jwt_token');
           localStorage.removeItem('clerk_user_id');
           localStorage.removeItem('sap_vendor_profile_data');
-          if (window.location.pathname !== '/sign-in' && window.location.pathname !== '/sign-up') {
+          const publicPaths = ['/sign-in', '/sign-up', '/forgot-password', '/reset-password'];
+          if (!publicPaths.includes(window.location.pathname)) {
             window.location.href = '/sign-in';
           }
         }

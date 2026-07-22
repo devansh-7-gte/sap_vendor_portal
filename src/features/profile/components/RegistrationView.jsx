@@ -489,6 +489,7 @@ export default function RegistrationView({
   const [draftSaving, setDraftSaving] = useState(false);
   const [showSaveToast, setShowSaveToast] = useState(false);
   const [passVisible, setPassVisible] = useState(false);
+  const [blockedStepAlert, setBlockedStepAlert] = useState('');
 
   // Field definitions to calculate metadata counts dynamically
   const stepConfigs = [
@@ -563,10 +564,29 @@ export default function RegistrationView({
   };
 
   const handleContinue = () => {
-    // Run validation to display error indicators, but do not block progression
-    validateStep(currentStep);
+    const stepValid = validateStep(currentStep);
+    if (!stepValid) {
+      setBlockedStepAlert('Please fill in all mandatory fields before continuing.');
+      setTimeout(() => setBlockedStepAlert(''), 3000);
+      return;
+    }
     saveDraft(companyForm);
     setCurrentStep(prev => prev + 1);
+  };
+
+  const handleStepClick = (targetStep) => {
+    if (targetStep <= currentStep) {
+      setCurrentStep(targetStep);
+      return;
+    }
+    for (let step = currentStep; step < targetStep; step++) {
+      if (!validateStep(step)) {
+        setBlockedStepAlert('Please fill in all mandatory fields before continuing.');
+        setTimeout(() => setBlockedStepAlert(''), 3000);
+        return;
+      }
+    }
+    setCurrentStep(targetStep);
   };
 
   const handleTriggerSaveDraft = () => {
@@ -581,7 +601,18 @@ export default function RegistrationView({
 
   const handleFinalSubmit = (e) => {
     e.preventDefault();
-    // Do not block submissions with strict validation gates during test phase
+    let firstInvalidStep = null;
+    for (let step = 1; step <= stepConfigs.length; step++) {
+      if (!validateStep(step) && firstInvalidStep === null) {
+        firstInvalidStep = step;
+      }
+    }
+    if (firstInvalidStep !== null) {
+      setCurrentStep(firstInvalidStep);
+      setBlockedStepAlert('Please fill in all mandatory fields before submitting your registration.');
+      setTimeout(() => setBlockedStepAlert(''), 3000);
+      return;
+    }
     submitRegistration(companyForm);
   };
 
@@ -644,9 +675,16 @@ export default function RegistrationView({
         <ProgressIndicator
           steps={stepConfigs}
           currentStep={currentStep}
-          onStepClick={setCurrentStep}
+          onStepClick={handleStepClick}
           errors={validationErrors}
         />
+      )}
+
+      {blockedStepAlert && (
+        <div className="fixed top-4 right-4 z-50 flex items-center gap-2 bg-rose-900/90 border border-rose-700 text-white text-xs px-4 py-2.5 rounded-none shadow-[0_1px_4px_rgba(10,15,46,0.08)] animate-slide-down">
+          <AlertTriangle className="size-4 shrink-0" />
+          <span className="font-semibold select-none">{blockedStepAlert}</span>
+        </div>
       )}
 
       {/* 5. DRAFT STATE: 4-STEP WIZARD BODY */}

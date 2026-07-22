@@ -105,6 +105,12 @@ export default function SignInPage() {
             <label className="label mb-0">
               Password
             </label>
+            <Link
+              href="/forgot-password"
+              className="text-[10px] font-semibold text-emerald-400 hover:opacity-80 transition-opacity duration-150"
+            >
+              Forgot password?
+            </Link>
           </div>
           <div className="relative">
             <input

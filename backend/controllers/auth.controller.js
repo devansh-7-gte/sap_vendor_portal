@@ -1,7 +1,22 @@
+const crypto = require('crypto');
 const Vendor = require('../models/Vendor');
 const jwt = require('jsonwebtoken');
 const ApiError = require('../utils/ApiError');
 const asyncHandler = require('../utils/asyncHandler');
+const logger = require('../utils/logger');
+
+// Assigns a vendorId server-side so nothing client-supplied has to be trusted
+// as the account's real identity. Retries on the (extremely unlikely) chance
+// of a collision with an existing document.
+const generateVendorId = async () => {
+  let vendorId;
+  let exists = true;
+  while (exists) {
+    vendorId = `VND-${Math.floor(10000 + Math.random() * 90000)}`;
+    exists = await Vendor.exists({ vendorId });
+  }
+  return vendorId;
+};
 
 // Helper to format flat vendor db document to backwards-compatible format with nested objects
 const formatVendorResponse = (vendor) => {
@@ -37,17 +52,23 @@ const generateToken = (vendor) => {
 // @route   POST /api/auth/register
 // @access  Public
 const register = asyncHandler(async (req, res, next) => {
-  const { vendorId, password, companyName, gstin, pan, email, phone, address, city, state, postalCode, bankName, accountNumber, ifscCode, accountName, bankBranch } = req.body;
+  const { password, companyName, gstin, pan, email, phone, address, city, state, postalCode, bankName, accountNumber, ifscCode, accountName, bankBranch } = req.body;
+  let { vendorId } = req.body;
 
   const existingVendor = await Vendor.findOne({
-    $or: [{ vendorId }, { email }, { gstin }]
+    $or: [{ email }, { gstin }, ...(vendorId ? [{ vendorId }] : [])]
   });
 
   if (existingVendor) {
     return next(ApiError.conflict('Vendor with this ID, email, or GSTIN already exists'));
   }
 
-  // Auto-set status for registration
+  if (!vendorId) {
+    vendorId = await generateVendorId();
+  }
+
+  // Freshly self-registered vendors start as a Draft until they complete
+  // and submit the full onboarding form.
   const defaultStatus = vendorId.startsWith('mock_vendor_') ? 'Pending' : 'Draft';
 
   // Bootstrap: emails listed in ADMIN_BOOTSTRAP_EMAILS (comma-separated) get
@@ -131,8 +152,63 @@ const getMe = asyncHandler(async (req, res, next) => {
   });
 });
 
+const RESET_TOKEN_TTL_MS = 60 * 60 * 1000; // 1 hour
+const GENERIC_FORGOT_MESSAGE = 'If an account exists for this email, a password reset link has been sent.';
+
+// @desc    Issue a time-limited password reset token
+// @route   POST /api/auth/forgot-password
+// @access  Public
+const forgotPassword = asyncHandler(async (req, res, next) => {
+  const { email } = req.body;
+  const vendor = await Vendor.findOne({ email: email.toLowerCase() });
+
+  // Same response whether or not the email exists, so this endpoint can't be
+  // used to enumerate registered vendors.
+  if (!vendor) {
+    return res.json({ success: true, message: GENERIC_FORGOT_MESSAGE });
+  }
+
+  const rawToken = crypto.randomBytes(32).toString('hex');
+  vendor.resetPasswordToken = crypto.createHash('sha256').update(rawToken).digest('hex');
+  vendor.resetPasswordExpires = Date.now() + RESET_TOKEN_TTL_MS;
+  await vendor.save();
+
+  const resetUrl = `${process.env.FRONTEND_URL || 'http://localhost:3000'}/reset-password?token=${rawToken}`;
+  // No email service is configured for this portal — log the link instead so
+  // it can be retrieved by an operator until one is wired up.
+  logger.info(`Password reset requested for ${vendor.email}: ${resetUrl}`);
+
+  res.json({ success: true, message: GENERIC_FORGOT_MESSAGE });
+});
+
+// @desc    Reset a vendor's password using a token issued by forgotPassword
+// @route   POST /api/auth/reset-password
+// @access  Public
+const resetPassword = asyncHandler(async (req, res, next) => {
+  const { token, password } = req.body;
+  const hashedToken = crypto.createHash('sha256').update(token).digest('hex');
+
+  const vendor = await Vendor.findOne({
+    resetPasswordToken: hashedToken,
+    resetPasswordExpires: { $gt: Date.now() }
+  });
+
+  if (!vendor) {
+    return next(ApiError.badRequest('Password reset token is invalid or has expired'));
+  }
+
+  vendor.password = password;
+  vendor.resetPasswordToken = undefined;
+  vendor.resetPasswordExpires = undefined;
+  await vendor.save();
+
+  res.json({ success: true, message: 'Password has been reset. You can now sign in.' });
+});
+
 module.exports = {
   register,
   login,
-  getMe
+  getMe,
+  forgotPassword,
+  resetPassword
 };
