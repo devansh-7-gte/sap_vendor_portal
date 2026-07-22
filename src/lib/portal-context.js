@@ -24,11 +24,23 @@ export function PortalProvider({ children }) {
   const dashboardHook = useDashboard(profileHook.profile, shell.clearSapLogs);
 
   const [toasts, setToasts] = useState([]);
+  const [notifications, setNotifications] = useState([]);
   const addToast = (type, message) => {
-    setToasts(prev => [...prev, { id: `toast-${Date.now()}-${Math.random()}`, type, message }]);
+    const id = `toast-${Date.now()}-${Math.random()}`;
+    setToasts(prev => [...prev, { id, type, message }]);
+    setNotifications(prev => [
+      { id, type, message, timestamp: new Date().toISOString(), read: false },
+      ...prev
+    ].slice(0, 30));
   };
   const removeToast = (id) => {
     setToasts(prev => prev.filter(t => t.id !== id));
+  };
+  const markNotificationsRead = () => {
+    setNotifications(prev => prev.map(n => ({ ...n, read: true })));
+  };
+  const clearNotifications = () => {
+    setNotifications([]);
   };
 
   const pathname = usePathname();
@@ -38,7 +50,7 @@ export function PortalProvider({ children }) {
   useEffect(() => {
     if (typeof window !== 'undefined') {
       const token = localStorage.getItem('jwt_token');
-      const isAuthPage = pathname === '/sign-in' || pathname === '/sign-up';
+      const isAuthPage = pathname === '/sign-in' || pathname === '/sign-up' || pathname === '/forgot-password' || pathname === '/reset-password';
       if (!token && !isAuthPage) {
         router.push('/sign-in');
       }
@@ -447,7 +459,10 @@ export function PortalProvider({ children }) {
         handleResetDatabase,
         logout,
         awardVendorBidWrapper,
-        addToast
+        addToast,
+        notifications,
+        markNotificationsRead,
+        clearNotifications
       }}
     >
       {children}

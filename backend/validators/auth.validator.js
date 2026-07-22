@@ -5,7 +5,10 @@ const panRegex = /^[A-Z0-9]{5}[0-9]{4}[A-Z]{1}$/i;
 const phoneRegex = /^[6-9]\d{9}$/;
 
 const registerSchema = z.object({
-  vendorId: z.string().min(3).max(50),
+  // Optional: if omitted, the backend assigns a vendorId. Never trusted as
+  // the sole source of a "real" id — only honored so existing test/dev
+  // fixtures that supply one keep working.
+  vendorId: z.string().min(3).max(50).optional(),
   password: z.string().min(6, { message: "Password must be at least 6 characters long" }),
   companyName: z.string().min(3).max(100),
   gstin: z.string().regex(gstinRegex, { message: "Invalid GSTIN format" }),
@@ -31,7 +34,18 @@ const loginSchema = z.object({
   password: z.string().min(1, { message: "Password is required" })
 });
 
+const forgotPasswordSchema = z.object({
+  email: z.string().email({ message: "Invalid email format" })
+});
+
+const resetPasswordSchema = z.object({
+  token: z.string().min(1, { message: "Reset token is required" }),
+  password: z.string().min(6, { message: "Password must be at least 6 characters long" })
+});
+
 module.exports = {
   registerSchema,
-  loginSchema
+  loginSchema,
+  forgotPasswordSchema,
+  resetPasswordSchema
 };

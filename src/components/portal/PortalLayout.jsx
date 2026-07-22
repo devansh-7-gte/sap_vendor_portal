@@ -21,7 +21,7 @@ export default function PortalLayout({ children }) {
     handleResetDatabase
   } = usePortal();
 
-  const isAuthPage = pathname === '/sign-in' || pathname === '/sign-up';
+  const isAuthPage = pathname === '/sign-in' || pathname === '/sign-up' || pathname === '/forgot-password' || pathname === '/reset-password';
 
   React.useEffect(() => {
     if (isAuthPage) {

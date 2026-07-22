@@ -80,15 +80,15 @@ export default function CommandPalette() {
       search: 'bapi sap console logs rfc odata diagnostics payload',
       perform: () => setConsoleOpen(true),
     },
-    {
+    ...(process.env.NODE_ENV !== 'production' ? [{
       key: 'act-reset',
       group: 'Actions',
       name: 'Reset ERP Database',
-      subtitle: 'Danger',
+      subtitle: 'Danger (dev only)',
       icon: Database,
       search: 'reset erp database clear transactions',
       perform: () => handleResetDatabase(),
-    },
+    }] : []),
     {
       key: 'act-logout',
       group: 'Actions',

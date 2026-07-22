@@ -67,6 +67,31 @@ describe('POST /api/auth/register', () => {
   });
 });
 
+describe('POST /api/auth/register — vendorId assignment', () => {
+  it('assigns a server-generated vendorId and Draft status when none is supplied', async () => {
+    const { vendorId, ...withoutVendorId } = validRegistration;
+    const res = await request(app).post('/api/auth/register').send(withoutVendorId);
+
+    expect(res.status).toBe(201);
+    expect(res.body.vendor.vendorId).toEqual(expect.stringMatching(/^VND-\d{5}$/));
+    expect(res.body.vendor.status).toBe('Draft');
+  });
+
+  it('assigns distinct auto-generated vendorIds to successive registrations', async () => {
+    const { vendorId, ...withoutVendorId } = validRegistration;
+    const first = await request(app).post('/api/auth/register').send(withoutVendorId);
+    const second = await request(app).post('/api/auth/register').send({
+      ...withoutVendorId,
+      email: 'second-vendor@example.com',
+      gstin: '29AABCS1234F1Z8'
+    });
+
+    expect(second.status).toBe(201);
+    expect(second.body.vendor.vendorId).not.toBe(first.body.vendor.vendorId);
+    expect(second.body.vendor.vendorId).toEqual(expect.stringMatching(/^VND-\d{5}$/));
+  });
+});
+
 describe('POST /api/auth/login', () => {
   beforeEach(async () => {
     await request(app).post('/api/auth/register').send(validRegistration);

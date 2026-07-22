@@ -31,6 +31,7 @@ import ErrorBoundary from '@/components/ErrorBoundary';
 import EmptyState from '@/components/ui/EmptyState';
 import KPICard from '@/components/ui/KPICard';
 import StatusBadge from '@/components/ui/StatusBadge';
+import Modal from '@/components/ui/Modal';
 import { usePortal } from '@/lib/portal-context';
 import { apiClient } from '@/lib/api-client';
 
@@ -38,7 +39,7 @@ const BASE_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000/api';
 
 export default function AdminPage() {
   const router = useRouter();
-  const { profileHook } = usePortal();
+  const { profileHook, addToast } = usePortal();
   const { profile, loading: profileLoading } = profileHook;
 
   // Gate this page behind the admin role — it's only reachable by URL
@@ -73,6 +74,7 @@ export default function AdminPage() {
   
   // Interactive Modals
   const [rejectModal, setRejectModal] = useState({ open: false, vendorId: null, reason: '' });
+  const [approveModal, setApproveModal] = useState({ open: false, vendorId: null });
   const [inspectLogModal, setInspectLogModal] = useState({ open: false, log: null });
 
   const fetchData = async () => {
@@ -124,29 +126,30 @@ export default function AdminPage() {
     return () => clearInterval(interval);
   }, [selectedLogFilter]);
 
-  const handleApprove = async (id) => {
-    if (!confirm('Are you sure you want to approve this vendor registration and register them in SAP?')) return;
+  const handleApproveConfirm = async () => {
+    const id = approveModal.vendorId;
+    setApproveModal({ open: false, vendorId: null });
     try {
       await apiClient.put(`/vendors/${id}/approve`, {});
-      alert('Vendor registration approved and SAP Vendor Code assigned successfully!');
+      addToast('success', 'Vendor registration approved and SAP Vendor Code assigned successfully!');
       fetchData();
     } catch (e) {
-      alert(`Error: ${e.message || 'Approval failed'}`);
+      addToast('error', `Approval failed: ${e.message || 'Unknown error'}`);
     }
   };
 
   const handleRejectSubmit = async () => {
     if (!rejectModal.reason.trim()) {
-      alert('Please specify a rejection reason');
+      addToast('warning', 'Please specify a rejection reason');
       return;
     }
     try {
       await apiClient.put(`/vendors/${rejectModal.vendorId}/reject`, { reason: rejectModal.reason });
-      alert('Vendor registration rejected.');
+      addToast('success', 'Vendor registration rejected.');
       setRejectModal({ open: false, vendorId: null, reason: '' });
       fetchData();
     } catch (e) {
-      alert(`Error: ${e.message || 'Rejection failed'}`);
+      addToast('error', `Rejection failed: ${e.message || 'Unknown error'}`);
     }
   };
 
@@ -448,7 +451,7 @@ export default function AdminPage() {
                           <td className="text-right">
                             <div className="flex gap-2 justify-end">
                               <Button
-                                onClick={() => handleApprove(vendor._id)}
+                                onClick={() => setApproveModal({ open: true, vendorId: vendor._id })}
                                 size="sm"
                                 variant="default"
                               >
@@ -595,6 +598,31 @@ export default function AdminPage() {
             </div>
           </div>
         )}
+
+        {/* DIALOG 0: APPROVE & SYNC CONFIRMATION */}
+        <Modal
+          open={approveModal.open}
+          onClose={() => setApproveModal({ open: false, vendorId: null })}
+          title="Approve Supplier Registration"
+          footer={
+            <>
+              <Button
+                onClick={() => setApproveModal({ open: false, vendorId: null })}
+                variant="outline"
+                size="sm"
+              >
+                Cancel
+              </Button>
+              <Button onClick={handleApproveConfirm} size="sm" variant="default">
+                Approve &amp; Sync
+              </Button>
+            </>
+          }
+        >
+          <p className="text-text-secondary text-xs leading-relaxed">
+            Are you sure you want to approve this vendor registration and register them in SAP? This assigns an active SAP Vendor Code and cannot be undone from here.
+          </p>
+        </Modal>
 
         {/* DIALOG 1: COMPLIANCE REJECTION REASON DRAWER */}
         {rejectModal.open && (
