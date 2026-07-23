@@ -108,8 +108,11 @@ export function useProfile() {
     setProfile(updated);
     persistLocally(updated);
 
+    // The vendor's account (and its Vendor doc) already exists for anyone who
+    // signed up normally, so PUT is the common case; only fall back to POST
+    // for the dev/mock-vendor flow that hasn't created a profile doc yet.
     try {
-      await profileService.createProfile(updated).catch(() => profileService.updateProfile(updated));
+      await profileService.updateProfile(updated).catch(() => profileService.createProfile(updated));
     } catch (e) {}
   };
 
@@ -147,7 +150,7 @@ export function useProfile() {
     );
 
     try {
-      await profileService.createProfile(updated).catch(() => {});
+      await profileService.updateProfile(updated).catch(() => profileService.createProfile(updated));
       await profileService.submitRegistration(updated);
     } catch (err) {
       setError(err.message);

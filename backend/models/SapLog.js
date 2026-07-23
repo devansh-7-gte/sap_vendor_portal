@@ -3,7 +3,7 @@ const Schema = mongoose.Schema;
 
 const sapLogSchema = new Schema({
   vendorId:     { type: String, required: true },    // Clerk user ID
-  type:         { type: String, enum: ['BAPI','RFC','OData','IDoc','SYS'], required: true },
+  type:         { type: String, enum: ['BAPI','RFC','OData','IDoc','SYS','KYC'], required: true },
   direction:    { type: String, enum: ['OUTBOUND','INBOUND'], required: true },
   name:         { type: String, required: true },    // e.g. 'BAPI_RFQ_CREATE'
   payload:      { type: String },                    // JSON string of BAPI parameters

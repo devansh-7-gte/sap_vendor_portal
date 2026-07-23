@@ -64,14 +64,14 @@ const profileCreateSchema = z.object({
   bankBranch: z.string().optional(),
   bankDetails: bankDetailsSchema,
   
-  // Document attachments
-  cancelledCheque: z.string().optional(),
-  panCardCopy: z.string().optional(),
-  gstCertificate: z.string().optional(),
-  incorporationCertificate: z.string().optional(),
-  msmeCertificate: z.string().optional(),
-  isoCertificate: z.string().optional(),
-  itReturns: z.string().optional()
+  // Document attachments (client sends null before a document is uploaded)
+  cancelledCheque: z.string().optional().nullable(),
+  panCardCopy: z.string().optional().nullable(),
+  gstCertificate: z.string().optional().nullable(),
+  incorporationCertificate: z.string().optional().nullable(),
+  msmeCertificate: z.string().optional().nullable(),
+  isoCertificate: z.string().optional().nullable(),
+  itReturns: z.string().optional().nullable()
 });
 
 const profileUpdateSchema = profileCreateSchema.partial();
