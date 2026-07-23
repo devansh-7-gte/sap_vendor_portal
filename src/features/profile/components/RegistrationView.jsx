@@ -80,7 +80,7 @@ function SectionHeader({ title, number }) {
 // 2. Card wrapper for a bordered, numbered form section
 function FormSection({ number, title, children }) {
   return (
-    <div className="bg-surface border border-border rounded-xl shadow-xs overflow-hidden">
+    <div className="bg-surface border border-border rounded-xl shadow-xs">
       <SectionHeader number={number} title={title} />
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-x-6 gap-y-4 p-4">
         {children}
@@ -490,6 +490,8 @@ export default function RegistrationView({
   const [showSaveToast, setShowSaveToast] = useState(false);
   const [passVisible, setPassVisible] = useState(false);
   const [blockedStepAlert, setBlockedStepAlert] = useState('');
+  const [ifscLookup, setIfscLookup] = useState({ status: 'idle', error: '' });
+  const [pincodeLookup, setPincodeLookup] = useState({ status: 'idle', error: '' });
 
   // Field definitions to calculate metadata counts dynamically
   const stepConfigs = [
@@ -539,6 +541,123 @@ export default function RegistrationView({
     setValidationErrors(prev => ({ ...prev, [stepIdx]: stepErrors }));
     return stepValid;
   };
+
+  // Auto-fetch bank name/branch whenever a valid IFSC code is entered
+  useEffect(() => {
+    const code = (companyForm.ifscCode || '').toUpperCase();
+    if (!/^[A-Z]{4}0[A-Z\d]{6}$/.test(code)) {
+      return;
+    }
+
+    let cancelled = false;
+
+    Promise.resolve()
+      .then(() => {
+        if (cancelled) return null;
+        setIfscLookup({ status: 'loading', error: '' });
+        return fetch(`https://ifsc.razorpay.com/${code}`);
+      })
+      .then(res => {
+        if (cancelled || !res) return null;
+        if (!res.ok) throw new Error('No bank found for this IFSC code');
+        return res.json();
+      })
+      .then(data => {
+        if (cancelled || !data) return;
+        setCompanyForm(prev => ({ ...prev, bankName: data.BANK || '', bankBranch: data.BRANCH || '' }));
+        setIfscLookup({ status: 'success', error: '' });
+      })
+      .catch(err => {
+        if (cancelled) return;
+        setCompanyForm(prev => ({ ...prev, bankName: '', bankBranch: '' }));
+        setIfscLookup({ status: 'error', error: err.message || 'Could not fetch bank details for this IFSC code' });
+      });
+
+    return () => { cancelled = true; };
+  }, [companyForm.ifscCode, setCompanyForm]);
+
+  // Auto-fill city/state and default the phone country code whenever a valid
+  // 6-digit PIN code is entered. City/state/phone stay normal editable inputs
+  // so the vendor can still override the looked-up values.
+  useEffect(() => {
+    const pin = (companyForm.postalCode || '').trim();
+    if (!/^\d{6}$/.test(pin)) {
+      return;
+    }
+
+    let cancelled = false;
+
+    Promise.resolve()
+      .then(() => {
+        if (cancelled) return null;
+        setPincodeLookup({ status: 'loading', error: '' });
+        return fetch(`https://api.postalpincode.in/pincode/${pin}`);
+      })
+      .then(res => {
+        if (cancelled || !res) return null;
+        if (!res.ok) throw new Error('Could not look up this PIN code');
+        return res.json();
+      })
+      .then(data => {
+        if (cancelled || !data) return;
+        const record = data[0];
+        const postOffice = record?.Status === 'Success' ? record.PostOffice?.[0] : null;
+        if (!postOffice) throw new Error('No location found for this PIN code');
+
+        const stateMatch = INDIAN_STATES.find(
+          s => s.name.toLowerCase() === (postOffice.State || '').toLowerCase()
+        );
+
+        setCompanyForm(prev => {
+          const phone = (prev.phone || '').trim();
+          return {
+            ...prev,
+            city: postOffice.District || prev.city,
+            state: stateMatch ? stateMatch.code : prev.state,
+            phone: phone.startsWith('+') ? prev.phone : (phone ? `+91 ${phone}` : '+91 ')
+          };
+        });
+        setPincodeLookup({ status: 'success', error: '' });
+      })
+      .catch(err => {
+        if (cancelled) return;
+        setPincodeLookup({ status: 'error', error: err.message || 'Could not look up this PIN code' });
+      });
+
+    return () => { cancelled = true; };
+  }, [companyForm.postalCode, setCompanyForm]);
+
+  // Auto-save progress so a vendor who leaves mid-form (closed tab, network
+  // blip, etc.) doesn't have to re-enter everything. Debounced so it doesn't
+  // fire on every keystroke, and skipped on the initial mount/hydration pass
+  // so it never overwrites a saved draft with the still-empty starting form.
+  const autosaveTimerRef = useRef(null);
+  const isFirstRenderRef = useRef(true);
+  useEffect(() => {
+    if (isFirstRenderRef.current) {
+      isFirstRenderRef.current = false;
+      return;
+    }
+    if (!isDraft) return;
+    if (!companyForm.companyName || !companyForm.gstin || !companyForm.email) return;
+
+    // Only autosave fields that are actually well-formed — a field that's merely
+    // non-empty (e.g. a GSTIN still mid-typed) would otherwise get sent to the
+    // backend and rejected with a 400 by its Zod validation.
+    const hasFormatErrors = Object.keys(companyForm).some(field => {
+      const val = companyForm[field];
+      if (!val) return false;
+      return !!validateField(field, val);
+    });
+    if (hasFormatErrors) return;
+
+    if (autosaveTimerRef.current) clearTimeout(autosaveTimerRef.current);
+    autosaveTimerRef.current = setTimeout(() => {
+      saveDraft(companyForm);
+    }, 1500);
+
+    return () => clearTimeout(autosaveTimerRef.current);
+  }, [companyForm, isDraft, saveDraft]);
 
   // Field change hook
   const handleFieldChange = (field, val) => {
@@ -741,7 +860,12 @@ export default function RegistrationView({
                     <SearchableSelect value={companyForm.state} onChange={val => handleFieldChange('state', val)} options={INDIAN_STATES} placeholder="Select State" />
                   </div>
                 </EnterpriseFieldCard>
-                <EnterpriseFieldCard label="PIN code" required error={validationErrors[1]?.postalCode}>
+                <EnterpriseFieldCard
+                  label="PIN code"
+                  required
+                  error={validationErrors[1]?.postalCode || (pincodeLookup.status === 'error' ? pincodeLookup.error : '')}
+                  hint={pincodeLookup.status === 'loading' ? 'Looking up city & state...' : 'City, state & phone code auto-fill from PIN'}
+                >
                   <input type="text" maxLength={6} value={companyForm.postalCode} onChange={e => handleFieldChange('postalCode', e.target.value.replace(/\D/g, ''))} placeholder="400021" className="font-mono w-[10ch] max-w-full" />
                 </EnterpriseFieldCard>
                 <EnterpriseFieldCard label="Contact email" required error={validationErrors[1]?.email}>
@@ -928,14 +1052,36 @@ export default function RegistrationView({
 
                   <EnterpriseFieldCard
                     label="Bank name (auto-fetched)"
+                    required
                     mappingCode="LFBK-BANKA"
                     isSapView={isSapView}
-                    error={validationErrors[3]?.bankName}
+                    error={validationErrors[3]?.bankName || (ifscLookup.status === 'error' ? ifscLookup.error : '')}
+                  >
+                    <div className="relative w-[64ch] max-w-full">
+                      <input
+                        type="text"
+                        maxLength={60}
+                        value={companyForm.bankName}
+                        readOnly
+                        placeholder={ifscLookup.status === 'loading' ? 'Fetching bank details...' : 'Auto-populated from IFSC'}
+                        className="bg-surface2 text-text-secondary select-none w-full pr-8"
+                      />
+                      {ifscLookup.status === 'loading' && (
+                        <RefreshCw className="absolute right-2 top-1/2 -translate-y-1/2 size-3.5 text-text-tertiary animate-spin" />
+                      )}
+                    </div>
+                  </EnterpriseFieldCard>
+                  <EnterpriseFieldCard
+                    label="Bank branch (auto-fetched)"
+                    required
+                    mappingCode="LFBK-BRNCH"
+                    isSapView={isSapView}
+                    error={validationErrors[3]?.bankBranch}
                   >
                     <input
                       type="text"
                       maxLength={60}
-                      value={companyForm.bankName}
+                      value={companyForm.bankBranch}
                       readOnly
                       placeholder="Auto-populated from IFSC"
                       className="bg-surface2 text-text-secondary select-none w-[64ch] max-w-full"

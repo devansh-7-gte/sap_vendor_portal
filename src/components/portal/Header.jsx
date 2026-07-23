@@ -31,11 +31,8 @@ export default function Header() {
   }, [notifOpen]);
 
   const toggleNotifications = () => {
-    setNotifOpen(prev => {
-      const next = !prev;
-      if (next) markNotificationsRead();
-      return next;
-    });
+    setNotifOpen(prev => !prev);
+    if (!notifOpen) markNotificationsRead();
   };
 
   const openPalette = () => {

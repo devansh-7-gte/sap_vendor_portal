@@ -4,6 +4,7 @@ const ASN = require('../models/ASN');
 const Invoice = require('../models/Invoice');
 const ApiError = require('../utils/ApiError');
 const asyncHandler = require('../utils/asyncHandler');
+const { verifyGstinPan } = require('../services/verification.service');
 
 // Helper to determine vendor ID from header (for dev) or JWT auth
 const getVendorId = (req) => {
@@ -53,6 +54,32 @@ const formatVendorResponse = (vendor) => {
   };
   
   return obj;
+};
+
+// Runs the GSTIN/PAN check for a vendor and persists the result on the
+// document. This is the only place gstinVerified/panVerified get set, so
+// every approval path is guaranteed to go through the same check.
+const runGstinPanVerification = async (vendor) => {
+  const result = await verifyGstinPan(vendor.gstin, vendor.pan);
+
+  vendor.gstinVerified = result.gstinValid;
+  vendor.panVerified = result.panValid;
+  vendor.verifiedAt = new Date();
+  vendor.verificationDetails = result;
+  await vendor.save();
+
+  const { createSapLog } = require('../utils/sapLogger');
+  await createSapLog({
+    vendorId: vendor.vendorId,
+    type: 'KYC',
+    direction: 'OUTBOUND',
+    name: 'GSTIN_PAN_VERIFY',
+    payload: { gstin: vendor.gstin, pan: vendor.pan, result },
+    status: (result.gstinValid && result.panValid) ? 'SUCCESS' : 'FAILED',
+    documentRef: vendor._id.toString()
+  });
+
+  return vendor;
 };
 
 // @desc    Get current vendor profile
@@ -149,11 +176,15 @@ const submitRegistration = asyncHandler(async (req, res, next) => {
     documentRef: vendor._id.toString()
   });
 
+  // Verify GSTIN/PAN as part of submission — approval is blocked until this passes
+  await runGstinPanVerification(vendor);
+
   // Simulate SAP auto-approval in 5 seconds
   setTimeout(async () => {
     try {
       const updatedVendor = await Vendor.findOne({ vendorId });
-      if (updatedVendor && (updatedVendor.status === 'Under Review' || updatedVendor.status === 'Pending Approval')) {
+      if (updatedVendor && updatedVendor.gstinVerified && updatedVendor.panVerified &&
+          (updatedVendor.status === 'Under Review' || updatedVendor.status === 'Pending Approval')) {
         updatedVendor.status = 'Approved';
         updatedVendor.approvedAt = new Date();
         updatedVendor.sapVendorCode = 'VND-' + Math.floor(10000 + Math.random() * 90000);
@@ -197,6 +228,14 @@ const approveVendor = asyncHandler(async (req, res, next) => {
   const vendor = await Vendor.findById(id);
   if (!vendor) {
     return next(ApiError.notFound('Vendor not found'));
+  }
+
+  if (!vendor.verifiedAt) {
+    await runGstinPanVerification(vendor);
+  }
+
+  if (!vendor.gstinVerified || !vendor.panVerified) {
+    return next(ApiError.badRequest('Vendor cannot be approved: GSTIN/PAN verification failed or has not been completed'));
   }
 
   vendor.status = 'Approved';

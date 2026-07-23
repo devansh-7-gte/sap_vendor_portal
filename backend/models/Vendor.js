@@ -46,6 +46,12 @@ const vendorSchema = new Schema({
   isoCertificate:  { type: String },
   itReturns:       { type: String },
 
+  // GSTIN/PAN verification (required before a vendor can be approved)
+  gstinVerified:  { type: Boolean, default: false },
+  panVerified:    { type: Boolean, default: false },
+  verifiedAt:     { type: Date },
+  verificationDetails: { type: Schema.Types.Mixed },
+
   // SAP ERP synchronization metadata
   sapVendorCode:  { type: String, unique: true, sparse: true }, // e.g. 'VND-40013'
   status:         { type: String, enum: ['Draft', 'Pending', 'Pending Approval', 'Under Review', 'Approved', 'Rejected'], default: 'Draft' },
